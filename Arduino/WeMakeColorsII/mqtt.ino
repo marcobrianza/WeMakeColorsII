@@ -122,7 +122,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
       //{
       //"h":"0",
       //"s":"128",
-      //"v":"256"
+      //"v":"255"
       //}
 
       int h = root["h"];
