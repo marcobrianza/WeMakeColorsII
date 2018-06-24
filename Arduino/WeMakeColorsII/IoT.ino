@@ -121,7 +121,7 @@ void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println("Entered config mode");
   Serial.println(WiFi.softAPIP());
   Serial.println(myWiFiManager->getConfigPortalSSID());
-  showLeds(0, 0, 255);
+  showAllLeds(0, 0, 255);
 }
 
 
@@ -133,7 +133,7 @@ void saveConfigCallback () {
   s_mqttServer = wfm_mqttServer.getValue();
   writeAttribute("mqttServer", s_mqttServer);
   //s_mqttServer.toCharArray(mqttServer, MAX_PARAM);
-  showLeds(0, 255, 255);
+  showAllLeds(0, 255, 255);
 
 }
 
@@ -237,11 +237,11 @@ void autoUpdate() {
       Serial.println(" Board md5: " + ESP.getSketchMD5());
       if ((ESP.getSketchMD5() != md5) && (md5.length() == 32) ) {
         Serial.println("Trying update...");
-        showLeds(64, 0, 0);
+        showAllLeds(64, 0, 0);
         blink(10);
 
         int u = httpUpdate(FW_URL);
-        if (u != HTTP_UPDATE_OK) showLeds(64, 64, 0);
+        if (u != HTTP_UPDATE_OK) showAllLeds(64, 64, 0);
       }
       else {
         Serial.println("will not update");

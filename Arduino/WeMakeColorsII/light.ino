@@ -78,10 +78,13 @@ CHSV newRndColor() {
   return CHSV(h, s, v);
 }
 
-void showLeds(int r, int g, int b ){
-  leds[0] = CRGB(r, g, b);
-  leds[1] = CRGB(r, g, b);
+
+
+void showAllLeds(int r, int g, int b ) {
+  for ( int i = 0; i < NUM_LEDS; i++) {
+  leds[i] = CRGB(r, g, b);
+  }
   FastLED.show();
-  
 }
+
 

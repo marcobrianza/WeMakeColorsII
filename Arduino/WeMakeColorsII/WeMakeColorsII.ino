@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.0.1"; //
+String softwareVersion = "1.0.2"; //
 String software = "";
 
 
@@ -68,7 +68,7 @@ String mqttSubscribeConfig = "";
 
 
 //LED
-#include <FastLED.h>
+#include <FastLED.h> // version  3.1.6
 #define LED_DATA_PIN D1 //D1 is GPIO5
 const int NUM_LEDS = 2;
 int GLOBAL_BRIGHTNESS = 255;
@@ -116,7 +116,7 @@ void setup() {
 
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
   FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
-  showLeds(64, 64, 64);
+  showAllLeds(64, 64, 64);
 
   Serial.begin(115200);  Serial.println();
   software = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
@@ -130,14 +130,7 @@ void setup() {
 
   if (c == BOOT_TEST_LIGHT) {
     Serial.println("Test mode");
-    while (millis() < TEST_TIME) {
-      int a = analogRead(inputPin);
-      int v = a / 4;
-      if (v > 255) v = 255;
-      Serial.println(v);
-      showLeds(v, v, v);
-      delay(LOOP_DELAY);
-    }
+    testDevice();
   }
 
   if (c == BOOT_RESET) {
@@ -181,7 +174,6 @@ void setup() {
   setupOTA();
 
   //MDNS discovery
-  //MDNS.addService("arduino", "udp", 11000);
   MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
   MDNS.addServiceTxt("arduino", "tcp", "thingName", s_thingName);
   MDNS.addServiceTxt("arduino", "tcp", "software", software);
@@ -201,6 +193,7 @@ void setup() {
   totalGB = a * numReadingsGB;
   averageGB = totalGB / numReadingsGB;
 
+  WiFi.setAutoReconnect(true);
 }
 
 void loop() {
@@ -228,6 +221,18 @@ void loop() {
   ArduinoOTA.handle();
   delay(LOOP_DELAY);
 
+}
+
+void testDevice() {
+
+  while (millis() < TEST_TIME) {
+    int a = analogRead(inputPin);
+    int v = a / 4;
+    if (v > 255) v = 255;
+    Serial.println(v);
+    showAllLeds(v, v, v);
+    delay(LOOP_DELAY);
+  }
 }
 
 

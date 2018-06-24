@@ -7,6 +7,7 @@ void reconnectMQTT() {
     digitalWrite(LED_BUILTIN, LOW);
     Serial.print("\nAttempting MQTT connection...");
     // Attempt to connect
+    wifiClient = WiFiClient(); // workaround to fix reconnection
     if (mqttClient.connect(THING_ID, THING_ID, MQTT_PASSWORD)) {
       digitalWrite(LED_BUILTIN, HIGH);
       Serial.println("connected\n");
@@ -72,11 +73,13 @@ void publishBeat() {
   JsonObject& jsonMsg = jsonBufferMQTT.createObject();
 
   jsonMsg["count"] = bb;
-  
-  jsonMsg["software"] = softwareVersion;
+  jsonMsg["softwareName"] = softwareName;
+  jsonMsg["softwareVersion"] = softwareVersion;
+  jsonMsg["thingName"] = THING_NAME;
+
   //jsonMsg["MD5"] = ESP.getSketchMD5();
 
-  jsonMsg["thingName"] = THING_NAME;
+
   jsonMsg["lightLevel"] = average;
 
   String jsonU;
@@ -117,18 +120,18 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   if (topic_leaf == mqttRandomColor) {
     if (topic_id != thingId) {
 
+
+      /*
+        {
+        "h": 0,
+        "s": 128,
+        "v": 255
+        }
+      */
       JsonObject& root = jsonBuffer.parseObject(payload);
-
-      //{
-      //"h":"0",
-      //"s":"128",
-      //"v":"255"
-      //}
-
       int h = root["h"];
       int s = root["s"];
       int v = root["v"];
-
 
       Serial.print("hsv ");
       Serial.print(h); Serial.print(" ");
@@ -145,11 +148,12 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   if ((topic_id = thingId) && (topic_leaf == mqttConfig)) {
     Serial.println("Config message:");
     JsonObject& root = jsonBuffer.parseObject(payload);
-
-    //{
-    //"command":"update",
-    //"option":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"
-    //}
+    /*
+      {
+      "command":"update",
+      "option":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"
+      }
+    */
 
     String command = root["command"];
     String option = root["option"];
@@ -158,9 +162,9 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     Serial.println(option);
 
     if (command = "update") {
-      showLeds(64, 0, 0);
+      showAllLeds(64, 0, 0);
       int u = httpUpdate(option);
-      if (u != HTTP_UPDATE_OK) showLeds(64, 64, 0);
+      if (u != HTTP_UPDATE_OK) showAllLeds(64, 64, 0);
     }
 
     Serial.println(command);
