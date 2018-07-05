@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.0.2"; //
+String softwareVersion = "1.0.3"; //
 String software = "";
 
 
