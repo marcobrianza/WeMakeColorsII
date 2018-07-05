@@ -1,6 +1,27 @@
 
 int LIGHT_TRIGGER = 100;
 
+void setupLEDs() {
+  FastLED.setBrightness(GLOBAL_BRIGHTNESS);
+  FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
+}
+
+
+void setupLightLevel() {
+  int a = analogRead(inputPin);
+
+  for (int i = 0; i < numReadings; i++) {
+    readings[i] = a;
+  }
+  total = a * numReadings;
+  //average = total / numReadings; average is not updated so we have  a new color at start
+
+  for (int iGB = 0; iGB < numReadingsGB; iGB++) {
+    readingsGB[iGB] = a;
+  }
+  totalGB = a * numReadingsGB;
+  averageGB = totalGB / numReadingsGB;
+}
 
 void setGlobalBrightness() {
   static unsigned long lastTimeGB = 0;

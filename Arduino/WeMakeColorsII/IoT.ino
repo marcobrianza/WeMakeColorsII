@@ -2,6 +2,42 @@
 
 #define COUNT_ADDR 0
 
+
+void setupParameters() {
+  s_thingName = readAttribute("thingName");
+  if (s_thingName == "") {
+    s_thingName = thingId;
+  }
+  s_thingName.toCharArray(THING_NAME, MAX_PARAM);
+  Serial.println ("thingName=" + String(THING_NAME));
+
+
+  s_mqttServer = readAttribute("mqttServer");
+  if (s_mqttServer != "") {
+    s_mqttServer.toCharArray(MQTT_SERVER, MAX_PARAM);
+  }
+  Serial.println ("mqttServer=" + String(MQTT_SERVER));
+
+
+  s_mqttUsername = readAttribute("mqttUsername");
+  if (s_mqttUsername != "") {
+    s_mqttUsername.toCharArray(MQTT_USERNAME, MAX_PARAM);
+  } else {
+    thingId.toCharArray(MQTT_USERNAME, MAX_PARAM);// if username is null it defaults to thingName
+  }
+  Serial.println ("mqttUsername=" + String(MQTT_USERNAME));
+
+
+  s_mqttPassword = readAttribute("mqttPassword");
+  if (s_mqttPassword != "") {
+    s_mqttPassword.toCharArray(MQTT_PASSWORD, MAX_PARAM);
+  }
+  Serial.println ("mqttPassword=" + String(MQTT_PASSWORD));
+
+}
+
+
+
 // -------------------------------------------
 byte bootCount() {
 
@@ -66,6 +102,8 @@ void connectWifi_or_AP(bool force_config) {
 
   wifiManager.addParameter(&wfm_thingName);
   wifiManager.addParameter(&wfm_mqttServer);
+  wifiManager.addParameter(&wfm_mqttUsername);
+  wifiManager.addParameter(&wfm_mqttPassword);
 
 
   if ( force_config == true) { //config must be done
@@ -93,7 +131,7 @@ void connectWifi_or_AP(bool force_config) {
 
   digitalWrite(LED_BUILTIN, HIGH);
   WiFi.mode(WIFI_STA);
-
+  WiFi.setAutoReconnect(true);
 }
 
 
@@ -114,6 +152,7 @@ void connectWifi() {
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
   Serial.println(ip);
+  WiFi.setAutoReconnect(true);
 }
 
 //---- config functions----
@@ -129,24 +168,32 @@ void configModeCallback (WiFiManager *myWiFiManager) {
 void saveConfigCallback () {
   s_thingName = wfm_thingName.getValue();
   writeAttribute("thingName", s_thingName);
-  //s_thingName.toCharArray(thingName, MAX_PARAM);
 
   s_mqttServer = wfm_mqttServer.getValue();
   writeAttribute("mqttServer", s_mqttServer);
-  //s_mqttServer.toCharArray(mqttServer, MAX_PARAM);
+
+  s_mqttUsername = wfm_mqttUsername.getValue();
+  writeAttribute("mqttUsername", s_mqttUsername);
+
+  s_mqttPassword = wfm_mqttPassword.getValue();
+  writeAttribute("mqttPassword", s_mqttPassword);
+
   showAllLeds(0, 255, 255);
 
 }
 
 
 String readAttribute(String attribute) {
-  String value;
+  String value = "";
   SPIFFS.begin();
   File configFile = SPIFFS.open(attribute + ".txt", "r");
   if (configFile) {
     value = configFile.readString();
     Serial.println("readAttribute: " + attribute + "=" + value);
+  } else {
+    Serial.println("readAttribute: " + attribute + "= null" );
   }
+
   configFile.close();
   SPIFFS.end();
   return value;
@@ -167,7 +214,6 @@ void writeAttribute(String attribute, String value) {
 
 // --------------- OTA Lan ---------------
 void setupOTA() {
-
   ArduinoOTA.setPort(8266); // Port defaults to 8266
   if (THING_NAME != THING_NAME_DEFAULT) {
     ArduinoOTA.setHostname(THING_NAME);   // Hostname defaults to esp8266-[ChipID]
@@ -256,6 +302,14 @@ void autoUpdate() {
   Serial.println();
 }
 
+
+void setupMdns() {
+  //MDNS discovery
+  MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
+  MDNS.addServiceTxt("arduino", "tcp", "thingName", s_thingName);
+  MDNS.addServiceTxt("arduino", "tcp", "software", software);
+  MDNS.update();
+}
 
 void blink(int b) {
   for (int i = 0; i < b; i++) {

@@ -1,25 +1,33 @@
 
 
 //--------------MQTT--------------
+void setupMqtt() {
+  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
+  mqttClient.setCallback(mqtt_callback);
+}
+
 void reconnectMQTT() {
   // Loop until we're reconnected
   while (!mqttClient.connected()) {
     digitalWrite(LED_BUILTIN, LOW);
     Serial.print("\nAttempting MQTT connection...");
     // Attempt to connect
-    wifiClient = WiFiClient(); // workaround to fix reconnection
-    if (mqttClient.connect(THING_ID, THING_ID, MQTT_PASSWORD)) {
+    wifiClient = WiFiClient(); // workaround to fix reconnection?
+    if (mqttClient.connect(THING_ID, MQTT_USERNAME, MQTT_PASSWORD)) {
       digitalWrite(LED_BUILTIN, HIGH);
       Serial.println("connected\n");
       // ... and resubscribe
       char MQTT_SUBSCRIBE[MQTT_MAX_PACKET_SIZE];
 #define QOS_AT_LEAST_1 1
 
+
+      mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
       mqttSubscribe_randomColor.toCharArray(MQTT_SUBSCRIBE, mqttSubscribe_randomColor.length() + 1);
       mqttClient.subscribe(MQTT_SUBSCRIBE, QOS_AT_LEAST_1);
       Serial.print("Subscibed to: ");
       Serial.println(MQTT_SUBSCRIBE);
 
+      mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
       mqttSubscribe_config.toCharArray(MQTT_SUBSCRIBE, mqttSubscribe_config.length() + 1);
       mqttClient.subscribe(MQTT_SUBSCRIBE, QOS_AT_LEAST_1);
       Serial.print("Subscibed to: ");
@@ -52,6 +60,7 @@ void publishRandomColor(CHSV c) {
   jsonMsg.printTo(mqttData);
 
   char mqttTopicPub[MQTT_MAX];
+  mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
   mqttPublish_randomColor.toCharArray(mqttTopicPub, mqttPublish_randomColor.length() + 1);
 
   int ret = mqttClient.publish(mqttTopicPub, mqttData);
@@ -88,7 +97,7 @@ void publishBeat() {
   jsonMsg.printTo(mqttData);
 
   char mqttTopicPub[MQTT_MAX];
-
+  mqttPublish_beat = mqttRoot + "/" + thingId + "/" + mqtt_beat;
   mqttPublish_beat.toCharArray(mqttTopicPub, mqttPublish_beat.length() + 1);
   int ret = mqttClient.publish(mqttTopicPub, mqttData);
 

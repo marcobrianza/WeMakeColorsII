@@ -1,8 +1,7 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.0.3"; //
+String softwareVersion = "1.1.0"; //
 String software = "";
-
 
 //boot Count
 #include <EEPROM.h>
@@ -27,12 +26,22 @@ String appId = "WMCII_";
 #define THING_NAME_DEFAULT ""
 char THING_NAME[MAX_PARAM] = THING_NAME_DEFAULT;
 String s_thingName = "";
+
 char MQTT_SERVER[MAX_PARAM] = "wmc.marcobrianza.it";
 String s_mqttServer = "";
+
+char MQTT_USERNAME[MAX_PARAM] = "";
+String s_mqttUsername = "";
+
+char MQTT_PASSWORD[MAX_PARAM] = "";
+String s_mqttPassword = "";
+
 
 // name, prompt, default, length
 WiFiManagerParameter wfm_thingName("thingName", "Thing Name", THING_NAME, sizeof(THING_NAME));
 WiFiManagerParameter wfm_mqttServer("mqttServer", "MQTT Server", MQTT_SERVER, sizeof(MQTT_SERVER));
+WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", MQTT_USERNAME, sizeof(MQTT_USERNAME));
+WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", MQTT_PASSWORD, sizeof(MQTT_PASSWORD));
 
 //OTA
 #include <ESP8266mDNS.h>
@@ -44,8 +53,8 @@ const char* OTA_PASSWORD = "12345678";
 #include <ESP8266httpUpdate.h>
 
 
-String MD5_URL = "http://iot.marcobrianza.it/WeMakeColorsII/md5.txt";
-String FW_URL = "http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin";
+String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
+String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 //MQTT
 #include <PubSubClient.h> // version 2.6.0 //in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
@@ -54,7 +63,7 @@ WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 int MQTT_PORT = 1883;
 String mqttRoot =   "WeMakeColorsII";
-char* MQTT_PASSWORD = "aieie";
+//char* MQTT_PASSWORD = "aieie";
 
 String mqtt_randomColor = "randomColor";
 String mqtt_beat = "beat";
@@ -104,7 +113,7 @@ int LOOP_DELAY = 40;
 
 #define TEST_TIME 30000
 
-//test connection
+//default ssid password
 const char* SSID = "colors";
 const char* PASSWORD = "colors01";
 
@@ -118,14 +127,12 @@ unsigned long last_beat = 0;
 
 void setup() {
 
-  FastLED.setBrightness(GLOBAL_BRIGHTNESS);
-  FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
+  setupLEDs();
   showAllLeds(64, 64, 64);
 
   Serial.begin(115200);  Serial.println();
   software = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
   Serial.println(software);
-
   getTHING_ID();
 
   byte c = bootCount();
@@ -144,6 +151,8 @@ void setup() {
     case BOOT_RESET:
       writeAttribute("thingName", "");
       writeAttribute("mqttServer", "");
+      writeAttribute("mqttUsername", "");
+      writeAttribute("mqttPassword", "");
       connectWifi_or_AP(true);
       break;
     default:
@@ -151,52 +160,14 @@ void setup() {
   }
 
   autoUpdate();
-
-  s_thingName = readAttribute("thingName");
-  if (s_thingName == "") {
-    s_thingName = thingId;
-  }
-
-  Serial.println ("thingName=" + s_thingName);
-  s_thingName.toCharArray(THING_NAME, MAX_PARAM);
-  WiFi.hostname(s_thingName);
-
-  s_mqttServer = readAttribute("mqttServer");
-  if (s_mqttServer != "") {
-    s_mqttServer.toCharArray(MQTT_SERVER, MAX_PARAM);
-  }
-
-  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-  mqttClient.setCallback(mqtt_callback);
-  mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
-  mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
-
-  mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
-  mqttPublish_beat = mqttRoot + "/" + thingId + "/" + mqtt_beat;
-
+  setupParameters();
+  setupMqtt();
   setupOTA();
+  setupMdns();
+  setupLightLevel();
 
-  //MDNS discovery
-  MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
-  MDNS.addServiceTxt("arduino", "tcp", "thingName", s_thingName);
-  MDNS.addServiceTxt("arduino", "tcp", "software", software);
-  MDNS.update();
 
-  int a = analogRead(inputPin);
-
-  for (int i = 0; i < numReadings; i++) {
-    readings[i] = a;
-  }
-  total = a * numReadings;
-  //average = total / numReadings; average is not updated so we have  a new color at start
-
-  for (int iGB = 0; iGB < numReadingsGB; iGB++) {
-    readingsGB[iGB] = a;
-  }
-  totalGB = a * numReadingsGB;
-  averageGB = totalGB / numReadingsGB;
-
-  WiFi.setAutoReconnect(true);
+  WiFi.hostname(s_thingName);
 }
 
 void loop() {
