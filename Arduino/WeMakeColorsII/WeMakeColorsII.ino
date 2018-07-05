@@ -56,15 +56,15 @@ int MQTT_PORT = 1883;
 String mqttRoot =   "WeMakeColorsII";
 char* MQTT_PASSWORD = "aieie";
 
-String mqttRandomColor = "randomColor";
-String mqttBeat = "beat";
-String mqttConfig = "config";
+String mqtt_randomColor = "randomColor";
+String mqtt_beat = "beat";
+String mqtt_config = "config";
 
-String mqttPublishRandomColor = "";
-String mqttPublishBeat = "";
+String mqttPublish_randomColor = "";
+String mqttPublish_beat = "";
 
-String mqttSubscribeRandomColor = "";
-String mqttSubscribeConfig = "";
+String mqttSubscribe_randomColor = "";
+String mqttSubscribe_config = "";
 
 
 //LED
@@ -97,7 +97,7 @@ int NEW_COLOR_TIME = 1000;
 int LOOP_DELAY = 40;
 #define  MAX_C  16
 
-// test
+// test device
 #define BOOT_TEST_LIGHT 2
 #define BOOT_RESET 3
 #define BOOT_DEFAULT_AP 4
@@ -111,6 +111,10 @@ const char* PASSWORD = "colors01";
 //beat
 #define BEAT_INTERVAL 900000 //900000 60000
 unsigned long last_beat = 0;
+
+//led builtin
+#define LED_ON LOW
+#define LED_OFF HIGH
 
 void setup() {
 
@@ -146,7 +150,6 @@ void setup() {
       connectWifi_or_AP(false);
   }
 
-
   autoUpdate();
 
   s_thingName = readAttribute("thingName");
@@ -165,11 +168,11 @@ void setup() {
 
   mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
   mqttClient.setCallback(mqtt_callback);
-  mqttSubscribeRandomColor = mqttRoot + "/+/" + mqttRandomColor;
-  mqttSubscribeConfig = mqttRoot + "/" + thingId + "/" + mqttConfig;
+  mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
+  mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
 
-  mqttPublishRandomColor = mqttRoot + "/" + thingId + "/" + mqttRandomColor;
-  mqttPublishBeat = mqttRoot + "/" + thingId + "/" + mqttBeat;
+  mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
+  mqttPublish_beat = mqttRoot + "/" + thingId + "/" + mqtt_beat;
 
   setupOTA();
 

@@ -15,12 +15,12 @@ void reconnectMQTT() {
       char MQTT_SUBSCRIBE[MQTT_MAX_PACKET_SIZE];
 #define QOS_AT_LEAST_1 1
 
-      mqttSubscribeRandomColor.toCharArray(MQTT_SUBSCRIBE, mqttSubscribeRandomColor.length() + 1);
+      mqttSubscribe_randomColor.toCharArray(MQTT_SUBSCRIBE, mqttSubscribe_randomColor.length() + 1);
       mqttClient.subscribe(MQTT_SUBSCRIBE, QOS_AT_LEAST_1);
       Serial.print("Subscibed to: ");
       Serial.println(MQTT_SUBSCRIBE);
 
-      mqttSubscribeConfig.toCharArray(MQTT_SUBSCRIBE, mqttSubscribeConfig.length() + 1);
+      mqttSubscribe_config.toCharArray(MQTT_SUBSCRIBE, mqttSubscribe_config.length() + 1);
       mqttClient.subscribe(MQTT_SUBSCRIBE, QOS_AT_LEAST_1);
       Serial.print("Subscibed to: ");
       Serial.println(MQTT_SUBSCRIBE);
@@ -52,7 +52,7 @@ void publishRandomColor(CHSV c) {
   jsonMsg.printTo(mqttData);
 
   char mqttTopicPub[MQTT_MAX];
-  mqttPublishRandomColor.toCharArray(mqttTopicPub, mqttPublishRandomColor.length() + 1);
+  mqttPublish_randomColor.toCharArray(mqttTopicPub, mqttPublish_randomColor.length() + 1);
 
   int ret = mqttClient.publish(mqttTopicPub, mqttData);
 
@@ -89,7 +89,7 @@ void publishBeat() {
 
   char mqttTopicPub[MQTT_MAX];
 
-  mqttPublishBeat.toCharArray(mqttTopicPub, mqttPublishBeat.length() + 1);
+  mqttPublish_beat.toCharArray(mqttTopicPub, mqttPublish_beat.length() + 1);
   int ret = mqttClient.publish(mqttTopicPub, mqttData);
 
   Serial.print("MQTT message sent: ");
@@ -117,9 +117,8 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
   DynamicJsonBuffer jsonBuffer(MQTT_MAX);
 
-  if (topic_leaf == mqttRandomColor) {
+  if (topic_leaf == mqtt_randomColor) {
     if (topic_id != thingId) {
-
 
       /*
         {
@@ -145,7 +144,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     } else Serial.println("My message");
   }
 
-  if ((topic_id = thingId) && (topic_leaf == mqttConfig)) {
+  if ((topic_id = thingId) && (topic_leaf == mqtt_config)) {
     Serial.println("Config message:");
     JsonObject& root = jsonBuffer.parseObject(payload);
     /*

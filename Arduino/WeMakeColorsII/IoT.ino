@@ -204,7 +204,6 @@ void setupOTA() {
 
 int httpUpdate(String url) {
   t_httpUpdate_return ret = ESPhttpUpdate.update(url);
-  //t_httpUpdate_return  ret = ESPhttpUpdate.update("https://server/file.bin");
 
   switch (ret) {
     case HTTP_UPDATE_FAILED:
@@ -260,9 +259,9 @@ void autoUpdate() {
 
 void blink(int b) {
   for (int i = 0; i < b; i++) {
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, LED_ON);
     delay(100);
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LED_OFF);
     delay(100);
   }
 }

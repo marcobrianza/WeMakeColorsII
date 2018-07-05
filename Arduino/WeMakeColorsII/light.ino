@@ -24,9 +24,9 @@ void applyColor() {
   int mb = map(averageGB, 0, 512, 64, 255);
   if (mb > 255) mb = 255;
 
-//  Serial.print(averageGB);
-//  Serial.print(" ");
-//  Serial.println(mb);
+  //  Serial.print(averageGB);
+  //  Serial.print(" ");
+  //  Serial.println(mb);
 
   FastLED.setBrightness(mb);
   FastLED.show();
@@ -82,7 +82,7 @@ CHSV newRndColor() {
 
 void showAllLeds(int r, int g, int b ) {
   for ( int i = 0; i < NUM_LEDS; i++) {
-  leds[i] = CRGB(r, g, b);
+    leds[i] = CRGB(r, g, b);
   }
   FastLED.show();
 }
