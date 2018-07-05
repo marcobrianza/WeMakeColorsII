@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.1.0"; //
+String softwareVersion = "1.1.1"; //
 String software = "";
 
 //boot Count
@@ -63,7 +63,6 @@ WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 int MQTT_PORT = 1883;
 String mqttRoot =   "WeMakeColorsII";
-//char* MQTT_PASSWORD = "aieie";
 
 String mqtt_randomColor = "randomColor";
 String mqtt_beat = "beat";
@@ -118,12 +117,15 @@ const char* SSID = "colors";
 const char* PASSWORD = "colors01";
 
 //beat
-#define BEAT_INTERVAL 900000 //900000 60000
-unsigned long last_beat = 0;
+#define BEAT_INTERVAL 900
 
 //led builtin
 #define LED_ON LOW
 #define LED_OFF HIGH
+
+#include <Ticker.h>
+Ticker T_mqtt_beat;
+Ticker T_globalBrighness;
 
 void setup() {
 
@@ -134,6 +136,7 @@ void setup() {
   software = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
   Serial.println(software);
   getTHING_ID();
+  WiFi.hostname(s_thingName);
 
   byte c = bootCount();
   Serial.print("\nboot count=");
@@ -166,8 +169,9 @@ void setup() {
   setupMdns();
   setupLightLevel();
 
+  T_mqtt_beat.attach(BEAT_INTERVAL, publishBeat);
+  T_globalBrighness.attach(1, setGlobalBrightness);
 
-  WiFi.hostname(s_thingName);
 }
 
 void loop() {
@@ -184,13 +188,6 @@ void loop() {
     applyColor();
     last_color_t = now;
   }
-
-  if (now - last_beat > BEAT_INTERVAL) {
-    last_beat = now;
-    publishBeat();
-  }
-
-  setGlobalBrightness();
 
   ArduinoOTA.handle();
   delay(LOOP_DELAY);
