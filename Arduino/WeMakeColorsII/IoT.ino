@@ -51,7 +51,7 @@ void getTHING_ID() {
 
 // ------ Wi-Fi Manager -------------------------------------
 
-void connectWifi_or_AP(int force_config) {
+void connectWifi_or_AP(bool force_config) {
   digitalWrite(LED_BUILTIN, LOW);
 
   //  WiFi.disconnect();
@@ -60,7 +60,7 @@ void connectWifi_or_AP(int force_config) {
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);
   wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
-  wifiManager.setMinimumSignalQuality(10); //default is 8
+  wifiManager.setMinimumSignalQuality(50); //default is 8
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
@@ -68,13 +68,14 @@ void connectWifi_or_AP(int force_config) {
   wifiManager.addParameter(&wfm_mqttServer);
 
 
-  if ( force_config == BOOT_RESET) { //config must be done
-    wifiManager.setConfigPortalTimeout(0);
+  if ( force_config == true) { //config must be done
+    WiFi.disconnect();
     wifiManager.resetSettings(); //reset saved settings
+    wifiManager.setConfigPortalTimeout(0);
     wifiManager.startConfigPortal(THING_ID);
   } else
   {
-    wifiManager.setConfigPortalTimeout(300);
+    wifiManager.setConfigPortalTimeout(300); //5 minutes
     wifiManager.autoConnect(THING_ID);
   }
 
@@ -100,7 +101,7 @@ void connectWifi() {
   WiFi.disconnect();
   delay(100);
   // We start by connecting to a WiFi network
-  Serial.print("Connecting to "); Serial.println(SSID);
+  Serial.print("Connecting to: "); Serial.println(SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(SSID, PASSWORD);
 

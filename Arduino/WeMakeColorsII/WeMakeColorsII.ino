@@ -100,7 +100,7 @@ int LOOP_DELAY = 40;
 // test
 #define BOOT_TEST_LIGHT 2
 #define BOOT_RESET 3
-#define BOOT_TEST_BOARD 4
+#define BOOT_DEFAULT_AP 4
 
 #define TEST_TIME 30000
 
@@ -133,17 +133,17 @@ void setup() {
     testDevice();
   }
 
-  if (c == BOOT_RESET) {
-    WiFi.disconnect();
-    writeAttribute("thingName", "");
-    writeAttribute("mqttServer", "");
-  }
-
-
-  if (c == BOOT_TEST_BOARD) {
-    connectWifi();
-  } else {
-    connectWifi_or_AP(c);
+  switch  (c) {
+    case BOOT_DEFAULT_AP:
+      connectWifi();
+      break;
+    case BOOT_RESET:
+      writeAttribute("thingName", "");
+      writeAttribute("mqttServer", "");
+      connectWifi_or_AP(true);
+      break;
+    default:
+      connectWifi_or_AP(false);
   }
 
 
