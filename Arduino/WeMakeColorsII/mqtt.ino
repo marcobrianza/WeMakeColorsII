@@ -53,6 +53,9 @@ void publishRandomColor(CHSV c) {
   jsonMsg["h"] = c.h;
   jsonMsg["s"] = c.s;
   jsonMsg["v"] = c.v;
+  
+  jsonMsg["thingName"] = THING_NAME;
+  jsonMsg["lightLevel"] = average;
 
   String jsonU;
 

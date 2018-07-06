@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.1.1"; //
+String softwareVersion = "1.1.2"; //
 String software = "";
 
 //boot Count
