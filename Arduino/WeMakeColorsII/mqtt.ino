@@ -53,7 +53,7 @@ void publishRandomColor(CHSV c) {
   jsonMsg["h"] = c.h;
   jsonMsg["s"] = c.s;
   jsonMsg["v"] = c.v;
-  
+
   jsonMsg["thingName"] = THING_NAME;
   jsonMsg["lightLevel"] = average;
 
@@ -78,21 +78,22 @@ void publishRandomColor(CHSV c) {
 
 void publishBeat() {
   static unsigned long b = 0;
-  String bb = String(b);
+  //String bb = String(b);
   b++;
 
   StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
   JsonObject& jsonMsg = jsonBufferMQTT.createObject();
 
-  jsonMsg["count"] = bb;
+  jsonMsg["count"] = b;
   jsonMsg["softwareName"] = softwareName;
   jsonMsg["softwareVersion"] = softwareVersion;
-  jsonMsg["thingName"] = THING_NAME;
-
-  //jsonMsg["MD5"] = ESP.getSketchMD5();
-
-
+  jsonMsg["thingName"] = THING_NAME; 
+ //jsonMsg["MD5"] = ESP.getSketchMD5();
   jsonMsg["lightLevel"] = average;
+
+  int fh = ESP.getFreeHeap();
+  jsonMsg["FreeHeap"] = fh;
+
 
   String jsonU;
 
@@ -110,7 +111,14 @@ void publishBeat() {
   Serial.print(mqttData);
   Serial.print(" result: ");
   Serial.println(ret);
+
+
+  Serial.print("FreeHeap: ");
+  Serial.println(fh);
+
 }
+
+
 
 void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
