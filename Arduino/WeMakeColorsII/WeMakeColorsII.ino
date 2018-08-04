@@ -1,19 +1,19 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.1.4"; //
+String softwareVersion = "1.2.0"; //
 String software = "";
 
 //boot Count
 #include <EEPROM.h>
 
 //Wi-Fi
-#include <ESP8266WiFi.h>  // ESP8266 core 2.4.1
+#include <ESP8266WiFi.h>  // ESP8266 core 2.4.2
 WiFiClient  wifi;
 
 //Wi-FiManager
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <WiFiManager.h> // Version 0.12.0
+#include <WiFiManager.h> // github version  https://github.com/tzapu/WiFiManager/tree/hotfixes
 #include "FS.h"
 
 #define MAX_PARAM 40
@@ -58,7 +58,7 @@ String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 //MQTT
 #include <PubSubClient.h> // version 2.6.0 //in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
-#include <ArduinoJson.h> // version 5.13.1
+#include <ArduinoJson.h> // version 5.13.2
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 int MQTT_PORT = 1883;

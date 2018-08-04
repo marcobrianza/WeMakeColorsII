@@ -12,7 +12,7 @@ void reconnectMQTT() {
     digitalWrite(LED_BUILTIN, LOW);
     Serial.print("\nAttempting MQTT connection...");
     // Attempt to connect
-    wifiClient = WiFiClient(); // workaround to fix reconnection?
+    //wifiClient = WiFiClient(); // workaround to fix reconnection?
     if (mqttClient.connect(THING_ID, MQTT_USERNAME, MQTT_PASSWORD)) {
       digitalWrite(LED_BUILTIN, HIGH);
       Serial.println("connected\n");
