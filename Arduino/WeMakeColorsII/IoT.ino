@@ -85,54 +85,8 @@ void getTHING_ID() {
   Serial.println(THING_ID);
 }
 
-// ------ Wi-Fi Manager -------------------------------------
+// ------ Wi-Fi Manager functions-------------------------------------
 
-void connectWifi_or_AP(bool force_config) {
-  digitalWrite(LED_BUILTIN, LOW);
-
-  //  WiFi.disconnect();
-  //  delay(100);
-
-  WiFiManager wifiManager;
-  wifiManager.setDebugOutput(true);
-  wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
-  wifiManager.setMinimumSignalQuality(50); //default is 8
-  wifiManager.setAPCallback(configModeCallback);
-  wifiManager.setSaveConfigCallback(saveConfigCallback);
-
-  wifiManager.addParameter(&wfm_thingName);
-  wifiManager.addParameter(&wfm_mqttServer);
-  wifiManager.addParameter(&wfm_mqttUsername);
-  wifiManager.addParameter(&wfm_mqttPassword);
-
-
-  if ( force_config == true) { //config must be done
-    WiFi.disconnect();
-    wifiManager.resetSettings(); //reset saved settings
-    wifiManager.setConfigPortalTimeout(0);
-    wifiManager.startConfigPortal(THING_ID);
-  } else
-  {
-    wifiManager.setConfigPortalTimeout(300); //5 minutes
-    wifiManager.autoConnect(THING_ID);
-  }
-
-  boolean led = false;
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    digitalWrite(LED_BUILTIN, led);
-    led = !led;
-  }
-
-  //if you get here you have connected to the WiFi
-  Serial.print("connected to network: ");
-  Serial.println(WiFi.SSID());
-
-  digitalWrite(LED_BUILTIN, HIGH);
-  WiFi.mode(WIFI_STA);
-  WiFi.setAutoReconnect(true);
-}
 
 
 void connectWifi() {
@@ -319,4 +273,3 @@ void blink(int b) {
     delay(100);
   }
 }
-

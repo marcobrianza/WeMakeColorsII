@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.2.0"; //
+String softwareVersion = "1.2.2"; // updating all the libraries at 2018-10-07 , building with ide 1.8.7
 String software = "";
 
 //boot Count
@@ -11,10 +11,12 @@ String software = "";
 WiFiClient  wifi;
 
 //Wi-FiManager
+#include "FS.h"
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
-#include <WiFiManager.h> // github version  https://github.com/tzapu/WiFiManager/tree/hotfixes
-#include "FS.h"
+#include <WiFiManager.h> // 0.14 
+
+
 
 #define MAX_PARAM 40
 #define MQTT_MAX MQTT_MAX_PACKET_SIZE
@@ -57,8 +59,8 @@ String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 //MQTT
-#include <PubSubClient.h> // version 2.6.0 //in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
-#include <ArduinoJson.h> // version 5.13.2
+#include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
+#include <ArduinoJson.h> // version 5.13.3 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 int MQTT_PORT = 1883;
@@ -76,7 +78,7 @@ String mqttSubscribe_config = "";
 
 
 //LED
-#include <FastLED.h> // version  3.1.6
+#include <FastLED.h> // version  3.2.1 
 #define LED_DATA_PIN D1 //D1 is GPIO5
 const int NUM_LEDS = 2;
 int GLOBAL_BRIGHTNESS = 255;
@@ -206,10 +208,51 @@ void testDevice() {
   }
 }
 
+//----WiFi manager main function ---- needs to be in the main sketch sice Arduino IDE 1.8.7
+
+void connectWifi_or_AP(bool force_config) {
+  digitalWrite(LED_BUILTIN, LOW);
+
+  //  WiFi.disconnect();
+  //  delay(100);
+
+  WiFiManager wifiManager;
+  wifiManager.setDebugOutput(true);
+  wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
+  wifiManager.setMinimumSignalQuality(50); //default is 8
+  wifiManager.setAPCallback(configModeCallback);
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+
+  wifiManager.addParameter(&wfm_thingName);
+  wifiManager.addParameter(&wfm_mqttServer);
+  wifiManager.addParameter(&wfm_mqttUsername);
+  wifiManager.addParameter(&wfm_mqttPassword);
 
 
+  if ( force_config == true) { //config must be done
+    WiFi.disconnect();
+    wifiManager.resetSettings(); //reset saved settings
+    wifiManager.setConfigPortalTimeout(0);
+    wifiManager.startConfigPortal(THING_ID);
+  } else
+  {
+    wifiManager.setConfigPortalTimeout(300); //5 minutes
+    wifiManager.autoConnect(THING_ID);
+  }
 
+  boolean led = false;
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    digitalWrite(LED_BUILTIN, led);
+    led = !led;
+  }
 
+  //if you get here you have connected to the WiFi
+  Serial.print("connected to network: ");
+  Serial.println(WiFi.SSID());
 
-
-
+  digitalWrite(LED_BUILTIN, HIGH);
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+}
