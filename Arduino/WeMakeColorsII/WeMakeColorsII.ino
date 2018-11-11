@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.2.2"; // updating all the libraries at 2018-10-07 , building with ide 1.8.7
+String softwareVersion = "1.2.3"; // reset all settings in DEFAULT_AP mode
 String software = "";
 
 //boot Count
@@ -151,6 +151,10 @@ void setup() {
 
   switch  (c) {
     case BOOT_DEFAULT_AP:
+      writeAttribute("thingName", "");
+      writeAttribute("mqttServer", "");
+      writeAttribute("mqttUsername", "");
+      writeAttribute("mqttPassword", "");
       connectWifi();
       break;
     case BOOT_RESET:
