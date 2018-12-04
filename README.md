@@ -1,11 +1,11 @@
 **WeMakeColors II**  
-*distributed light installation*  
+*Distributed light installation - Minimal social network*  
 
 http://www.marcobrianza.it/wemakecolors-ii/
 
 
 Arduino IDE portable 1.8.7 with the required ESP8266 core and libraries:
-* [Mac](https://www.dropbox.com/s/q5bcygl1w20enc5/Arduino-1.8.7-portable-WMCII.app.zip?dl=0)  
+* [Mac](https://www.dropbox.com/sh/keqsfwwcmzjxv07/AACXMYWth2wcJUUqbWed8Tfba?dl=0)  
 * [Windows](https://www.dropbox.com/s/cx47uh6hqpspyux/arduino-1.8.5-portable-win-wmc.zip?dl=0)
 
 Serial port drivers for CH340 chip
