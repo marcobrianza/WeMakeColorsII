@@ -1,9 +1,28 @@
+#define QOS_AT_LEAST_1 1
 
+String mqttRoot =   "WeMakeColorsII";
+
+String mqtt_randomColor = "randomColor";
+String mqtt_beat = "beat";
+String mqtt_config = "config";
+
+String mqttPublish_randomColor = "";
+String mqttPublish_beat = "";
+
+String mqttSubscribe_randomColor = "";
+String mqttSubscribe_config = "";
 
 //--------------MQTT--------------
 void setupMqtt() {
   mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
   mqttClient.setCallback(mqtt_callback);
+
+  mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
+  mqttPublish_beat = mqttRoot + "/" + thingId + "/" + mqtt_beat;
+
+  mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
+  mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
+
 }
 
 void reconnectMQTT() {
@@ -13,25 +32,18 @@ void reconnectMQTT() {
     Serial.print("\nAttempting MQTT connection...");
     // Attempt to connect
     //wifiClient = WiFiClient(); // workaround to fix reconnection?
-    if (mqttClient.connect(THING_ID, MQTT_USERNAME, MQTT_PASSWORD)) {
+    if (mqttClient.connect(thingId.c_str(), MQTT_USERNAME, MQTT_PASSWORD)) {
       digitalWrite(LED_BUILTIN, HIGH);
       Serial.println("connected\n");
       // ... and resubscribe
-      char MQTT_SUBSCRIBE[MQTT_MAX_PACKET_SIZE];
-#define QOS_AT_LEAST_1 1
 
-
-      mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
-      mqttSubscribe_randomColor.toCharArray(MQTT_SUBSCRIBE, mqttSubscribe_randomColor.length() + 1);
-      mqttClient.subscribe(MQTT_SUBSCRIBE, QOS_AT_LEAST_1);
+      mqttClient.subscribe(mqttSubscribe_randomColor.c_str(), QOS_AT_LEAST_1);
       Serial.print("Subscibed to: ");
-      Serial.println(MQTT_SUBSCRIBE);
+      Serial.println(mqttSubscribe_randomColor);
 
-      mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
-      mqttSubscribe_config.toCharArray(MQTT_SUBSCRIBE, mqttSubscribe_config.length() + 1);
-      mqttClient.subscribe(MQTT_SUBSCRIBE, QOS_AT_LEAST_1);
+      mqttClient.subscribe(mqttSubscribe_config.c_str(), QOS_AT_LEAST_1);
       Serial.print("Subscibed to: ");
-      Serial.println(MQTT_SUBSCRIBE);
+      Serial.println(mqttSubscribe_config);
 
       publishBeat();
 
@@ -39,8 +51,7 @@ void reconnectMQTT() {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
+      delay(5000); // Wait 5 seconds before retrying
     }
   }
 }
@@ -57,19 +68,15 @@ void publishRandomColor(CHSV c) {
   jsonMsg["thingName"] = THING_NAME;
   jsonMsg["lightLevel"] = average;
 
-  String jsonU;
 
   char mqttData[MQTT_MAX];
   jsonMsg.printTo(mqttData);
 
-  char mqttTopicPub[MQTT_MAX];
-  mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
-  mqttPublish_randomColor.toCharArray(mqttTopicPub, mqttPublish_randomColor.length() + 1);
 
-  int ret = mqttClient.publish(mqttTopicPub, mqttData);
+  int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
 
   Serial.print("MQTT message sent: ");
-  Serial.print(mqttTopicPub);
+  Serial.print(mqttPublish_randomColor);
   Serial.print(" ");
   Serial.print(mqttData);
   Serial.print(" result: ");
@@ -87,31 +94,24 @@ void publishBeat() {
   jsonMsg["count"] = b;
   jsonMsg["softwareName"] = softwareName;
   jsonMsg["softwareVersion"] = softwareVersion;
-  jsonMsg["thingName"] = THING_NAME; 
- //jsonMsg["MD5"] = ESP.getSketchMD5();
+  jsonMsg["thingName"] = THING_NAME;
+  //jsonMsg["MD5"] = ESP.getSketchMD5();
   jsonMsg["lightLevel"] = average;
 
   int fh = ESP.getFreeHeap();
   jsonMsg["FreeHeap"] = fh;
 
-
-  String jsonU;
-
   char mqttData[MQTT_MAX];
   jsonMsg.printTo(mqttData);
 
-  char mqttTopicPub[MQTT_MAX];
-  mqttPublish_beat = mqttRoot + "/" + thingId + "/" + mqtt_beat;
-  mqttPublish_beat.toCharArray(mqttTopicPub, mqttPublish_beat.length() + 1);
-  int ret = mqttClient.publish(mqttTopicPub, mqttData);
+  int ret = mqttClient.publish(mqttPublish_beat.c_str(), mqttData);
 
   Serial.print("MQTT message sent: ");
-  Serial.print(mqttTopicPub);
+  Serial.print(mqttPublish_beat);
   Serial.print(" ");
   Serial.print(mqttData);
   Serial.print(" result: ");
   Serial.println(ret);
-
 
   Serial.print("FreeHeap: ");
   Serial.println(fh);
@@ -159,8 +159,8 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
       Serial.println();
 
-      leds[1] = CHSV(h, s, v);
-      applyColor();
+      setRemoteLED(CHSV(h, s, v));
+
     } else Serial.println("My message");
   }
 
@@ -191,4 +191,3 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
   }
 }
-

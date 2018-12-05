@@ -1,5 +1,25 @@
 
+const int numReadings = 25;
+int readings[numReadings];      // the readings from the analog input
+int readIndex = 0;              // the index of the current reading
+int total = 0;                  // the running total
+int average = 0;
+
+//brightness
+const int numReadingsGB = 25;
+int readingsGB[numReadingsGB];      // the readings from the analog input
+int readIndexGB = 0;              // the index of the current reading
+int totalGB = 0;                  // the running total
+int averageGB = 0;
+
 int LIGHT_TRIGGER = 100;
+
+#define LED_DATA_PIN D1 //D1 is GPIO5
+
+int GLOBAL_BRIGHTNESS = 255;
+
+const int NUM_LEDS = 2;
+CRGB leds[NUM_LEDS];
 
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
@@ -96,7 +116,6 @@ void setGlobalBrightness() {
   }
 
 
-
   void showAllLeds(int r, int g, int b ) {
     for ( int i = 0; i < NUM_LEDS; i++) {
       leds[i] = CRGB(r, g, b);
@@ -104,4 +123,12 @@ void setGlobalBrightness() {
     FastLED.show();
   }
 
+void setMyLED(CHSV newC){
+    leds[0] = newC;
+    applyColor();
+}
 
+void setRemoteLED(CHSV newC){
+    leds[1] = newC;
+    applyColor();
+}

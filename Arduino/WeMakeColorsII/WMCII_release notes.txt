@@ -1,11 +1,28 @@
 release notes
+1.3.0 2018-12-05
+Refactoring after discovering .c_str() and others
 
-1.0.0 2018-03-18
-First public release
+
+1.2.3 2018-11-10
+reset all settings in DEFAULT_AP mode
+
+1.2.2 2018-11-09
+tested with updated libraries and Arduino IDE 1.8.7
+
+Refactoring and new features.
+
+
+1.0.2 2018-06-24
+attempt to fix reconnect
+some structure refactoring to have a more generic program structure
 
 1.0.1 2018-04-07
 setAutoReconnect(true)
 
-1.0.2 2018-06-24
-attemp to fix reconnect
-some structure refactoring to have a more generic program structure
+1.0.0 2018-03-18
+First public release
+
+
+
+
+

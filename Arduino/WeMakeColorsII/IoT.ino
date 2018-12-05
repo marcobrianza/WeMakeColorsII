@@ -1,7 +1,6 @@
-#include <EEPROM.h>
+#include <EEPROM.h> //boot Count
 
 #define COUNT_ADDR 0
-
 
 void setupParameters() {
   s_thingName = readAttribute("thingName");
@@ -71,19 +70,18 @@ byte bootCount() {
 
 // ------THING_ID----------
 
-void getTHING_ID() {
+String getTHING_ID(String appId) {
   byte ma[6];
   char* MAC = "11:22:33:44:55:66";
+  String id;
 
   WiFi.macAddress(ma);
   sprintf(MAC, "%02X:%02X:%02X:%02X:%02X:%02X", ma[0], ma[1], ma[2], ma[3], ma[4], ma[5]);
 
-  thingId = appId + String(MAC);
-  thingId.toCharArray(THING_ID, thingId.length() + 1);
-
-  Serial.print("THING_ID: ");
-  Serial.println(THING_ID);
+  id = appId + "_" +  String(MAC);;
+  return (id);
 }
+
 
 // ------ Wi-Fi Manager functions-------------------------------------
 
@@ -95,7 +93,7 @@ void connectWifi() {
   // We start by connecting to a WiFi network
   Serial.print("Connecting to: "); Serial.println(SSID);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, PASSWORD);
+  WiFi.begin(SSID.c_str(), PASSWORD.c_str());
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -172,9 +170,9 @@ void setupOTA() {
   if (THING_NAME != THING_NAME_DEFAULT) {
     ArduinoOTA.setHostname(THING_NAME);   // Hostname defaults to esp8266-[ChipID]
   } else {
-    ArduinoOTA.setHostname(THING_ID);
+    ArduinoOTA.setHostname(thingId.c_str());
   }
-  ArduinoOTA.setPassword((const char *) OTA_PASSWORD);   // No authentication by default
+  ArduinoOTA.setPassword((const char *) OTA_PASSWORD.c_str());   // No authentication by default
 
   ArduinoOTA.onStart([]() {
     Serial.println("\nStart OTA");
