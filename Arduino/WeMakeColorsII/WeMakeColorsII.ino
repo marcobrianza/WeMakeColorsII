@@ -1,11 +1,22 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.3.2"; // other refactoring
+String softwareVersion = "1.4.0"; // wifi manager paramenters all strings
 String software = "";
-   
+
 //Wi-Fi
 #include <ESP8266WiFi.h>  // ESP8266 core 2.4.2
-WiFiClient  wifi;
+
+
+//MQTT
+WiFiClient wifiClient;
+#include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
+#include <ArduinoJson.h> // version 5.13.5
+PubSubClient mqttClient(wifiClient);
+
+String mqttServer = "wmc.marcobrianza.it";
+String mqttUsername = "";
+String mqttPassword = "";
+int MQTT_PORT = 1883;
 
 //Wi-FiManager
 #include "FS.h"
@@ -18,25 +29,14 @@ WiFiClient  wifi;
 
 String thingId = "";
 String appId = "WMCII";
-
-#define THING_NAME_DEFAULT ""
-char THING_NAME[MAX_PARAM] = THING_NAME_DEFAULT;
-String s_thingName = "";
-
-char MQTT_SERVER[MAX_PARAM] = "wmc.marcobrianza.it";
-String s_mqttServer = "";
-
-char MQTT_USERNAME[MAX_PARAM] = "";
-String s_mqttUsername = "";
-
-char MQTT_PASSWORD[MAX_PARAM] = "";
-String s_mqttPassword = "";
+String thingName = "";
 
 // name, prompt, default, length
-WiFiManagerParameter wfm_thingName("thingName", "Thing Name", THING_NAME, sizeof(THING_NAME));
-WiFiManagerParameter wfm_mqttServer("mqttServer", "MQTT Server", MQTT_SERVER, sizeof(MQTT_SERVER));
-WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", MQTT_USERNAME, sizeof(MQTT_USERNAME));
-WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", MQTT_PASSWORD, sizeof(MQTT_PASSWORD));
+WiFiManagerParameter wfm_thingName("thingName", "Thing Name", thingName.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_mqttServer("mqttServer", "MQTT Server", mqttServer.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", mqttUsername.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassword.c_str(), MAX_PARAM);
+
 
 //OTA
 #include <ESP8266mDNS.h>
@@ -50,16 +50,8 @@ String OTA_PASSWORD = "12345678";
 String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
-//MQTT
-WiFiClient wifiClient;
-#include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
-#include <ArduinoJson.h> // version 5.13.3 
-PubSubClient mqttClient(wifiClient);
-
-int MQTT_PORT = 1883;
-
 //LED
-#include <FastLED.h> // version  3.2.1 
+#include <FastLED.h> // version  3.2.6
 
 //presence
 unsigned long last_color_t = 0;
@@ -98,9 +90,9 @@ void setup() {
   Serial.begin(115200);  Serial.println();
   software = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
   Serial.println(software);
-  thingId=getTHING_ID(appId);
-  Serial.println("thingId: "+thingId);
-  WiFi.hostname(s_thingName);
+  thingId = getTHING_ID(appId);
+  Serial.println("thingId: " + thingId);
+  thingName = thingId;
 
   byte c = bootCount();
   Serial.print("\nboot count=");
@@ -111,19 +103,18 @@ void setup() {
     testDevice();
   }
 
+  loadParametersFromFile();
+  WiFi.hostname(thingName);
+
   switch  (c) {
     case BOOT_DEFAULT_AP:
-      writeAttribute("thingName", "");
-      writeAttribute("mqttServer", "");
-      writeAttribute("mqttUsername", "");
-      writeAttribute("mqttPassword", "");
+      Serial.println("Reset parameters and connect to default AP");
+      saveParametersToFile();
       connectWifi();
       break;
     case BOOT_RESET:
-      writeAttribute("thingName", "");
-      writeAttribute("mqttServer", "");
-      writeAttribute("mqttUsername", "");
-      writeAttribute("mqttPassword", "");
+      Serial.println("Reset parameters");
+      saveParametersToFile();
       connectWifi_or_AP(true);
       break;
     default:
@@ -132,7 +123,6 @@ void setup() {
 
 
   autoUpdate();
-  setupParameters();
   setupMqtt();
   setupOTA();
   setupMdns();
@@ -178,9 +168,6 @@ void testDevice() {
 
 void connectWifi_or_AP(bool force_config) {
   digitalWrite(LED_BUILTIN, LOW);
-
-  //  WiFi.disconnect();
-  //  delay(100);
 
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);

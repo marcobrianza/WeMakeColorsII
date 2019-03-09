@@ -14,8 +14,8 @@ String mqttSubscribe_config = "";
 
 //--------------MQTT--------------
 void setupMqtt() {
-  mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-  mqttClient.setCallback(mqtt_callback);
+  mqttClient.setServer(mqttServer.c_str(), MQTT_PORT);
+  mqttClient.setCallback(mqttReceive);
 
   mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
   mqttPublish_beat = mqttRoot + "/" + thingId + "/" + mqtt_beat;
@@ -32,7 +32,7 @@ void reconnectMQTT() {
     Serial.print("\nAttempting MQTT connection...");
     // Attempt to connect
     //wifiClient = WiFiClient(); // workaround to fix reconnection?
-    if (mqttClient.connect(thingId.c_str(), MQTT_USERNAME, MQTT_PASSWORD)) {
+    if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       digitalWrite(LED_BUILTIN, HIGH);
       Serial.println("connected\n");
       // ... and resubscribe
@@ -65,7 +65,7 @@ void publishRandomColor(CHSV c) {
   jsonMsg["s"] = c.s;
   jsonMsg["v"] = c.v;
 
-  jsonMsg["thingName"] = THING_NAME;
+  jsonMsg["thingName"] = thingName;
   jsonMsg["lightLevel"] = average;
 
 
@@ -94,12 +94,12 @@ void publishBeat() {
   jsonMsg["count"] = b;
   jsonMsg["softwareName"] = softwareName;
   jsonMsg["softwareVersion"] = softwareVersion;
-  jsonMsg["thingName"] = THING_NAME;
+  jsonMsg["thingName"] = thingName;
   //jsonMsg["MD5"] = ESP.getSketchMD5();
   jsonMsg["lightLevel"] = average;
 
   int fh = ESP.getFreeHeap();
-  jsonMsg["FreeHeap"] = fh;
+  //  jsonMsg["FreeHeap"] = fh;
 
   char mqttData[MQTT_MAX];
   jsonMsg.printTo(mqttData);
@@ -120,7 +120,7 @@ void publishBeat() {
 
 
 
-void mqtt_callback(char* topic, byte* payload, unsigned int length) {
+void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
   Serial.println("MQTT message arrived: " + Topic);
 
