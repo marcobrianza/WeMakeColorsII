@@ -14,8 +14,6 @@ int averageGB = 0;
 
 int LIGHT_TRIGGER = 100;
 
-#define LED_DATA_PIN D1 //D1 is GPIO5
-
 int GLOBAL_BRIGHTNESS = 255;
 
 const int NUM_LEDS = 2;
@@ -23,7 +21,7 @@ CRGB leds[NUM_LEDS];
 
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
-  FastLED.addLeds<WS2812B, LED_DATA_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2812B, D1, GRB>(leds, NUM_LEDS); //D1 is GPIO5
 }
 
 

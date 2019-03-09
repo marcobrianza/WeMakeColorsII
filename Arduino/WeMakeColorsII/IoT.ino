@@ -72,7 +72,7 @@ byte bootCount() {
 
 String getTHING_ID(String appId) {
   byte ma[6];
-  char* MAC = "11:22:33:44:55:66";
+  char* MAC = "00:11:22:33:44:55";
   String id;
 
   WiFi.macAddress(ma);

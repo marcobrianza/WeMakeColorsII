@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.3.0"; // refactor char to Strings (except wifimanager 
+String softwareVersion = "1.3.2"; // other refactoring
 String software = "";
    
 //Wi-Fi
