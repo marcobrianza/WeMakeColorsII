@@ -86,13 +86,13 @@ String getTHING_ID(String appId) {
 
 
 
-void connectWifi() {
+void connectWifi(String ssid, String password) {
   WiFi.disconnect();
   delay(100);
   // We start by connecting to a WiFi network
-  Serial.print("Connecting to: "); Serial.println(SSID);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID.c_str(), PASSWORD.c_str());
+  Serial.print("Connecting to: "); Serial.println(ssid);
+
+  WiFi.begin(ssid.c_str(), password.c_str());
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
@@ -106,7 +106,38 @@ void connectWifi() {
   WiFi.setAutoReconnect(true);
 }
 
-//---- config functions----
+
+void connectWifi_or_AP(bool force_config) {
+  digitalWrite(LED_BUILTIN, LOW);
+
+  WiFiManager wifiManager;
+  wifiManager.setDebugOutput(true);
+  wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
+  wifiManager.setMinimumSignalQuality(50); //default is 8
+  wifiManager.setAPCallback(configModeCallback);
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+
+  wifiManager.addParameter(&wfm_thingName);
+  wifiManager.addParameter(&wfm_mqttServer);
+  wifiManager.addParameter(&wfm_mqttUsername);
+  wifiManager.addParameter(&wfm_mqttPassword);
+
+
+  if ( force_config == true) { //config must be done
+    WiFi.disconnect();
+    wifiManager.resetSettings(); //reset saved settings
+    wifiManager.setConfigPortalTimeout(0);
+    wifiManager.startConfigPortal(thingId.c_str());
+  } else
+  {
+    wifiManager.setConfigPortalTimeout(300); //300s is 5 minutes
+    wifiManager.autoConnect(thingId.c_str());
+    Serial.println("Captive portal timeout");
+  }
+
+}
+
+
 
 void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println("Entered config mode");
@@ -128,6 +159,8 @@ void saveConfigCallback () {
 }
 
 
+//---- file attribute functions----
+
 String readAttribute(String attributeName) {
   String value = "";
   SPIFFS.begin();
@@ -138,7 +171,6 @@ String readAttribute(String attributeName) {
   } else {
     Serial.println("readAttribute: " + attributeName + "= null" );
   }
-
   configFile.close();
   SPIFFS.end();
   return value;
@@ -189,7 +221,7 @@ void setupOTA() {
 
 
 
-// http update
+// -----  http update ----------------
 
 int httpUpdate(String url) {
   t_httpUpdate_return ret = ESPhttpUpdate.update(url);
@@ -250,7 +282,7 @@ void setupMdns() {
   //MDNS discovery
   MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
   MDNS.addServiceTxt("arduino", "tcp", "thingName", thingName);
-  MDNS.addServiceTxt("arduino", "tcp", "software", software);
+  MDNS.addServiceTxt("arduino", "tcp", "softwareInfo", softwareInfo);
   MDNS.update();
 }
 

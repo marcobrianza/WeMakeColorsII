@@ -1,4 +1,12 @@
 release notes
+
+1.4.1 2019-03-10
+Tested with core 2.5.0
+software is now softwareInfo
+if captive portal times out after 5min, reboot to retry connection.
+Put back wifimanger functions is corresponding tab
+Minor changes to variable names
+
 1.4.0 2019-03-09
 all settings are handled with strings
 Fastled 3.2.1 -> 3.2.6

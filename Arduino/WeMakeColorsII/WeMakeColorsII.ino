@@ -1,14 +1,13 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.4.0"; // wifi manager paramenters all strings
-String software = "";
+String softwareVersion = "1.4.1"; // wifi manager paramenters all strings
+String softwareInfo = "";
 
 //Wi-Fi
-#include <ESP8266WiFi.h>  // ESP8266 core 2.4.2
-
+#include <ESP8266WiFi.h>  // ESP8266 core 2.5.0
+WiFiClient wifiClient;
 
 //MQTT
-WiFiClient wifiClient;
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
 #include <ArduinoJson.h> // version 5.13.5
 PubSubClient mqttClient(wifiClient);
@@ -68,8 +67,11 @@ int LOOP_DELAY = 40;
 #define TEST_TIME 30000 // 30 seconds
 
 //default ssid password
-String SSID = "colors";
-String PASSWORD = "colors01";
+String defaultSSID = "colors";
+String defaultPassword = "colors01";
+
+String savedSSID = "";
+String savedPassword = "";
 
 //beat
 #define BEAT_INTERVAL 900 // 900 seconds is 15 minutes
@@ -88,8 +90,8 @@ void setup() {
   showAllLeds(64, 64, 64);
 
   Serial.begin(115200);  Serial.println();
-  software = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
-  Serial.println(software);
+  softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
+  Serial.println(softwareInfo);
   thingId = getTHING_ID(appId);
   Serial.println("thingId: " + thingId);
   thingName = thingId;
@@ -106,11 +108,14 @@ void setup() {
   loadParametersFromFile();
   WiFi.hostname(thingName);
 
+  savedSSID = WiFi.SSID();
+  savedPassword = WiFi.psk();
+
   switch  (c) {
     case BOOT_DEFAULT_AP:
       Serial.println("Reset parameters and connect to default AP");
       saveParametersToFile();
-      connectWifi();
+      connectWifi(defaultSSID, defaultPassword);
       break;
     case BOOT_RESET:
       Serial.println("Reset parameters");
@@ -119,8 +124,13 @@ void setup() {
       break;
     default:
       connectWifi_or_AP(false);
+      if (WiFi.status() != WL_CONNECTED) ESP.restart();
+
   }
 
+  WiFi.setAutoReconnect(true);
+  Serial.println("connected to network: " + WiFi.SSID());
+  digitalWrite(LED_BUILTIN, LED_OFF);
 
   autoUpdate();
   setupMqtt();
@@ -162,50 +172,4 @@ void testDevice() {
     showAllLeds(v, v, v);
     delay(LOOP_DELAY);
   }
-}
-
-//----WiFi manager main function ---- needs to be in the main sketch sice Arduino IDE 1.8.7
-
-void connectWifi_or_AP(bool force_config) {
-  digitalWrite(LED_BUILTIN, LOW);
-
-  WiFiManager wifiManager;
-  wifiManager.setDebugOutput(true);
-  wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
-  wifiManager.setMinimumSignalQuality(50); //default is 8
-  wifiManager.setAPCallback(configModeCallback);
-  wifiManager.setSaveConfigCallback(saveConfigCallback);
-
-  wifiManager.addParameter(&wfm_thingName);
-  wifiManager.addParameter(&wfm_mqttServer);
-  wifiManager.addParameter(&wfm_mqttUsername);
-  wifiManager.addParameter(&wfm_mqttPassword);
-
-
-  if ( force_config == true) { //config must be done
-    WiFi.disconnect();
-    wifiManager.resetSettings(); //reset saved settings
-    wifiManager.setConfigPortalTimeout(0);
-    wifiManager.startConfigPortal(thingId.c_str());
-  } else
-  {
-    wifiManager.setConfigPortalTimeout(300); //5 minutes
-    wifiManager.autoConnect(thingId.c_str());
-  }
-
-  boolean led = false;
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    digitalWrite(LED_BUILTIN, led);
-    led = !led;
-  }
-
-  //if you get here you have connected to the WiFi
-  Serial.print("connected to network: ");
-  Serial.println(WiFi.SSID());
-
-  digitalWrite(LED_BUILTIN, HIGH);
-  WiFi.mode(WIFI_STA);
-  WiFi.setAutoReconnect(true);
 }
