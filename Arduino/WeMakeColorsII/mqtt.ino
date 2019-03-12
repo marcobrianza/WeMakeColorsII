@@ -26,95 +26,102 @@ void setupMqtt() {
 }
 
 void reconnectMQTT() {
-  // Loop until we're reconnected
-  while (!mqttClient.connected()) {
-    digitalWrite(LED_BUILTIN, LOW);
-    Serial.print("\nAttempting MQTT connection...");
-    // Attempt to connect
-    //wifiClient = WiFiClient(); // workaround to fix reconnection?
-    if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
-      digitalWrite(LED_BUILTIN, HIGH);
-      Serial.println("connected\n");
-      // ... and resubscribe
 
-      mqttClient.subscribe(mqttSubscribe_randomColor.c_str(), QOS_AT_LEAST_1);
-      Serial.print("Subscibed to: ");
-      Serial.println(mqttSubscribe_randomColor);
+  if (checkWiFiStatus() == WL_CONNECTED) {
+    if (!mqttClient.connected()) {
+      digitalWrite(LED_BUILTIN, LED_ON);
+      Serial.print("\nAttempting MQTT connection...");
+      if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
+        Serial.println("connected\n");
+        digitalWrite(LED_BUILTIN, LED_OFF);
 
-      mqttClient.subscribe(mqttSubscribe_config.c_str(), QOS_AT_LEAST_1);
-      Serial.print("Subscibed to: ");
-      Serial.println(mqttSubscribe_config);
+        subscribeMQTT();
+        publishBeat();
 
-      publishBeat();
-
-    } else {
-      Serial.print("failed, rc=");
-      Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000); // Wait 5 seconds before retrying
+      } else {
+        Serial.print("MQTT connect failed, rc=" + mqttClient.state());
+        Serial.println(" try again in 5 seconds");
+        delay(5000); // Wait 5 seconds before retrying
+      }
     }
+  } else {
+    //mqttClient.disconnect();
+    digitalWrite(LED_BUILTIN, LED_ON);
+    //Serial.println("WiFi not connected");
+    delay(5000);
   }
 }
 
 
+void subscribeMQTT() {
+  mqttClient.subscribe(mqttSubscribe_randomColor.c_str(), QOS_AT_LEAST_1);
+  Serial.print("Subscibed to: ");
+  Serial.println(mqttSubscribe_randomColor);
+
+  mqttClient.subscribe(mqttSubscribe_config.c_str(), QOS_AT_LEAST_1);
+  Serial.print("Subscibed to: ");
+  Serial.println(mqttSubscribe_config);
+}
+
 void publishRandomColor(CHSV c) {
-  StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
-  JsonObject& jsonMsg = jsonBufferMQTT.createObject();
 
-  jsonMsg["h"] = c.h;
-  jsonMsg["s"] = c.s;
-  jsonMsg["v"] = c.v;
+  if (mqttClient.connected()) {
+    StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
+    JsonObject& jsonMsg = jsonBufferMQTT.createObject();
 
-  jsonMsg["thingName"] = thingName;
-  jsonMsg["lightLevel"] = average;
+    jsonMsg["h"] = c.h;
+    jsonMsg["s"] = c.s;
+    jsonMsg["v"] = c.v;
+
+    jsonMsg["thingName"] = friendlyName;
+    jsonMsg["friendlyName"] = friendlyName;
+    jsonMsg["lightLevel"] = average;
 
 
-  char mqttData[MQTT_MAX];
-  jsonMsg.printTo(mqttData);
+    char mqttData[MQTT_MAX];
+    jsonMsg.printTo(mqttData);
 
 
-  int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
+    int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
 
-  Serial.print("MQTT message sent: ");
-  Serial.print(mqttPublish_randomColor);
-  Serial.print(" ");
-  Serial.print(mqttData);
-  Serial.print(" result: ");
-  Serial.println(ret);
+    Serial.print("MQTT message sent: ");
+    Serial.print(mqttPublish_randomColor);
+    Serial.print(" ");
+    Serial.print(mqttData);
+    Serial.print(" result: ");
+    Serial.println(ret);
+  } else Serial.println("MQTT not connected");
 }
 
 void publishBeat() {
   static unsigned long b = 0;
-  //String bb = String(b);
   b++;
 
-  StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
-  JsonObject& jsonMsg = jsonBufferMQTT.createObject();
+  if (mqttClient.connected()) {
 
-  jsonMsg["count"] = b;
-  jsonMsg["softwareName"] = softwareName;
-  jsonMsg["softwareVersion"] = softwareVersion;
-  jsonMsg["thingName"] = thingName;
-  //jsonMsg["MD5"] = ESP.getSketchMD5();
-  jsonMsg["lightLevel"] = average;
+    StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
+    JsonObject& jsonMsg = jsonBufferMQTT.createObject();
 
-  int fh = ESP.getFreeHeap();
-  //  jsonMsg["FreeHeap"] = fh;
+    jsonMsg["count"] = b;
+    jsonMsg["softwareName"] = softwareName;
+    jsonMsg["softwareVersion"] = softwareVersion;
+    jsonMsg["thingName"] = friendlyName;
+    jsonMsg["friendlyName"] = friendlyName;
+    jsonMsg["lightLevel"] = average;
 
-  char mqttData[MQTT_MAX];
-  jsonMsg.printTo(mqttData);
+    char mqttData[MQTT_MAX];
+    jsonMsg.printTo(mqttData);
 
-  int ret = mqttClient.publish(mqttPublish_beat.c_str(), mqttData);
+    int ret = mqttClient.publish(mqttPublish_beat.c_str(), mqttData);
 
-  Serial.print("MQTT message sent: ");
-  Serial.print(mqttPublish_beat);
-  Serial.print(" ");
-  Serial.print(mqttData);
-  Serial.print(" result: ");
-  Serial.println(ret);
+    Serial.print("MQTT message sent: ");
+    Serial.print(mqttPublish_beat);
+    Serial.print(" ");
+    Serial.print(mqttData);
+    Serial.print(" result: ");
+    Serial.println(ret);
 
-  Serial.print("FreeHeap: ");
-  Serial.println(fh);
+  } else Serial.println("MQTT not connected");
 
 }
 
@@ -167,12 +174,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   if ((topic_id = thingId) && (topic_leaf == mqtt_config)) {
     Serial.println("Config message:");
     JsonObject& root = jsonBuffer.parseObject(payload);
-    /*
-      {
-      "command":"update",
-      "option":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"
-      }
-    */
+
 
     String command = root["command"];
     String option = root["option"];
@@ -180,14 +182,40 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
     Serial.println(command);
     Serial.println(option);
 
+    /*
+         {
+         "command":"update",
+         "option":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"
+         }
+    */
     if (command = "update") {
       showAllLeds(64, 0, 0);
       int u = httpUpdate(option);
       if (u != HTTP_UPDATE_OK) showAllLeds(64, 64, 0);
     }
 
-    Serial.println(command);
-    Serial.println(option);
+    /*
+         {
+         "command":"info"
+         }
+    */
+
+    if (command = "info") {
+      // send detailed information on the device
+
+
+      //int fh = ESP.getFreeHeap();
+      //Serial.print("FreeHeap: ");
+      //Serial.println(fh);
+      //jsonMsg["FreeHeap"] = fh;
+      //jsonMsg["MD5"] = ESP.getSketchMD5();
+
+
+      //String  savedSSID = WiFi.SSID();
+      //String  savedPassword = WiFi.psk();
+    }
+
+
 
   }
 }

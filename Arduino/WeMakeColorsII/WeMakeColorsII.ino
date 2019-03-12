@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.4.1"; // wifi manager paramenters all strings
+String softwareVersion = "1.4.5"; // ticker for MQTT reconnect;
 String softwareInfo = "";
 
 //Wi-Fi
@@ -28,14 +28,13 @@ int MQTT_PORT = 1883;
 
 String thingId = "";
 String appId = "WMCII";
-String thingName = "";
+String friendlyName = "";
 
 // name, prompt, default, length
-WiFiManagerParameter wfm_thingName("thingName", "Thing Name", thingName.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_friendlyName("friendlyName", "Friendly Name", friendlyName.c_str(), MAX_PARAM);
 WiFiManagerParameter wfm_mqttServer("mqttServer", "MQTT Server", mqttServer.c_str(), MAX_PARAM);
 WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", mqttUsername.c_str(), MAX_PARAM);
 WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassword.c_str(), MAX_PARAM);
-
 
 //OTA
 #include <ESP8266mDNS.h>
@@ -70,9 +69,6 @@ int LOOP_DELAY = 40;
 String defaultSSID = "colors";
 String defaultPassword = "colors01";
 
-String savedSSID = "";
-String savedPassword = "";
-
 //beat
 #define BEAT_INTERVAL 900 // 900 seconds is 15 minutes
 
@@ -83,6 +79,7 @@ String savedPassword = "";
 #include <Ticker.h>
 Ticker T_mqtt_beat;
 Ticker T_globalBrighness;
+Ticker T_mqttConnect;
 
 void setup() {
 
@@ -92,9 +89,15 @@ void setup() {
   Serial.begin(115200);  Serial.println();
   softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
   Serial.println(softwareInfo);
-  thingId = getTHING_ID(appId);
+  //thingId = getTHING_ID(appId);
+
+  thingId = appId + "_" +  WiFi.macAddress().c_str();
+
   Serial.println("thingId: " + thingId);
-  thingName = thingId;
+  friendlyName = thingId;
+
+  loadParametersFromFile();
+  WiFi.hostname(friendlyName);
 
   byte c = bootCount();
   Serial.print("\nboot count=");
@@ -105,11 +108,6 @@ void setup() {
     testDevice();
   }
 
-  loadParametersFromFile();
-  WiFi.hostname(thingName);
-
-  savedSSID = WiFi.SSID();
-  savedPassword = WiFi.psk();
 
   switch  (c) {
     case BOOT_DEFAULT_AP:
@@ -124,12 +122,14 @@ void setup() {
       break;
     default:
       connectWifi_or_AP(false);
-      if (WiFi.status() != WL_CONNECTED) ESP.restart();
+      //if (WiFi.status() != WL_CONNECTED) ESP.restart();
 
   }
 
+  WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
-  Serial.println("connected to network: " + WiFi.SSID());
+  Serial.println("WiFi connection status: ");
+  WiFi.printDiag(Serial);
   digitalWrite(LED_BUILTIN, LED_OFF);
 
   autoUpdate();
@@ -140,6 +140,7 @@ void setup() {
 
   T_mqtt_beat.attach(BEAT_INTERVAL, publishBeat);
   T_globalBrighness.attach(1, setGlobalBrightness);
+  //T_mqttConnect.attach(5, reconnectMQTT);
 
 }
 
@@ -147,8 +148,11 @@ void loop() {
 
   unsigned long now = millis();
 
-  if (!mqttClient.connected())  reconnectMQTT();
-  mqttClient.loop();
+  if (mqttClient.connected())  {
+    mqttClient.loop();
+  } else {
+    reconnectMQTT();
+  }
 
   if (lightChange() && (now - last_color_t > NEW_COLOR_TIME)) {
     CHSV c = newRndColor();

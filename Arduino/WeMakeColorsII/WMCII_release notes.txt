@@ -1,4 +1,12 @@
 release notes
+1.4.5
+ThingName is now friendlyName
+Captive signal quality = 30
+Basic structure for info command
+Thing id function simplified
+Wifi connection status fucnction
+
+
 
 1.4.1 2019-03-10
 Tested with core 2.5.0
