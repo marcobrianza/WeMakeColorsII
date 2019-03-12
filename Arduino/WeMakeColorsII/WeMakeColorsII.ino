@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.4.5"; // ticker for MQTT reconnect;
+String softwareVersion = "1.5.0"; // ticker for MQTT reconnect;
 String softwareInfo = "";
 
 //Wi-Fi

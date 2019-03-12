@@ -28,7 +28,8 @@ void setupMqtt() {
 void reconnectMQTT() {
 
   if (checkWiFiStatus() == WL_CONNECTED) {
-    if (!mqttClient.connected()) {
+    if (checkMQTTStatus () != MQTT_CONNECTED) {
+
       digitalWrite(LED_BUILTIN, LED_ON);
       Serial.print("\nAttempting MQTT connection...");
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
@@ -52,6 +53,51 @@ void reconnectMQTT() {
   }
 }
 
+
+
+int checkMQTTStatus () {
+  int c = mqttClient.state();
+  String s = "";
+
+  switch (c) {
+    case MQTT_CONNECTION_TIMEOUT:
+      s = "MQTT_CONNECTION_TIMEOUT";
+      break;
+    case MQTT_CONNECTION_LOST:
+      s = "MQTT_CONNECTION_LOST";
+      break;
+    case MQTT_CONNECT_FAILED:
+      s = "MQTT_CONNECT_FAILED";
+      break;
+    case MQTT_DISCONNECTED:
+      s = "MQTT_DISCONNECTED";
+      break;
+    case MQTT_CONNECTED:
+      s = "MQTT_CONNECTED";
+      break;
+    case MQTT_CONNECT_BAD_PROTOCOL:
+      s = "MQTT_CONNECT_BAD_PROTOCOL";
+      break;
+    case MQTT_CONNECT_BAD_CLIENT_ID:
+      s = "MQTT_CONNECT_BAD_CLIENT_ID";
+      break;
+    case MQTT_CONNECT_UNAVAILABLE:
+      s = "MQTT_CONNECT_UNAVAILABLE";
+      break;
+    case MQTT_CONNECT_BAD_CREDENTIALS:
+      s = "MQTT_CONNECT_BAD_CREDENTIALS";
+      break;
+    case MQTT_CONNECT_UNAUTHORIZED:
+      s = "MQTT_CONNECT_UNAUTHORIZED";
+      break;
+    default:
+      s = "UNKNOWN";
+  }
+
+  Serial.println( "MQTT Status=" + String( c) + " " + s);
+  return c;
+
+}
 
 void subscribeMQTT() {
   mqttClient.subscribe(mqttSubscribe_randomColor.c_str(), QOS_AT_LEAST_1);
