@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.5.0"; // ticker for MQTT reconnect;
+String softwareVersion = "1.5.1";
 String softwareInfo = "";
 
 //Wi-Fi
@@ -108,7 +108,7 @@ void setup() {
     testDevice();
   }
 
-
+  digitalWrite(LED_BUILTIN, LED_ON);
   switch  (c) {
     case BOOT_DEFAULT_AP:
       Serial.println("Reset parameters and connect to default AP");
@@ -122,7 +122,6 @@ void setup() {
       break;
     default:
       connectWifi_or_AP(false);
-      //if (WiFi.status() != WL_CONNECTED) ESP.restart();
 
   }
 

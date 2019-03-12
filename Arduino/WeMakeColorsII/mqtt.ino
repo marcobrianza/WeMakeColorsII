@@ -1,5 +1,7 @@
 #define QOS_AT_LEAST_1 1
 
+#define BLINK_NO_MQTT 3
+
 String mqttRoot =   "WeMakeColorsII";
 
 String mqtt_randomColor = "randomColor";
@@ -30,25 +32,23 @@ void reconnectMQTT() {
   if (checkWiFiStatus() == WL_CONNECTED) {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
 
-      digitalWrite(LED_BUILTIN, LED_ON);
+      //digitalWrite(LED_BUILTIN, LED_ON);
       Serial.print("\nAttempting MQTT connection...");
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
         Serial.println("connected\n");
-        digitalWrite(LED_BUILTIN, LED_OFF);
+        //digitalWrite(LED_BUILTIN, LED_OFF);
 
         subscribeMQTT();
         publishBeat();
 
       } else {
+        blink(BLINK_NO_MQTT);
         Serial.print("MQTT connect failed, rc=" + mqttClient.state());
         Serial.println(" try again in 5 seconds");
         delay(5000); // Wait 5 seconds before retrying
       }
     }
   } else {
-    //mqttClient.disconnect();
-    digitalWrite(LED_BUILTIN, LED_ON);
-    //Serial.println("WiFi not connected");
     delay(5000);
   }
 }
@@ -119,7 +119,6 @@ void publishRandomColor(CHSV c) {
     jsonMsg["s"] = c.s;
     jsonMsg["v"] = c.v;
 
-    jsonMsg["thingName"] = friendlyName;
     jsonMsg["friendlyName"] = friendlyName;
     jsonMsg["lightLevel"] = average;
 
@@ -151,7 +150,6 @@ void publishBeat() {
     jsonMsg["count"] = b;
     jsonMsg["softwareName"] = softwareName;
     jsonMsg["softwareVersion"] = softwareVersion;
-    jsonMsg["thingName"] = friendlyName;
     jsonMsg["friendlyName"] = friendlyName;
     jsonMsg["lightLevel"] = average;
 

@@ -5,6 +5,9 @@
 #define CAPTIVE_TIMEOUT 300
 #define CAPTIVE_SIGNAL_QUALITY 20
 
+#define BLINK_NO_SSID 1
+#define BLINK_CONNECTION_ERROR 2
+
 void loadParametersFromFile() {
   String temp = "";
 
@@ -51,16 +54,16 @@ void saveParametersToFile() {
 byte bootCount() {
 
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, LED_OFF);
   delay(500);
 
   EEPROM.begin(512);
   byte boot_count = EEPROM.read(COUNT_ADDR);
   boot_count++;
   for (int i = 0;  i  < boot_count; i++) {
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, LED_ON);
     delay(300);
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, LED_OFF);
     delay(300);
   }
 
@@ -68,9 +71,6 @@ byte bootCount() {
   EEPROM.commit();
 
   delay(2000);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(100);
-  digitalWrite(LED_BUILTIN, HIGH);
 
   EEPROM.write(COUNT_ADDR, 0);
   EEPROM.commit();
@@ -82,17 +82,19 @@ int checkWiFiStatus() {
 
   String s = "";
   int c = WiFi.status();
+  int b = 0;
 
   switch (c) {
     case WL_CONNECTED:
       s = "WL_CONNECTED";
       break;
-
     case WL_NO_SSID_AVAIL:
       s = "WL_NO_SSID_AVAIL";
+      b = BLINK_NO_SSID;
       break;
     case WL_CONNECT_FAILED:
       s = "WL_CONNECT_FAILED";
+      b = BLINK_CONNECTION_ERROR;
       break;
     case WL_IDLE_STATUS:
       s = "WL_IDLE_STATUS";
@@ -109,31 +111,13 @@ int checkWiFiStatus() {
   }
 
   Serial.println( "WiFi Status=" + String( c) + " " + s);
+  if (b > 0) blink(b);
   return c;
 }
 
 
 
-// ------THING_ID----------
-
-//String getTHING_ID(String appId) {
-//  byte ma[6];
-//  char* MAC = "00:11:22:33:44:55";
-//  String id;
-//
-//  WiFi.macAddress(ma);
-//  sprintf(MAC, "%02X:%02X:%02X:%02X:%02X:%02X", ma[0], ma[1], ma[2], ma[3], ma[4], ma[5]);
-//
-//  id = appId + "_" +  String(MAC);;
-//  return (id);
-//}
-
-
-
-
-
 // ------ Wi-Fi Manager functions-------------------------------------
-
 
 
 void connectWifi(String ssid, String password) {
@@ -158,7 +142,6 @@ void connectWifi(String ssid, String password) {
 
 
 void connectWifi_or_AP(bool force_config) {
-  digitalWrite(LED_BUILTIN, LOW);
 
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);
@@ -184,7 +167,6 @@ void connectWifi_or_AP(bool force_config) {
     wifiManager.autoConnect(thingId.c_str());
     Serial.println("Captive portal timeout");
   }
-
 }
 
 
@@ -347,8 +329,8 @@ void setupMdns() {
 void blink(int b) {
   for (int i = 0; i < b; i++) {
     digitalWrite(LED_BUILTIN, LED_ON);
-    delay(100);
+    delay(200);
     digitalWrite(LED_BUILTIN, LED_OFF);
-    delay(100);
+    delay(200);
   }
 }
