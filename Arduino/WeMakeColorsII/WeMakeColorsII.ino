@@ -1,6 +1,6 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.5.1";
+String softwareVersion = "1.5.2";
 String softwareInfo = "";
 
 //Wi-Fi
@@ -62,6 +62,7 @@ int LOOP_DELAY = 40;
 #define BOOT_TEST_LIGHT 2
 #define BOOT_RESET 3
 #define BOOT_DEFAULT_AP 4
+#define BOOT_ESPTOUCH 5
 
 #define TEST_TIME 30000 // 30 seconds
 
@@ -119,6 +120,10 @@ void setup() {
       Serial.println("Reset parameters");
       saveParametersToFile();
       connectWifi_or_AP(true);
+      break;
+    case BOOT_ESPTOUCH:
+      Serial.println("Starting ESPTouch SmartConfig");
+      WiFi.beginSmartConfig();
       break;
     default:
       connectWifi_or_AP(false);
