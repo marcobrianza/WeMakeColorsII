@@ -5,14 +5,16 @@
 String mqttRoot =   "WeMakeColorsII";
 
 String mqtt_randomColor = "randomColor";
-String mqtt_beat = "beat";
+String mqtt_status = "status";
 String mqtt_config = "config";
 
 String mqttPublish_randomColor = "";
-String mqttPublish_beat = "";
+String mqttPublish_status = "";
 
 String mqttSubscribe_randomColor = "";
 String mqttSubscribe_config = "";
+
+
 
 //--------------MQTT--------------
 void setupMqtt() {
@@ -20,7 +22,7 @@ void setupMqtt() {
   mqttClient.setCallback(mqttReceive);
 
   mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
-  mqttPublish_beat = mqttRoot + "/" + thingId + "/" + mqtt_beat;
+  mqttPublish_status = mqttRoot + "/" + thingId + "/" + mqtt_status;
 
   mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
   mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
@@ -39,7 +41,7 @@ void reconnectMQTT() {
         //digitalWrite(LED_BUILTIN, LED_OFF);
 
         subscribeMQTT();
-        publishBeat();
+        publishStatus = true;
 
       } else {
         blink(BLINK_NO_MQTT);
@@ -138,16 +140,14 @@ void publishRandomColor(CHSV c) {
   } else Serial.println("MQTT not connected");
 }
 
-void publishBeat() {
-  static unsigned long b = 0;
-  b++;
+void publishStatusMQTT() {
 
   if (mqttClient.connected()) {
 
     StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
     JsonObject& jsonMsg = jsonBufferMQTT.createObject();
 
-    jsonMsg["count"] = b;
+    jsonMsg["upTime"] = upTime;
     jsonMsg["softwareName"] = softwareName;
     jsonMsg["softwareVersion"] = softwareVersion;
     jsonMsg["friendlyName"] = friendlyName;
@@ -156,10 +156,10 @@ void publishBeat() {
     char mqttData[MQTT_MAX];
     jsonMsg.printTo(mqttData);
 
-    int ret = mqttClient.publish(mqttPublish_beat.c_str(), mqttData);
+    int ret = mqttClient.publish(mqttPublish_status.c_str(), mqttData);
 
     Serial.print("MQTT message sent: ");
-    Serial.print(mqttPublish_beat);
+    Serial.print(mqttPublish_status);
     Serial.print(" ");
     Serial.print(mqttData);
     Serial.print(" result: ");

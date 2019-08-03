@@ -8,6 +8,14 @@
 #define BLINK_NO_SSID 1
 #define BLINK_CONNECTION_ERROR 2
 
+unsigned int upTime = 0;
+
+
+void upTimeInc() {
+  upTime++;
+  if (upTime % 15 == true )publishStatus = true;
+}
+
 void loadParametersFromFile() {
   String temp = "";
 

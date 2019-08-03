@@ -1,10 +1,10 @@
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.5.2";
+String softwareVersion = "1.6.0";
 String softwareInfo = "";
 
 //Wi-Fi
-#include <ESP8266WiFi.h>  // ESP8266 core 2.5.0
+#include <ESP8266WiFi.h>  // ESP8266 core 2.5.2
 WiFiClient wifiClient;
 
 //MQTT
@@ -49,7 +49,7 @@ String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 //LED
-#include <FastLED.h> // version  3.2.6
+#include <FastLED.h> // version  3.2.10
 
 //presence
 unsigned long last_color_t = 0;
@@ -70,17 +70,18 @@ int LOOP_DELAY = 40;
 String defaultSSID = "colors";
 String defaultPassword = "colors01";
 
-//beat
-#define BEAT_INTERVAL 900 // 900 seconds is 15 minutes
+//status
+#define STATUS_INTERVAL 15 //minutes
+boolean publishStatus = false;
 
 //led builtin
 #define LED_ON LOW
 #define LED_OFF HIGH
 
 #include <Ticker.h>
-Ticker T_mqtt_beat;
+Ticker T_upTime;
 Ticker T_globalBrighness;
-Ticker T_mqttConnect;
+//Ticker T_mqttConnect;
 
 void setup() {
 
@@ -142,7 +143,7 @@ void setup() {
   setupMdns();
   setupLightLevel();
 
-  T_mqtt_beat.attach(BEAT_INTERVAL, publishBeat);
+  T_upTime.attach(60, upTimeInc);
   T_globalBrighness.attach(1, setGlobalBrightness);
   //T_mqttConnect.attach(5, reconnectMQTT);
 
@@ -163,6 +164,12 @@ void loop() {
     setMyLED(c);
     publishRandomColor(c);
     last_color_t = now;
+  }
+
+
+  if (publishStatus) {
+    publishStatus = false;
+    publishStatusMQTT();
   }
 
   ArduinoOTA.handle();

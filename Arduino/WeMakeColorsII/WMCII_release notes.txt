@@ -1,4 +1,11 @@
 release notes
+1.6.0
+update: using core ESP8266 2.5.2 - Fastled 3.2.10
+modification: beat becomes status uptime is minutes
+
+1.5.2
+support for ESP touch SmartConfig
+
 1.5.1
 Blink for wifi & mqtt errors
 Removed thingName 
