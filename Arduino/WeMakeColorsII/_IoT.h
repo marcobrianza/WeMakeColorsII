@@ -53,7 +53,7 @@ String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 
 void setup_IoT(){
-
+ thingId = appId + "_" +  WiFi.macAddress().c_str();
 }
 
 

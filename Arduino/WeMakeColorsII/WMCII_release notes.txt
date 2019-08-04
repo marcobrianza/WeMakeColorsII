@@ -1,5 +1,8 @@
 release notes
 
+1.7.2 2019-08-04
+fix missing code in setup_IoT()
+
 1.7.1 2019-08-04
 refactor with .h include
 new mqtt messages hello byebye for connect and lastwill
