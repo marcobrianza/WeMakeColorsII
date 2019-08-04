@@ -1,6 +1,32 @@
 #include <EEPROM.h> //boot Count
 
+//Wi-Fi
+#include <ESP8266WiFi.h>  // ESP8266 core 2.5.2
+WiFiClient wifiClient;
+
+//default ssid password
+String defaultSSID = "colors";
+String defaultPassword = "colors01";
+
+//Wi-FiManager
+#include "FS.h"
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h> // 0.14 
 #define COUNT_ADDR 0
+
+String thingId = "";
+String appId = "WMCII";
+String friendlyName = "";
+
+#define MAX_PARAM 40
+
+// name, prompt, default, length
+WiFiManagerParameter wfm_friendlyName("friendlyName", "Friendly Name", friendlyName.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_mqttServer("mqttServer", "MQTT Server", mqttServer.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", mqttUsername.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassword.c_str(), MAX_PARAM);
+
 
 #define CAPTIVE_TIMEOUT 300
 #define CAPTIVE_SIGNAL_QUALITY 20
@@ -9,12 +35,71 @@
 #define BLINK_CONNECTION_ERROR 2
 
 unsigned int upTime = 0;
+//status
+#define STATUS_INTERVAL 15 //minutes
+boolean publishStatus = false;
+
+//OTA
+#include <ESP8266mDNS.h>
+#include <ArduinoOTA.h>
+String OTA_PASSWORD = "12345678";
+
+//http update
+#include <ESP8266HTTPClient.h>
+#include <ESP8266httpUpdate.h>
+
+String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
+String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
+
+
+void setup_IoT(){
+
+}
 
 
 void upTimeInc() {
   upTime++;
   if (upTime % 15 == true )publishStatus = true;
 }
+
+
+//---- file attribute functions----
+
+String readAttribute(String attributeName) {
+  String value = "";
+  if (SPIFFS.begin()) {
+    File configFile = SPIFFS.open(attributeName + ".txt", "r");
+    if (configFile) {
+      value = configFile.readString();
+      Serial.println("readAttribute: " + attributeName + "=" + value);
+    } else {
+      Serial.println("readAttribute: " + attributeName + "= null" );
+    }
+    configFile.close();
+    SPIFFS.end();
+  } else Serial.println("readAttribute ERROR: cannot open file system");
+  return value;
+}
+
+String deleteAttribute(String attributeName) {
+  if (SPIFFS.begin()) {
+    String value = "";
+    SPIFFS.remove(attributeName + ".txt");
+  } else Serial.println("deleteAttribute ERROR: cannot open file system");
+}
+
+void writeAttribute(String attributeName, String value) {
+  if (SPIFFS.begin()) {
+    File configFile = SPIFFS.open(attributeName + ".txt", "w");
+    if (configFile) {
+      configFile.print(value);
+      Serial.println("writeAttribute: " + attributeName + "=" + value);
+    } else  Serial.println("writeAttribute: ERROR cannot open file " + attributeName);
+    configFile.close();
+    SPIFFS.end();
+  } else Serial.println("writeAttribute ERROR: cannot open file system");
+}
+
 
 void loadParametersFromFile() {
   String temp = "";
@@ -49,6 +134,8 @@ void loadParametersFromFile() {
   Serial.println ("mqttPassword=" + mqttPassword);
 
 }
+
+
 
 
 void saveParametersToFile() {
@@ -149,6 +236,27 @@ void connectWifi(String ssid, String password) {
 }
 
 
+
+void configModeCallback (WiFiManager *myWiFiManager) {
+  Serial.println("Entered config mode");
+  Serial.println(WiFi.softAPIP());
+  Serial.println(myWiFiManager->getConfigPortalSSID());
+  showAllLeds(0, 0, 255);
+}
+
+
+void saveConfigCallback () {
+  Serial.println("Config callback");
+  if (String(wfm_friendlyName.getValue()) != "") friendlyName = wfm_friendlyName.getValue();
+  if (String(wfm_mqttServer.getValue()) != "")  mqttServer = wfm_mqttServer.getValue();
+  if (String(wfm_mqttUsername.getValue()) != "") mqttUsername = wfm_mqttUsername.getValue();
+  if (String(wfm_mqttPassword.getValue()) != "") mqttPassword = wfm_mqttPassword.getValue();
+
+  saveParametersToFile();
+  showAllLeds(0, 255, 255);
+}
+
+
 void connectWifi_or_AP(bool force_config) {
 
   WiFiManager wifiManager;
@@ -179,62 +287,8 @@ void connectWifi_or_AP(bool force_config) {
 
 
 
-void configModeCallback (WiFiManager *myWiFiManager) {
-  Serial.println("Entered config mode");
-  Serial.println(WiFi.softAPIP());
-  Serial.println(myWiFiManager->getConfigPortalSSID());
-  showAllLeds(0, 0, 255);
-}
 
 
-void saveConfigCallback () {
-  Serial.println("Config callback");
-  if (String(wfm_friendlyName.getValue()) != "") friendlyName = wfm_friendlyName.getValue();
-  if (String(wfm_mqttServer.getValue()) != "")  mqttServer = wfm_mqttServer.getValue();
-  if (String(wfm_mqttUsername.getValue()) != "") mqttUsername = wfm_mqttUsername.getValue();
-  if (String(wfm_mqttPassword.getValue()) != "") mqttPassword = wfm_mqttPassword.getValue();
-
-  saveParametersToFile();
-  showAllLeds(0, 255, 255);
-}
-
-
-//---- file attribute functions----
-
-String readAttribute(String attributeName) {
-  String value = "";
-  if (SPIFFS.begin()) {
-    File configFile = SPIFFS.open(attributeName + ".txt", "r");
-    if (configFile) {
-      value = configFile.readString();
-      Serial.println("readAttribute: " + attributeName + "=" + value);
-    } else {
-      Serial.println("readAttribute: " + attributeName + "= null" );
-    }
-    configFile.close();
-    SPIFFS.end();
-  } else Serial.println("readAttribute ERROR: cannot open file system");
-  return value;
-}
-
-String deleteAttribute(String attributeName) {
-  if (SPIFFS.begin()) {
-    String value = "";
-    SPIFFS.remove(attributeName + ".txt");
-  } else Serial.println("deleteAttribute ERROR: cannot open file system");
-}
-
-void writeAttribute(String attributeName, String value) {
-  if (SPIFFS.begin()) {
-    File configFile = SPIFFS.open(attributeName + ".txt", "w");
-    if (configFile) {
-      configFile.print(value);
-      Serial.println("writeAttribute: " + attributeName + "=" + value);
-    } else  Serial.println("writeAttribute: ERROR cannot open file " + attributeName);
-    configFile.close();
-    SPIFFS.end();
-  } else Serial.println("writeAttribute ERROR: cannot open file system");
-}
 
 
 // --------------- OTA Lan ---------------
@@ -332,13 +386,4 @@ void setupMdns() {
   MDNS.addServiceTxt("arduino", "tcp", "friendlyName", friendlyName);
   MDNS.addServiceTxt("arduino", "tcp", "softwareInfo", softwareInfo);
   MDNS.update();
-}
-
-void blink(int b) {
-  for (int i = 0; i < b; i++) {
-    digitalWrite(LED_BUILTIN, LED_ON);
-    delay(200);
-    digitalWrite(LED_BUILTIN, LED_OFF);
-    delay(200);
-  }
 }

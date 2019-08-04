@@ -1,4 +1,7 @@
 
+//LED
+#include <FastLED.h> // version  3.2.10
+
 const int numReadings = 25;
 int readings[numReadings];      // the readings from the analog input
 int readIndex = 0;              // the index of the current reading
@@ -18,6 +21,10 @@ int GLOBAL_BRIGHTNESS = 255;
 
 const int NUM_LEDS = 2;
 CRGB leds[NUM_LEDS];
+
+//presence
+unsigned long last_color_t = 0;
+int inputPin = A0;
 
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);

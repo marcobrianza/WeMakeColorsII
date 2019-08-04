@@ -1,59 +1,18 @@
-
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.6.0";
+String softwareVersion = "1.7.1";
 String softwareInfo = "";
 
-//Wi-Fi
-#include <ESP8266WiFi.h>  // ESP8266 core 2.5.2
-WiFiClient wifiClient;
-
-//MQTT
-#include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
-#include <ArduinoJson.h> // version 5.13.5
-PubSubClient mqttClient(wifiClient);
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
-int MQTT_PORT = 1883;
 
-//Wi-FiManager
-#include "FS.h"
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h> // 0.14 
 
-#define MAX_PARAM 40
-#define MQTT_MAX MQTT_MAX_PACKET_SIZE
+#include "_userInterface.h"
+#include "_light.h"
+#include "_IoT.h"
+#include "_MQTT.h"
 
-String thingId = "";
-String appId = "WMCII";
-String friendlyName = "";
-
-// name, prompt, default, length
-WiFiManagerParameter wfm_friendlyName("friendlyName", "Friendly Name", friendlyName.c_str(), MAX_PARAM);
-WiFiManagerParameter wfm_mqttServer("mqttServer", "MQTT Server", mqttServer.c_str(), MAX_PARAM);
-WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", mqttUsername.c_str(), MAX_PARAM);
-WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassword.c_str(), MAX_PARAM);
-
-//OTA
-#include <ESP8266mDNS.h>
-#include <ArduinoOTA.h>
-String OTA_PASSWORD = "12345678";
-
-//http update
-#include <ESP8266HTTPClient.h>
-#include <ESP8266httpUpdate.h>
-
-String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
-String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
-
-//LED
-#include <FastLED.h> // version  3.2.10
-
-//presence
-unsigned long last_color_t = 0;
-int inputPin = A0;
 
 int NEW_COLOR_TIME = 1000;
 int LOOP_DELAY = 40;
@@ -64,19 +23,6 @@ int LOOP_DELAY = 40;
 #define BOOT_DEFAULT_AP 4
 #define BOOT_ESPTOUCH 5
 
-#define TEST_TIME 30000 // 30 seconds
-
-//default ssid password
-String defaultSSID = "colors";
-String defaultPassword = "colors01";
-
-//status
-#define STATUS_INTERVAL 15 //minutes
-boolean publishStatus = false;
-
-//led builtin
-#define LED_ON LOW
-#define LED_OFF HIGH
 
 #include <Ticker.h>
 Ticker T_upTime;
@@ -91,9 +37,8 @@ void setup() {
   Serial.begin(115200);  Serial.println();
   softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
   Serial.println(softwareInfo);
-  //thingId = getTHING_ID(appId);
 
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
+  setup_IoT();
 
   Serial.println("thingId: " + thingId);
   friendlyName = thingId;
@@ -169,7 +114,7 @@ void loop() {
 
   if (publishStatus) {
     publishStatus = false;
-    publishStatusMQTT();
+    publishStatusMQTT(mqttPublish_status);
   }
 
   ArduinoOTA.handle();
@@ -178,6 +123,7 @@ void loop() {
 }
 
 void testDevice() {
+  int TEST_TIME = 30000; // 30 seconds
 
   while (millis() < TEST_TIME) {
     int a = analogRead(inputPin);
@@ -185,6 +131,6 @@ void testDevice() {
     if (v > 255) v = 255;
     Serial.println(v);
     showAllLeds(v, v, v);
-    delay(LOOP_DELAY);
+    delay(40);
   }
 }

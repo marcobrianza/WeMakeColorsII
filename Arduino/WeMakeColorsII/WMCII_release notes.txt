@@ -1,9 +1,16 @@
 release notes
-1.6.0
-update: using core ESP8266 2.5.2 - Fastled 3.2.10
+
+1.7.1 2019-08-04
+refactor with .h include
+new mqtt messages hello byebye for connect and lastwill
+
+
+1.6.0 2019-08-03
+core ESP8266 2.5.2 
+Fastled 3.2.10
 modification: beat becomes status uptime is minutes
 
-1.5.2
+1.5.2 2019-03-13
 support for ESP touch SmartConfig
 
 1.5.1
