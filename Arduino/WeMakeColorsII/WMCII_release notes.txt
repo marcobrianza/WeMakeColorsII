@@ -1,11 +1,17 @@
 release notes
 
-1.7.2 2019-08-04
+1.7.4    2019-08-07
+stattus messages are retained, working lastwill with status message and upTime=-1
+
+1.7.3     2019-08-04
+LOOP_DELAY = 5 instead of 40
+new mqtt messages hello byebye for connect and lastwill
+
+1.7.2     2019-08-04
 fix missing code in setup_IoT()
 
-1.7.1 2019-08-04
+1.7.1     2019-08-04
 refactor with .h include
-new mqtt messages hello byebye for connect and lastwill
 
 
 1.6.0 2019-08-03

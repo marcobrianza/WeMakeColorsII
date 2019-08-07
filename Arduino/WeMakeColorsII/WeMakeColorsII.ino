@@ -1,7 +1,6 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.7.2";
+String softwareVersion = "1.7.4";
 String softwareInfo = "";
-
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
@@ -15,7 +14,7 @@ String mqttPassword = "";
 
 
 int NEW_COLOR_TIME = 1000;
-int LOOP_DELAY = 40;
+int LOOP_DELAY = 5;
 
 // test device
 #define BOOT_TEST_LIGHT 2
@@ -114,7 +113,7 @@ void loop() {
 
   if (publishStatus) {
     publishStatus = false;
-    publishStatusMQTT(mqttPublish_status);
+    publishStatusMQTT();
   }
 
   ArduinoOTA.handle();

@@ -15,20 +15,16 @@ String mqttRoot =   "WeMakeColorsII";
 
 String mqtt_randomColor = "randomColor";
 String mqtt_status = "status";
-String mqtt_hello = "hello";
-String mqtt_byebye = "byebye";
 
 String mqtt_config = "config";
 
 String mqttPublish_randomColor = "";
 String mqttPublish_status = "";
-String mqttPublish_hello = "";
-String mqttPublish_byebye = "";
 
 String mqttSubscribe_randomColor = "";
 String mqttSubscribe_config = "";
 
-
+char mqttDataStatus[MQTT_MAX];
 
 void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
@@ -127,8 +123,6 @@ void setupMqtt() {
 
   mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
   mqttPublish_status = mqttRoot + "/" + thingId + "/" + mqtt_status;
-  mqttPublish_hello = mqttRoot + "/" + thingId + "/" + mqtt_hello;
-  mqttPublish_byebye = mqttRoot + "/" + thingId + "/" + mqtt_byebye;
 
   mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
   mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
@@ -190,16 +184,31 @@ void subscribeMQTT() {
   Serial.println(mqttSubscribe_config);
 }
 
+void prepareStatusMessage(int ut) {
+
+  StaticJsonBuffer<MQTT_MAX> jsonBufferMQTTStatus;
+  JsonObject& jsonMsgStatus = jsonBufferMQTTStatus.createObject();
+
+  jsonMsgStatus["softwareName"] = softwareName;
+  jsonMsgStatus["softwareVersion"] = softwareVersion;
+  jsonMsgStatus["friendlyName"] = friendlyName;
+
+  jsonMsgStatus["upTime"] = ut;
+  jsonMsgStatus["lightLevel"] = average;
+
+  jsonMsgStatus.printTo(mqttDataStatus);
+}
+
 void reconnectMQTT() {
 
   if (checkWiFiStatus() == WL_CONNECTED) {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
 
-      //digitalWrite(LED_BUILTIN, LED_ON);
+      prepareStatusMessage(-1);
       Serial.print("\nAttempting MQTT connection...");
-      if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
+      //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
+      if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttPublish_status.c_str(), QOS_AT_LEAST_1, true, mqttDataStatus)) {
         Serial.println("connected\n");
-        //digitalWrite(LED_BUILTIN, LED_OFF);
 
         subscribeMQTT();
         publishStatus = true;
@@ -215,7 +224,6 @@ void reconnectMQTT() {
     delay(5000);
   }
 }
-
 
 
 
@@ -239,39 +247,23 @@ void publishRandomColor(CHSV c) {
 
     int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
 
-    Serial.print("MQTT message sent: ");
-    Serial.print(mqttPublish_randomColor);
-    Serial.print(" ");
-    Serial.print(mqttData);
-    Serial.print(" result: ");
-    Serial.println(ret);
+   Serial.println("MQTT message sent: " + mqttPublish_randomColor + " " + mqttData + " result: " + ret);
+
   } else Serial.println("MQTT not connected");
 }
 
-void publishStatusMQTT(String topic) {
+
+
+
+void publishStatusMQTT() {
 
   if (mqttClient.connected()) {
 
-    StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
-    JsonObject& jsonMsg = jsonBufferMQTT.createObject();
+    prepareStatusMessage(upTime);
 
-    jsonMsg["upTime"] = upTime;
-    jsonMsg["softwareName"] = softwareName;
-    jsonMsg["softwareVersion"] = softwareVersion;
-    jsonMsg["friendlyName"] = friendlyName;
-    jsonMsg["lightLevel"] = average;
-
-    char mqttData[MQTT_MAX];
-    jsonMsg.printTo(mqttData);
-
-    int ret = mqttClient.publish(topic.c_str(), mqttData);
-
-    Serial.print("MQTT message sent: ");
-    Serial.print(topic);
-    Serial.print(" ");
-    Serial.print(mqttData);
-    Serial.print(" result: ");
-    Serial.println(ret);
+    int ret = mqttClient.publish(mqttPublish_status.c_str(), mqttDataStatus, true);
+    
+    Serial.println("MQTT message sent: " + mqttPublish_status + " " + mqttDataStatus + " result: " + ret);
 
   } else Serial.println("MQTT not connected");
 
