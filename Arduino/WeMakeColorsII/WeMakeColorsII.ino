@@ -1,5 +1,5 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.7.4";
+String softwareVersion = "1.7.5";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
@@ -87,7 +87,7 @@ void setup() {
   setupMdns();
   setupLightLevel();
 
-  T_upTime.attach(60, upTimeInc);
+  T_upTime.attach(60, upTimeInc); //fires every minute
   T_globalBrighness.attach(1, setGlobalBrightness);
   //T_mqttConnect.attach(5, reconnectMQTT);
 

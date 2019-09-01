@@ -59,7 +59,7 @@ void setup_IoT(){
 
 void upTimeInc() {
   upTime++;
-  if (upTime % 15 == true )publishStatus = true;
+  if (upTime % STATUS_INTERVAL == true )publishStatus = true;
 }
 
 
