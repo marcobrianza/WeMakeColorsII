@@ -1,5 +1,12 @@
 release notes:
 
+1.8.3
+force no sleep NONE_SLEEP_T
+
+1.8.2
+#define CAPTIVE_SIGNAL_QUALITY 10
+
+
 1.8.1    2009-11-06
 LOOP_DELAY = 10 
 <ArduinoJson.h> // version 6.13.0

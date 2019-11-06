@@ -29,7 +29,7 @@ WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassw
 
 
 #define CAPTIVE_TIMEOUT 300
-#define CAPTIVE_SIGNAL_QUALITY 20
+#define CAPTIVE_SIGNAL_QUALITY 10
 
 #define BLINK_NO_SSID 1
 #define BLINK_CONNECTION_ERROR 2

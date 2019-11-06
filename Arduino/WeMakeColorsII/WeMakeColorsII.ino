@@ -1,5 +1,5 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.8.1";
+String softwareVersion = "1.8.3";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
@@ -77,6 +77,10 @@ void setup() {
 
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
+
+  wifi_set_sleep_type(NONE_SLEEP_T);
+  //Serial.println(wifi_get_sleep_type());
+
   Serial.println("WiFi connection status: ");
   WiFi.printDiag(Serial);
   digitalWrite(LED_BUILTIN, LED_OFF);
