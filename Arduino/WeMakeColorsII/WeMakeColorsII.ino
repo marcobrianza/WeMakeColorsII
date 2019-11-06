@@ -1,5 +1,5 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.7.5";
+String softwareVersion = "1.7.9";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
@@ -97,11 +97,11 @@ void loop() {
 
   unsigned long now = millis();
 
-  if (mqttClient.connected())  {
-    mqttClient.loop();
-  } else {
+  mqttClient.loop();
+  if (!mqttClient.connected())  {
     reconnectMQTT();
   }
+
 
   if (lightChange() && (now - last_color_t > NEW_COLOR_TIME)) {
     CHSV c = newRndColor();

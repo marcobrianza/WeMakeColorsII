@@ -169,7 +169,7 @@ int checkMQTTStatus () {
       s = "UNKNOWN";
   }
 
-  Serial.println( "MQTT Status=" + String( c) + " " + s);
+  Serial.println( "MQTT Status=" + String(c) + " " + s);
   return c;
 
 }
@@ -220,9 +220,11 @@ void reconnectMQTT() {
         delay(5000); // Wait 5 seconds before retrying
       }
     }
-  } else {
-    delay(5000);
-  }
+  } // no else since there is auto reconnect
+  
+  //else {
+   // delay(5000);
+  //}
 }
 
 

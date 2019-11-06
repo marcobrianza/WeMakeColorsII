@@ -36,7 +36,7 @@ WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassw
 
 unsigned int upTime = 0;
 //status
-#define STATUS_INTERVAL 15 //minutes
+#define STATUS_INTERVAL 5 //minutes
 boolean publishStatus = false;
 
 //OTA
@@ -59,7 +59,8 @@ void setup_IoT(){
 
 void upTimeInc() {
   upTime++;
-  if (upTime % STATUS_INTERVAL == true )publishStatus = true;
+  //publishStatus = true;
+  if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
 }
 
 
@@ -205,7 +206,7 @@ int checkWiFiStatus() {
       break;
   }
 
-  Serial.println( "WiFi Status=" + String( c) + " " + s);
+  Serial.println( "WiFi Status=" + String(c) + " " + s);
   if (b > 0) blink(b);
   return c;
 }

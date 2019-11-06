@@ -1,4 +1,10 @@
 release notes
+1.7.9    2019-11-06
+correct use of mqtt.loop() no delay for wifi reconnect
+
+
+1.7.5    2019-09-01
+const for status update
 
 1.7.4    2019-08-07
 stattus messages are retained, working lastwill with status message and upTime=-1
