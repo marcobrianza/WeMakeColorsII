@@ -1,6 +1,6 @@
 
 //LED
-#include <FastLED.h> // version  3.2.10
+#include <FastLED.h> // version  3.3.2
 
 const int numReadings = 25;
 int readings[numReadings];      // the readings from the analog input

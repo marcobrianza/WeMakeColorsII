@@ -1,5 +1,5 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.7.9";
+String softwareVersion = "1.8.1";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
@@ -14,7 +14,7 @@ String mqttPassword = "";
 
 
 int NEW_COLOR_TIME = 1000;
-int LOOP_DELAY = 5;
+int LOOP_DELAY = 10;
 
 // test device
 #define BOOT_TEST_LIGHT 2

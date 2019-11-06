@@ -1,6 +1,6 @@
 //MQTT
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
-#include <ArduinoJson.h> // version 5.13.5
+#include <ArduinoJson.h> // version 6.13.0
 PubSubClient mqttClient(wifiClient);
 
 #define MQTT_MAX MQTT_MAX_PACKET_SIZE
@@ -41,7 +41,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   //  Serial.println(topic_id);
   //  Serial.println(topic_leaf);
 
-  DynamicJsonBuffer jsonBuffer(MQTT_MAX);
+  StaticJsonDocument<MQTT_MAX> doc;
 
   if (topic_leaf == mqtt_randomColor) {
     if (topic_id != thingId) {
@@ -53,10 +53,13 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
         "v": 255
         }
       */
-      JsonObject& root = jsonBuffer.parseObject(payload);
-      int h = root["h"];
-      int s = root["s"];
-      int v = root["v"];
+      
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
+
+      int h = doc["h"];
+      int s = doc["s"];
+      int v = doc["v"];
 
       Serial.print("hsv ");
       Serial.print(h); Serial.print(" ");
@@ -72,11 +75,11 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
 
   if ((topic_id = thingId) && (topic_leaf == mqtt_config)) {
     Serial.println("Config message:");
-    JsonObject& root = jsonBuffer.parseObject(payload);
+    DeserializationError error = deserializeJson(doc, payload);
+    if (error)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
 
-
-    String command = root["command"];
-    String option = root["option"];
+    String command = doc["command"];
+    String option = doc["option"];
 
     Serial.println(command);
     Serial.println(option);
@@ -106,8 +109,8 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
       //int fh = ESP.getFreeHeap();
       //Serial.print("FreeHeap: ");
       //Serial.println(fh);
-      //jsonMsg["FreeHeap"] = fh;
-      //jsonMsg["MD5"] = ESP.getSketchMD5();
+      //doc["FreeHeap"] = fh;
+      //doc["MD5"] = ESP.getSketchMD5();
 
 
       //String  savedSSID = WiFi.SSID();
@@ -186,17 +189,17 @@ void subscribeMQTT() {
 
 void prepareStatusMessage(int ut) {
 
-  StaticJsonBuffer<MQTT_MAX> jsonBufferMQTTStatus;
-  JsonObject& jsonMsgStatus = jsonBufferMQTTStatus.createObject();
+  StaticJsonDocument<MQTT_MAX> doc;
 
-  jsonMsgStatus["softwareName"] = softwareName;
-  jsonMsgStatus["softwareVersion"] = softwareVersion;
-  jsonMsgStatus["friendlyName"] = friendlyName;
+  doc["softwareName"] = softwareName;
+  doc["softwareVersion"] = softwareVersion;
+  doc["friendlyName"] = friendlyName;
 
-  jsonMsgStatus["upTime"] = ut;
-  jsonMsgStatus["lightLevel"] = average;
+  doc["upTime"] = ut;
+  doc["lightLevel"] = average;
 
-  jsonMsgStatus.printTo(mqttDataStatus);
+  serializeJson(doc, mqttDataStatus);
+
 }
 
 void reconnectMQTT() {
@@ -220,11 +223,10 @@ void reconnectMQTT() {
         delay(5000); // Wait 5 seconds before retrying
       }
     }
-  } // no else since there is auto reconnect
-  
-  //else {
-   // delay(5000);
-  //}
+  }
+  else {
+    delay(500); // take time to autoReconect
+  }
 }
 
 
@@ -234,22 +236,22 @@ void reconnectMQTT() {
 void publishRandomColor(CHSV c) {
 
   if (mqttClient.connected()) {
-    StaticJsonBuffer<MQTT_MAX> jsonBufferMQTT;
-    JsonObject& jsonMsg = jsonBufferMQTT.createObject();
+    StaticJsonDocument<MQTT_MAX> doc;
 
-    jsonMsg["h"] = c.h;
-    jsonMsg["s"] = c.s;
-    jsonMsg["v"] = c.v;
 
-    jsonMsg["friendlyName"] = friendlyName;
-    jsonMsg["lightLevel"] = average;
+    doc["h"] = c.h;
+    doc["s"] = c.s;
+    doc["v"] = c.v;
+
+    doc["friendlyName"] = friendlyName;
+    doc["lightLevel"] = average;
 
     char mqttData[MQTT_MAX];
-    jsonMsg.printTo(mqttData);
-
+    serializeJson(doc, mqttData);
+    
     int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
 
-   Serial.println("MQTT message sent: " + mqttPublish_randomColor + " " + mqttData + " result: " + ret);
+    Serial.println("MQTT message sent: " + mqttPublish_randomColor + " " + mqttData + " result: " + ret);
 
   } else Serial.println("MQTT not connected");
 }
@@ -264,7 +266,7 @@ void publishStatusMQTT() {
     prepareStatusMessage(upTime);
 
     int ret = mqttClient.publish(mqttPublish_status.c_str(), mqttDataStatus, true);
-    
+
     Serial.println("MQTT message sent: " + mqttPublish_status + " " + mqttDataStatus + " result: " + ret);
 
   } else Serial.println("MQTT not connected");

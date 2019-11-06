@@ -1,6 +1,17 @@
-release notes
+release notes:
+
+1.8.1    2009-11-06
+LOOP_DELAY = 10 
+<ArduinoJson.h> // version 6.13.0
+delay 500 for WiFi recconect
+
+
+
 1.7.9    2019-11-06
-correct use of mqtt.loop() no delay for wifi reconnect
+correct use of mqtt.loop() 
+no delay for wifi reconnect
+status message every 5 minutes
+Fastled library 3.3.2
 
 
 1.7.5    2019-09-01
