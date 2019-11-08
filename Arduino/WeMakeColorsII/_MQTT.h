@@ -28,7 +28,7 @@ char mqttDataStatus[MQTT_MAX];
 
 void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
-  Serial.println("MQTT message arrived: " + Topic);
+  Serial.println("MQTT message arrived: " + String(length) + " " + Topic);
 
   int p1 = mqttRoot.length() + 1;
   int p2 = Topic.indexOf("/", p1);
@@ -44,7 +44,8 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   StaticJsonDocument<MQTT_MAX> doc;
 
   if (topic_leaf == mqtt_randomColor) {
-   // if (topic_id != thingId) {
+    if (topic_id == thingId) Serial.println("my message");
+    if ((topic_id == thingId) && (echoMode) || (topic_id != thingId) ) {
 
       /*
         {
@@ -69,8 +70,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
       Serial.println();
 
       setRemoteLED(CHSV(h, s, v));
-
-   // } else Serial.println("My message");
+    }
   }
 
   if ((topic_id = thingId) && (topic_leaf == mqtt_config)) {
@@ -240,7 +240,6 @@ void publishRandomColor(CHSV c) {
 
   if (mqttClient.connected()) {
     StaticJsonDocument<MQTT_MAX> doc;
-
 
     doc["h"] = c.h;
     doc["s"] = c.s;

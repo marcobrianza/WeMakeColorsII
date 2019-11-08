@@ -17,6 +17,8 @@ int averageGB = 0;
 
 int LIGHT_TRIGGER = 100;
 
+int NEW_COLOR_TIME = 1000;
+
 int GLOBAL_BRIGHTNESS = 255;
 
 const int NUM_LEDS = 2;
@@ -26,11 +28,20 @@ CRGB leds[NUM_LEDS];
 unsigned long last_color_t = 0;
 int inputPin = A0;
 
+boolean newColor = false;
+
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
   FastLED.addLeds<WS2812B, D1, GRB>(leds, NUM_LEDS); //D1 is GPIO5
 }
 
+
+void showAllLeds(int r, int g, int b ) {
+  for ( int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CRGB(r, g, b);
+  }
+  FastLED.show();
+}
 
 void setupLightLevel() {
   int a = analogRead(inputPin);
@@ -47,6 +58,17 @@ void setupLightLevel() {
   totalGB = a * numReadingsGB;
   averageGB = totalGB / numReadingsGB;
 }
+
+
+void setupLight() {
+
+  setupLEDs();
+  showAllLeds(64, 64, 64);
+  setupLightLevel() ;
+}
+
+
+
 
 void setGlobalBrightness() {
 
@@ -75,7 +97,9 @@ void applyColor() {
 }
 
 
-boolean lightChange() {
+
+
+void checkLight() {
 
   int l = analogRead(inputPin);
   int dl = l - average;
@@ -106,7 +130,13 @@ boolean lightChange() {
   //    change = true;
   //  }
 
-  return change;
+  if (change && (millis() - last_color_t > NEW_COLOR_TIME)) {
+    last_color_t = millis();
+    newColor = true;
+  }
+
+
+  // return change;
 }
 
 
@@ -121,12 +151,6 @@ CHSV newRndColor() {
 }
 
 
-void showAllLeds(int r, int g, int b ) {
-  for ( int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB(r, g, b);
-  }
-  FastLED.show();
-}
 
 void setMyLED(CHSV newC) {
   leds[0] = newC;

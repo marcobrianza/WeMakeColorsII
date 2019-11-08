@@ -1,10 +1,13 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.0";
+String softwareVersion = "1.9.1";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
+
+bool echoMode = true;
+int netStatus = 0;
 
 #define LAN_OTA false
 
@@ -12,10 +15,6 @@ String mqttPassword = "";
 #include "_light.h"
 #include "_WiFi.h"
 #include "_MQTT.h"
-
-
-int NEW_COLOR_TIME = 1000;
-int LOOP_DELAY = 10;
 
 // test device
 #define BOOT_TEST_LIGHT 2
@@ -27,12 +26,14 @@ int LOOP_DELAY = 10;
 #include <Ticker.h>
 Ticker T_upTime;
 Ticker T_globalBrighness;
+Ticker T_light;
 //Ticker T_mqttConnect;
+
+
 
 void setup() {
 
-  setupLEDs();
-  showAllLeds(64, 64, 64);
+  setupLight();
 
   Serial.begin(115200);  Serial.println();
   softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
@@ -48,6 +49,7 @@ void setup() {
   //mqttServer = "192.168.1.5";
   //mqttServer = "192.168.1.138";
   //mqttServer = "vir.local";
+  //mqttServer = "broker.mqtt-dashboard.com";
 
   WiFi.hostname(friendlyName);
 
@@ -64,23 +66,25 @@ void setup() {
 
   setWiFi() ;
 
+
+
   switch  (c) {
     case BOOT_DEFAULT_AP:
       Serial.println("Reset parameters and connect to default AP");
       saveParametersToFile();
-      connectWifi(defaultSSID, defaultPassword);
+      connectWiFi(defaultSSID, defaultPassword);
       break;
     case BOOT_RESET:
       Serial.println("Reset parameters");
       saveParametersToFile();
-      connectWifi_or_AP(true);
+      connectWiFi_or_AP(true);
       break;
     case BOOT_ESPTOUCH:
       Serial.println("Starting ESPTouch SmartConfig");
       WiFi.beginSmartConfig();
       break;
     default:
-      connectWifi_or_AP(false);
+      connectWiFi_or_AP(false);
   }
 
 
@@ -96,23 +100,26 @@ void setup() {
   setupOTA();
 #endif
   //setupMdns();
-  setupLightLevel();
+  // setupLightLevel();
 
   T_upTime.attach(60, upTimeInc); //fires every minute
   T_globalBrighness.attach(1, setGlobalBrightness);
+  T_light.attach_ms(40, checkLight);
   //T_mqttConnect.attach(5, reconnectMQTT);
+
 
 }
 
 void loop() {
+  mqttClient.loop();
 
   if (!mqttClient.connected())  {
     reconnectMQTT();
   }
-  mqttClient.loop();
 
-  if (lightChange() && (millis() - last_color_t > NEW_COLOR_TIME)) {
-    last_color_t = millis();
+
+  if (newColor) {
+    newColor = false;
     CHSV c = newRndColor();
     setMyLED(c);
     publishRandomColor(c);
@@ -128,8 +135,6 @@ void loop() {
 #if  (LAN_OTA)
   ArduinoOTA.handle();
 #endif
-
-  delay(LOOP_DELAY);
 
 }
 

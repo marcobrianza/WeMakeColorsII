@@ -189,7 +189,7 @@ void setWiFi() {
 }
 
 
-void connectWifi(String ssid, String password) {
+void connectWiFi(String ssid, String password) {
   WiFi.disconnect();
   delay(100);
   // We start by connecting to a WiFi network
@@ -270,7 +270,7 @@ void saveConfigCallback () {
 }
 
 
-void connectWifi_or_AP(bool force_config) {
+void connectWiFi_or_AP(bool force_config) {
 
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);
@@ -297,8 +297,6 @@ void connectWifi_or_AP(bool force_config) {
     Serial.println("Captive portal timeout");
   }
 }
-
-
 
 
 
