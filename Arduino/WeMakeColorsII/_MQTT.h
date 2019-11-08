@@ -225,7 +225,7 @@ void connectMQTT() {
 
   if (checkWiFiStatus() == WL_CONNECTED) {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
-      netStatus = 10;
+      //netStatus = 10;
       prepareStatusMessage(-1);
       Serial.print("\nAttempting MQTT connection..." + String(millis()));
 
@@ -239,17 +239,15 @@ void connectMQTT() {
         netStatus = 2;
 
       } else {
-        // blink(BLINK_NO_MQTT);
+         blink(BLINK_NO_MQTT);
         Serial.print("MQTT connect failed, rc=" + mqttClient.state());
         Serial.println(" will try again..." + String (millis()));
-        // delay(5000); // Wait 5 seconds before retrying
       }
     }
     netStatus = 1;
   }
   else {
     netStatus = -1;
-    //delay(2000); // take time to autoReconect
   }
 
 }

@@ -1,5 +1,5 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.3";
+String softwareVersion = "1.9.4";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
@@ -34,9 +34,9 @@ void setup() {
   Serial.println("thingId: " + thingId);
   friendlyName = thingId;
 
-  setWiFi() ;
 
   loadParametersFromFile();
+  mqttServer = "192.168.1.138";
 
   WiFi.hostname(friendlyName);
 
@@ -49,9 +49,11 @@ void setup() {
     testDevice();
   }
 
-  digitalWrite(LED_BUILTIN, LED_ON);
-
+  ledON();
+  
   setWiFi() ;
+
+  //connectWiFi("PucciThings", "Grandebellezza3");
 
   switch  (c) {
     case BOOT_DEFAULT_AP:
@@ -77,7 +79,8 @@ void setup() {
   WiFi.printDiag(Serial);
   Serial.println("-----------------------------------");
 
-  digitalWrite(LED_BUILTIN, LED_OFF);
+  ledOFF();
+
 
   autoUpdate();
 

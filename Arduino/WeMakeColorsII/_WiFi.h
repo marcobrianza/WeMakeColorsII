@@ -234,6 +234,7 @@ int checkWiFiStatus() {
       break;
     case WL_DISCONNECTED:
       s = "WL_DISCONNECTED";
+      b = BLINK_NO_SSID;
       break;
     case WL_CONNECTION_LOST:
       s = "WL_CONNECTION_LOST";
@@ -244,7 +245,7 @@ int checkWiFiStatus() {
   }
 
   if (c != WL_CONNECTED) Serial.println( "WiFi Status=" + String(c) + " " + s);
-  // if (b > 0) blink(b);
+  if (b > 0) blink(b);
   return c;
 }
 
@@ -318,7 +319,7 @@ void setupOTA() {
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\nEnd OTA");
-    delay(100);
+    //delay(100);
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
