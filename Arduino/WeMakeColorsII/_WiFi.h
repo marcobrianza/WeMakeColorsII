@@ -34,6 +34,8 @@ WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassw
 #define BLINK_NO_SSID 1
 #define BLINK_CONNECTION_ERROR 2
 
+int netStatus = 0; //0=undefined 1=WiFi connected 2=MQTT connected -1 WiFi not Connected
+
 unsigned int upTime = 0;
 //status
 #define STATUS_INTERVAL 5 //minutes
@@ -52,16 +54,26 @@ String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 
+
+void setWiFi() {
+  WiFi.setOutputPower(20.5); // 20.5 is maximum power
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+
+  //Serial.println(wifi_get_sleep_type());
+  wifi_set_sleep_type(NONE_SLEEP_T);
+
+  //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
+  WiFi.setPhyMode(WIFI_PHY_MODE_11N);   // WIFI_PHY_MODE_11B = 1, WIFI_PHY_MODE_11G = 2, WIFI_PHY_MODE_11N = 3
+  //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
+}
+
+
 void setup_IoT() {
   thingId = appId + "_" +  WiFi.macAddress().c_str();
+
 }
 
-
-void upTimeInc() {
-  upTime++;
-  //publishStatus = true;
-  if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
-}
 
 
 byte bootCount() {
@@ -175,18 +187,7 @@ void saveParametersToFile() {
 // -------------------------------------------
 
 
-void setWiFi() {
-  WiFi.setOutputPower(20.5); // 20.5 is maximum power
-  WiFi.mode(WIFI_STA);
-  WiFi.setAutoReconnect(true);
 
-  //Serial.println(wifi_get_sleep_type());
-  wifi_set_sleep_type(NONE_SLEEP_T);
-
-  //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
-  WiFi.setPhyMode(WIFI_PHY_MODE_11N);   // WIFI_PHY_MODE_11B = 1, WIFI_PHY_MODE_11G = 2, WIFI_PHY_MODE_11N = 3
-  //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
-}
 
 
 void connectWiFi(String ssid, String password) {
@@ -242,8 +243,8 @@ int checkWiFiStatus() {
       break;
   }
 
-  Serial.println( "WiFi Status=" + String(c) + " " + s);
-  if (b > 0) blink(b);
+  if (c != WL_CONNECTED) Serial.println( "WiFi Status=" + String(c) + " " + s);
+  // if (b > 0) blink(b);
   return c;
 }
 
@@ -301,7 +302,11 @@ void connectWiFi_or_AP(bool force_config) {
 
 
 // --------------- OTA Lan ---------------
+
+
 void setupOTA() {
+
+
   ArduinoOTA.setPort(8266); // Port defaults to 8266
   ArduinoOTA.setHostname(friendlyName.c_str());
 
@@ -326,7 +331,15 @@ void setupOTA() {
     else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
+
   ArduinoOTA.begin();
+
+  //MDNS discovery additiona info
+  MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
+  MDNS.addServiceTxt("arduino", "tcp", "friendlyName", friendlyName);
+  MDNS.addServiceTxt("arduino", "tcp", "softwareInfo", softwareInfo);
+  MDNS.update();
+
   Serial.println("OTA Ready");
 }
 
@@ -386,13 +399,4 @@ void autoUpdate() {
     http.end();
   }
   Serial.println();
-}
-
-
-void setupMdns() {
-  //MDNS discovery
-  MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
-  MDNS.addServiceTxt("arduino", "tcp", "friendlyName", friendlyName);
-  MDNS.addServiceTxt("arduino", "tcp", "softwareInfo", softwareInfo);
-  MDNS.update();
 }

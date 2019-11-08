@@ -30,6 +30,10 @@ int inputPin = A0;
 
 boolean newColor = false;
 
+#include <Ticker.h>
+Ticker T_globalBrighness;
+Ticker T_light;
+
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
   FastLED.addLeds<WS2812B, D1, GRB>(leds, NUM_LEDS); //D1 is GPIO5
@@ -61,14 +65,10 @@ void setupLightLevel() {
 
 
 void setupLight() {
-
   setupLEDs();
   showAllLeds(64, 64, 64);
   setupLightLevel() ;
 }
-
-
-
 
 void setGlobalBrightness() {
 
@@ -82,21 +82,6 @@ void setGlobalBrightness() {
   if (readIndexGB >= numReadingsGB)  readIndexGB = 0;
 
 }
-
-void applyColor() {
-
-  int mb = map(averageGB, 0, 512, 64, 255);
-  if (mb > 255) mb = 255;
-
-  //  Serial.print(averageGB);
-  //  Serial.print(" ");
-  //  Serial.println(mb);
-
-  FastLED.setBrightness(mb);
-  FastLED.show();
-}
-
-
 
 
 void checkLight() {
@@ -135,9 +120,32 @@ void checkLight() {
     newColor = true;
   }
 
-
   // return change;
 }
+
+
+void startLight() {
+  T_globalBrighness.attach(1, setGlobalBrightness);
+  T_light.attach_ms(40, checkLight);
+}
+
+
+
+void applyColor() {
+
+  int mb = map(averageGB, 0, 512, 64, 255);
+  if (mb > 255) mb = 255;
+
+  //  Serial.print(averageGB);
+  //  Serial.print(" ");
+  //  Serial.println(mb);
+
+  FastLED.setBrightness(mb);
+  FastLED.show();
+}
+
+
+
 
 
 CHSV newRndColor() {

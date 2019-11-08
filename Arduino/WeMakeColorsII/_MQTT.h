@@ -26,6 +26,24 @@ String mqttSubscribe_config = "";
 
 char mqttDataStatus[MQTT_MAX];
 
+#include <Ticker.h>
+Ticker T_connectMQTT;
+Ticker T_upTime;
+
+boolean B_connectMQTT=true;
+
+void F_connectMQTT() {
+  T_connectMQTT.detach();
+  B_connectMQTT = true;
+}
+
+void upTimeInc() {
+  upTime++;
+  //publishStatus = true;
+  if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
+}
+
+
 void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
   Serial.println("MQTT message arrived: " + String(length) + " " + Topic);
@@ -38,13 +56,12 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String topic_leaf = String(topic).substring(p2 + 1);
 
   //Serial.println(topic_root);
-  //  Serial.println(topic_id);
-  //  Serial.println(topic_leaf);
+  //Serial.println(topic_id);
+  //Serial.println(topic_leaf);
 
   StaticJsonDocument<MQTT_MAX> doc;
 
   if (topic_leaf == mqtt_randomColor) {
-    if (topic_id == thingId) Serial.println("my message");
     if ((topic_id == thingId) && (echoMode) || (topic_id != thingId) ) {
 
       /*
@@ -62,12 +79,8 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
       int s = doc["s"];
       int v = doc["v"];
 
-      Serial.print("hsv ");
-      Serial.print(h); Serial.print(" ");
-      Serial.print(s); Serial.print(" ");
-      Serial.print(v); Serial.print(" ");
-
-      Serial.println();
+      if (topic_id == thingId) Serial.print("my message ");
+      Serial.println("hsv: " + String(h) + " " + String(s) + " " + String(v) );
 
       setRemoteLED(CHSV(h, s, v));
     }
@@ -130,6 +143,9 @@ void setupMqtt() {
   mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
   mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
 
+  thingId = appId + "_" +  WiFi.macAddress().c_str();
+  T_upTime.attach(60, upTimeInc); //fires every minute
+
 }
 
 
@@ -172,7 +188,7 @@ int checkMQTTStatus () {
       s = "UNKNOWN";
   }
 
-  Serial.println( "MQTT Status=" + String(c) + " " + s);
+  if (c != MQTT_CONNECTED) Serial.println( "MQTT Status=" + String(c) + " " + s);
   return c;
 
 }
@@ -198,19 +214,21 @@ void prepareStatusMessage(int ut) {
   doc["upTime"] = ut;
   doc["lightLevel"] = average;
 
-  doc["freeHeap"] = ESP.getFreeHeap();
+  //doc["freeHeap"] = ESP.getFreeHeap();
 
   serializeJson(doc, mqttDataStatus);
 
 }
 
-void reconnectMQTT() {
+void connectMQTT() {
+
 
   if (checkWiFiStatus() == WL_CONNECTED) {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
-
+      netStatus = 10;
       prepareStatusMessage(-1);
-      Serial.print("\nAttempting MQTT connection...");
+      Serial.print("\nAttempting MQTT connection..." + String(millis()));
+
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttPublish_status.c_str(), QOS_AT_LEAST_1, true, mqttDataStatus)) {
         Serial.println("connected\n");
@@ -218,21 +236,23 @@ void reconnectMQTT() {
 
         subscribeMQTT();
         publishStatus = true;
+        netStatus = 2;
 
       } else {
-        blink(BLINK_NO_MQTT);
+        // blink(BLINK_NO_MQTT);
         Serial.print("MQTT connect failed, rc=" + mqttClient.state());
-        Serial.println(" try again in 5 seconds");
-        delay(5000); // Wait 5 seconds before retrying
+        Serial.println(" will try again..." + String (millis()));
+        // delay(5000); // Wait 5 seconds before retrying
       }
     }
+    netStatus = 1;
   }
   else {
-    delay(2000); // take time to autoReconect
+    netStatus = -1;
+    //delay(2000); // take time to autoReconect
   }
+
 }
-
-
 
 
 
@@ -255,9 +275,8 @@ void publishRandomColor(CHSV c) {
 
     Serial.println("MQTT message sent: " + mqttPublish_randomColor + " " + mqttData + " result: " + ret);
 
-  } else Serial.println("MQTT not connected");
+  } else Serial.println("publishRandomColor: MQTT not connected");
 }
-
 
 
 
@@ -266,11 +285,26 @@ void publishStatusMQTT() {
   if (mqttClient.connected()) {
 
     prepareStatusMessage(upTime);
-
     int ret = mqttClient.publish(mqttPublish_status.c_str(), mqttDataStatus, true);
-
     Serial.println("MQTT message sent: " + mqttPublish_status + " " + mqttDataStatus + " result: " + ret);
 
-  } else Serial.println("MQTT not connected");
+  } else Serial.println("publishStatusMQTT: MQTT not connected");
+
+}
+
+
+void mqtt_loop() {
+  mqttClient.loop();
+  
+  if (publishStatus) {
+    publishStatus = false;
+    publishStatusMQTT();
+  }
+
+  if (B_connectMQTT) {
+    B_connectMQTT = false;
+    connectMQTT() ;
+    T_connectMQTT.attach(5, F_connectMQTT);
+  }
 
 }

@@ -1,13 +1,12 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.1";
+String softwareVersion = "1.9.3";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
 
-bool echoMode = true;
-int netStatus = 0;
+bool echoMode = true; //legacy =flase
 
 #define LAN_OTA false
 
@@ -23,14 +22,6 @@ int netStatus = 0;
 #define BOOT_ESPTOUCH 5
 
 
-#include <Ticker.h>
-Ticker T_upTime;
-Ticker T_globalBrighness;
-Ticker T_light;
-//Ticker T_mqttConnect;
-
-
-
 void setup() {
 
   setupLight();
@@ -40,16 +31,12 @@ void setup() {
   Serial.println(softwareInfo);
 
   setup_IoT();
-
   Serial.println("thingId: " + thingId);
   friendlyName = thingId;
 
-  loadParametersFromFile();
+  setWiFi() ;
 
-  //mqttServer = "192.168.1.5";
-  //mqttServer = "192.168.1.138";
-  //mqttServer = "vir.local";
-  //mqttServer = "broker.mqtt-dashboard.com";
+  loadParametersFromFile();
 
   WiFi.hostname(friendlyName);
 
@@ -65,8 +52,6 @@ void setup() {
   digitalWrite(LED_BUILTIN, LED_ON);
 
   setWiFi() ;
-
-
 
   switch  (c) {
     case BOOT_DEFAULT_AP:
@@ -95,40 +80,25 @@ void setup() {
   digitalWrite(LED_BUILTIN, LED_OFF);
 
   autoUpdate();
-  setupMqtt();
+
 #if  (LAN_OTA)
   setupOTA();
 #endif
-  //setupMdns();
-  // setupLightLevel();
 
-  T_upTime.attach(60, upTimeInc); //fires every minute
-  T_globalBrighness.attach(1, setGlobalBrightness);
-  T_light.attach_ms(40, checkLight);
-  //T_mqttConnect.attach(5, reconnectMQTT);
-
+  setupMqtt();
+  startLight();
 
 }
 
 void loop() {
-  mqttClient.loop();
 
-  if (!mqttClient.connected())  {
-    reconnectMQTT();
-  }
-
+  mqtt_loop() ;
 
   if (newColor) {
     newColor = false;
     CHSV c = newRndColor();
     setMyLED(c);
     publishRandomColor(c);
-  }
-
-
-  if (publishStatus) {
-    publishStatus = false;
-    publishStatusMQTT();
   }
 
 

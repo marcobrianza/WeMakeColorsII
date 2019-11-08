@@ -11,3 +11,7 @@ void blink(int b) {
     delay(200);
   }
 }
+
+void setup_UI(){
+  
+}
