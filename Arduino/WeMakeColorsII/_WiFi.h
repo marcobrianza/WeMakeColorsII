@@ -52,8 +52,8 @@ String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 
-void setup_IoT(){
- thingId = appId + "_" +  WiFi.macAddress().c_str();
+void setup_IoT() {
+  thingId = appId + "_" +  WiFi.macAddress().c_str();
 }
 
 
@@ -62,6 +62,34 @@ void upTimeInc() {
   //publishStatus = true;
   if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
 }
+
+
+byte bootCount() {
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LED_OFF);
+  delay(500);
+
+  EEPROM.begin(512);
+  byte boot_count = EEPROM.read(COUNT_ADDR);
+  boot_count++;
+  for (int i = 0;  i  < boot_count; i++) {
+    digitalWrite(LED_BUILTIN, LED_ON);
+    delay(300);
+    digitalWrite(LED_BUILTIN, LED_OFF);
+    delay(300);
+  }
+
+  EEPROM.write(COUNT_ADDR, boot_count);
+  EEPROM.commit();
+
+  delay(2000);
+
+  EEPROM.write(COUNT_ADDR, 0);
+  EEPROM.commit();
+  return boot_count;
+}
+
 
 
 //---- file attribute functions----
@@ -137,8 +165,6 @@ void loadParametersFromFile() {
 }
 
 
-
-
 void saveParametersToFile() {
   writeAttribute("mqttServer", mqttServer);
   writeAttribute("mqttUsername", mqttUsername);
@@ -147,30 +173,40 @@ void saveParametersToFile() {
 }
 
 // -------------------------------------------
-byte bootCount() {
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LED_OFF);
-  delay(500);
 
-  EEPROM.begin(512);
-  byte boot_count = EEPROM.read(COUNT_ADDR);
-  boot_count++;
-  for (int i = 0;  i  < boot_count; i++) {
-    digitalWrite(LED_BUILTIN, LED_ON);
-    delay(300);
-    digitalWrite(LED_BUILTIN, LED_OFF);
-    delay(300);
+void setWiFi() {
+  WiFi.setOutputPower(20.5); // 20.5 is maximum power
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+
+  //Serial.println(wifi_get_sleep_type());
+  wifi_set_sleep_type(NONE_SLEEP_T);
+
+  //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
+  WiFi.setPhyMode(WIFI_PHY_MODE_11N);   // WIFI_PHY_MODE_11B = 1, WIFI_PHY_MODE_11G = 2, WIFI_PHY_MODE_11N = 3
+  //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
+}
+
+
+void connectWifi(String ssid, String password) {
+  WiFi.disconnect();
+  delay(100);
+  // We start by connecting to a WiFi network
+  Serial.print("Connecting to: "); Serial.println(ssid);
+
+  WiFi.begin(ssid.c_str(), password.c_str());
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
   }
 
-  EEPROM.write(COUNT_ADDR, boot_count);
-  EEPROM.commit();
-
-  delay(2000);
-
-  EEPROM.write(COUNT_ADDR, 0);
-  EEPROM.commit();
-  return boot_count;
+  IPAddress ip = WiFi.localIP();
+  Serial.println("WiFi connected");
+  Serial.print("IP address: ");
+  Serial.println(ip);
+  WiFi.setAutoReconnect(true);
 }
 
 
@@ -212,31 +248,7 @@ int checkWiFiStatus() {
 }
 
 
-
 // ------ Wi-Fi Manager functions-------------------------------------
-
-
-void connectWifi(String ssid, String password) {
-  WiFi.disconnect();
-  delay(100);
-  // We start by connecting to a WiFi network
-  Serial.print("Connecting to: "); Serial.println(ssid);
-
-  WiFi.begin(ssid.c_str(), password.c_str());
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  IPAddress ip = WiFi.localIP();
-  Serial.println("WiFi connected");
-  Serial.print("IP address: ");
-  Serial.println(ip);
-  WiFi.setAutoReconnect(true);
-}
-
-
 
 void configModeCallback (WiFiManager *myWiFiManager) {
   Serial.println("Entered config mode");
@@ -285,8 +297,6 @@ void connectWifi_or_AP(bool force_config) {
     Serial.println("Captive portal timeout");
   }
 }
-
-
 
 
 

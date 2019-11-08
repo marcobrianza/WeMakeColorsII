@@ -44,7 +44,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   StaticJsonDocument<MQTT_MAX> doc;
 
   if (topic_leaf == mqtt_randomColor) {
-    if (topic_id != thingId) {
+   // if (topic_id != thingId) {
 
       /*
         {
@@ -53,7 +53,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
         "v": 255
         }
       */
-      
+
       DeserializationError error = deserializeJson(doc, payload);
       if (error)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
 
@@ -70,7 +70,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
 
       setRemoteLED(CHSV(h, s, v));
 
-    } else Serial.println("My message");
+   // } else Serial.println("My message");
   }
 
   if ((topic_id = thingId) && (topic_leaf == mqtt_config)) {
@@ -198,6 +198,8 @@ void prepareStatusMessage(int ut) {
   doc["upTime"] = ut;
   doc["lightLevel"] = average;
 
+  doc["freeHeap"] = ESP.getFreeHeap();
+
   serializeJson(doc, mqttDataStatus);
 
 }
@@ -212,6 +214,7 @@ void reconnectMQTT() {
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttPublish_status.c_str(), QOS_AT_LEAST_1, true, mqttDataStatus)) {
         Serial.println("connected\n");
+        Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));
 
         subscribeMQTT();
         publishStatus = true;
@@ -225,7 +228,7 @@ void reconnectMQTT() {
     }
   }
   else {
-    delay(500); // take time to autoReconect
+    delay(2000); // take time to autoReconect
   }
 }
 
@@ -248,7 +251,7 @@ void publishRandomColor(CHSV c) {
 
     char mqttData[MQTT_MAX];
     serializeJson(doc, mqttData);
-    
+
     int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
 
     Serial.println("MQTT message sent: " + mqttPublish_randomColor + " " + mqttData + " result: " + ret);

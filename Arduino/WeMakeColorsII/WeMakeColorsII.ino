@@ -1,15 +1,16 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.8.3";
+String softwareVersion = "1.9.0";
 String softwareInfo = "";
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
 
+#define LAN_OTA false
 
 #include "_userInterface.h"
 #include "_light.h"
-#include "_IoT.h"
+#include "_WiFi.h"
 #include "_MQTT.h"
 
 
@@ -43,6 +44,11 @@ void setup() {
   friendlyName = thingId;
 
   loadParametersFromFile();
+
+  //mqttServer = "192.168.1.5";
+  //mqttServer = "192.168.1.138";
+  //mqttServer = "vir.local";
+
   WiFi.hostname(friendlyName);
 
   byte c = bootCount();
@@ -55,6 +61,9 @@ void setup() {
   }
 
   digitalWrite(LED_BUILTIN, LED_ON);
+
+  setWiFi() ;
+
   switch  (c) {
     case BOOT_DEFAULT_AP:
       Serial.println("Reset parameters and connect to default AP");
@@ -72,23 +81,21 @@ void setup() {
       break;
     default:
       connectWifi_or_AP(false);
-
   }
 
-  WiFi.mode(WIFI_STA);
-  WiFi.setAutoReconnect(true);
 
-  wifi_set_sleep_type(NONE_SLEEP_T);
-  //Serial.println(wifi_get_sleep_type());
-
-  Serial.println("WiFi connection status: ");
+  Serial.println("-------WiFi connection status:-----");
   WiFi.printDiag(Serial);
+  Serial.println("-----------------------------------");
+
   digitalWrite(LED_BUILTIN, LED_OFF);
 
   autoUpdate();
   setupMqtt();
+#if  (LAN_OTA)
   setupOTA();
-  setupMdns();
+#endif
+  //setupMdns();
   setupLightLevel();
 
   T_upTime.attach(60, upTimeInc); //fires every minute
@@ -99,19 +106,16 @@ void setup() {
 
 void loop() {
 
-  unsigned long now = millis();
-
-  mqttClient.loop();
   if (!mqttClient.connected())  {
     reconnectMQTT();
   }
+  mqttClient.loop();
 
-
-  if (lightChange() && (now - last_color_t > NEW_COLOR_TIME)) {
+  if (lightChange() && (millis() - last_color_t > NEW_COLOR_TIME)) {
+    last_color_t = millis();
     CHSV c = newRndColor();
     setMyLED(c);
     publishRandomColor(c);
-    last_color_t = now;
   }
 
 
@@ -120,7 +124,11 @@ void loop() {
     publishStatusMQTT();
   }
 
+
+#if  (LAN_OTA)
   ArduinoOTA.handle();
+#endif
+
   delay(LOOP_DELAY);
 
 }
