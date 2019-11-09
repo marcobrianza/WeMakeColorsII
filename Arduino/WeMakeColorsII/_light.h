@@ -169,3 +169,16 @@ void setRemoteLED(CHSV newC) {
   leds[1] = newC;
   applyColor();
 }
+
+void testDevice() {
+  int TEST_TIME = 30000; // 30 seconds
+
+  while (millis() < TEST_TIME) {
+    int a = analogRead(inputPin);
+    int v = a / 4;
+    if (v > 255) v = 255;
+    Serial.println(v);
+    showAllLeds(v, v, v);
+    delay(40);
+  }
+}

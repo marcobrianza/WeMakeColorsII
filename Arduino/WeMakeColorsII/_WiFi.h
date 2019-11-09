@@ -1,5 +1,6 @@
-#include <EEPROM.h> //boot Count
-#define COUNT_ADDR 0
+
+
+#define LAN_OTA false
 
 //Wi-Fi
 #include <ESP8266WiFi.h>  // ESP8266 core 2.5.2
@@ -9,11 +10,9 @@ WiFiClient wifiClient;
 String defaultSSID = "colors";
 String defaultPassword = "colors01";
 
-
 String thingId = "";
 String appId = "WMCII";
 String friendlyName = "";
-
 
 #define BLINK_NO_SSID 1
 #define BLINK_DISCONNECTED 1
@@ -57,31 +56,6 @@ void IoT_setup() {
 }
 
 
-byte bootCount() {
-
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LED_OFF);
-  delay(500);
-
-  EEPROM.begin(512);
-  byte boot_count = EEPROM.read(COUNT_ADDR);
-  boot_count++;
-  for (int i = 0;  i  < boot_count; i++) {
-    digitalWrite(LED_BUILTIN, LED_ON);
-    delay(300);
-    digitalWrite(LED_BUILTIN, LED_OFF);
-    delay(300);
-  }
-
-  EEPROM.write(COUNT_ADDR, boot_count);
-  EEPROM.commit();
-
-  delay(2000);
-
-  EEPROM.write(COUNT_ADDR, 0);
-  EEPROM.commit();
-  return boot_count;
-}
 
 
 void connectWiFi(String ssid, String password) {

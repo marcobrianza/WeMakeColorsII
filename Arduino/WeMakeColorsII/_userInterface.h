@@ -1,4 +1,7 @@
 
+#include <EEPROM.h> //boot Count
+#define COUNT_ADDR 0
+
 //led builtin
 #define LED_ON LOW
 #define LED_OFF HIGH
@@ -9,6 +12,11 @@ Ticker T_UI;
 int c = 0;
 bool LED_STATE = false;
 
+
+#define BOOT_TEST_LIGHT 2
+#define BOOT_RESET 3
+#define BOOT_DEFAULT_AP 4
+#define BOOT_ESPTOUCH 5
 
 void F_UI() {
   c--;
@@ -34,6 +42,33 @@ void ledON() {
 
 void ledOFF() {
   digitalWrite(LED_BUILTIN, LED_OFF);
+}
+
+
+byte bootCount() {
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LED_OFF);
+  delay(500);
+
+  EEPROM.begin(512);
+  byte boot_count = EEPROM.read(COUNT_ADDR);
+  boot_count++;
+  for (int i = 0;  i  < boot_count; i++) {
+    digitalWrite(LED_BUILTIN, LED_ON);
+    delay(300);
+    digitalWrite(LED_BUILTIN, LED_OFF);
+    delay(300);
+  }
+
+  EEPROM.write(COUNT_ADDR, boot_count);
+  EEPROM.commit();
+
+  delay(2000);
+
+  EEPROM.write(COUNT_ADDR, 0);
+  EEPROM.commit();
+  return boot_count;
 }
 
 

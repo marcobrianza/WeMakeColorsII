@@ -1,22 +1,14 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.5";
+String softwareVersion = "1.9.6";
 String softwareInfo = "";
 
 bool echoMode = true; //legacy =flase
-
-#define LAN_OTA false
 
 #include "_userInterface.h"
 #include "_light.h"
 #include "_WiFi.h"
 #include "_MQTT.h"
 #include "_WiFiManager.h"
-
-// test device
-#define BOOT_TEST_LIGHT 2
-#define BOOT_RESET 3
-#define BOOT_DEFAULT_AP 4
-#define BOOT_ESPTOUCH 5
 
 
 void setup() {
@@ -30,7 +22,6 @@ void setup() {
   IoT_setup();
   Serial.println("thingId: " + thingId);
   friendlyName = thingId;
-
 
   loadParametersFromFile();
   //mqttServer = "192.168.1.138";
@@ -100,22 +91,8 @@ void loop() {
     publishRandomColor(c);
   }
 
-
 #if  (LAN_OTA)
   ArduinoOTA.handle();
 #endif
 
-}
-
-void testDevice() {
-  int TEST_TIME = 30000; // 30 seconds
-
-  while (millis() < TEST_TIME) {
-    int a = analogRead(inputPin);
-    int v = a / 4;
-    if (v > 255) v = 255;
-    Serial.println(v);
-    showAllLeds(v, v, v);
-    delay(40);
-  }
 }
