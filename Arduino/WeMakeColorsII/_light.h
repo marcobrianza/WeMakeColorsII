@@ -64,7 +64,7 @@ void setupLightLevel() {
 }
 
 
-void setupLight() {
+void light_setup() {
   setupLEDs();
   showAllLeds(64, 64, 64);
   setupLightLevel() ;
@@ -124,7 +124,7 @@ void checkLight() {
 }
 
 
-void startLight() {
+void light_start() {
   T_globalBrighness.attach(1, setGlobalBrightness);
   T_light.attach_ms(40, checkLight);
 }

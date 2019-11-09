@@ -1,4 +1,9 @@
 //MQTT
+
+String mqttServer = "wmc.marcobrianza.it";
+String mqttUsername = "";
+String mqttPassword = "";
+
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
 #include <ArduinoJson.h> // version 6.13.0
 PubSubClient mqttClient(wifiClient);
@@ -25,6 +30,11 @@ String mqttSubscribe_randomColor = "";
 String mqttSubscribe_config = "";
 
 char mqttDataStatus[MQTT_MAX];
+
+unsigned int upTime = 0;
+//status
+#define STATUS_INTERVAL 5 //minutes
+boolean publishStatus = false;
 
 #include <Ticker.h>
 Ticker T_connectMQTT;
@@ -133,20 +143,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   }
 }
 
-void setupMqtt() {
-  mqttClient.setServer(mqttServer.c_str(), MQTT_PORT);
-  mqttClient.setCallback(mqttReceive);
 
-  mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
-  mqttPublish_status = mqttRoot + "/" + thingId + "/" + mqtt_status;
-
-  mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
-  mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
-
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
-  T_upTime.attach(60, upTimeInc); //fires every minute
-
-}
 
 
 int checkMQTTStatus () {
@@ -222,7 +219,6 @@ void prepareStatusMessage(int ut) {
 
 void connectMQTT() {
 
-
   if (checkWiFiStatus() == WL_CONNECTED) {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
       //netStatus = 10;
@@ -255,10 +251,8 @@ void connectMQTT() {
 
 
 void publishRandomColor(CHSV c) {
-
   if (mqttClient.connected()) {
     StaticJsonDocument<MQTT_MAX> doc;
-
     doc["h"] = c.h;
     doc["s"] = c.s;
     doc["v"] = c.v;
@@ -270,26 +264,36 @@ void publishRandomColor(CHSV c) {
     serializeJson(doc, mqttData);
 
     int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
-
     Serial.println("MQTT message sent: " + mqttPublish_randomColor + " " + mqttData + " result: " + ret);
 
   } else Serial.println("publishRandomColor: MQTT not connected");
 }
 
 
-
 void publishStatusMQTT() {
 
   if (mqttClient.connected()) {
-
     prepareStatusMessage(upTime);
     int ret = mqttClient.publish(mqttPublish_status.c_str(), mqttDataStatus, true);
     Serial.println("MQTT message sent: " + mqttPublish_status + " " + mqttDataStatus + " result: " + ret);
-
   } else Serial.println("publishStatusMQTT: MQTT not connected");
 
 }
 
+void mqtt_setup() {
+  mqttClient.setServer(mqttServer.c_str(), MQTT_PORT);
+  mqttClient.setCallback(mqttReceive);
+
+  mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
+  mqttPublish_status = mqttRoot + "/" + thingId + "/" + mqtt_status;
+
+  mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
+  mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
+
+  thingId = appId + "_" +  WiFi.macAddress().c_str();
+  T_upTime.attach(60, upTimeInc); //fires every minute
+
+}
 
 void mqtt_loop() {
   mqttClient.loop();
@@ -304,5 +308,4 @@ void mqtt_loop() {
     connectMQTT() ;
     T_connectMQTT.attach(5, F_connectMQTT);
   }
-
 }

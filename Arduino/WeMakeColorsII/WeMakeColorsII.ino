@@ -1,10 +1,6 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.4";
+String softwareVersion = "1.9.5";
 String softwareInfo = "";
-
-String mqttServer = "wmc.marcobrianza.it";
-String mqttUsername = "";
-String mqttPassword = "";
 
 bool echoMode = true; //legacy =flase
 
@@ -14,6 +10,7 @@ bool echoMode = true; //legacy =flase
 #include "_light.h"
 #include "_WiFi.h"
 #include "_MQTT.h"
+#include "_WiFiManager.h"
 
 // test device
 #define BOOT_TEST_LIGHT 2
@@ -24,19 +21,19 @@ bool echoMode = true; //legacy =flase
 
 void setup() {
 
-  setupLight();
+  light_setup();
 
   Serial.begin(115200);  Serial.println();
   softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
-  Serial.println(softwareInfo);
+  Serial.println(softwareInfo + +" @" + String (ESP.getCpuFreqMHz()) + "MHz" );
 
-  setup_IoT();
+  IoT_setup();
   Serial.println("thingId: " + thingId);
   friendlyName = thingId;
 
 
   loadParametersFromFile();
-  mqttServer = "192.168.1.138";
+  //mqttServer = "192.168.1.138";
 
   WiFi.hostname(friendlyName);
 
@@ -50,7 +47,7 @@ void setup() {
   }
 
   ledON();
-  
+
   setWiFi() ;
 
   //connectWiFi("PucciThings", "Grandebellezza3");
@@ -81,15 +78,14 @@ void setup() {
 
   ledOFF();
 
-
   autoUpdate();
 
 #if  (LAN_OTA)
-  setupOTA();
+  OTA_setup();
 #endif
 
-  setupMqtt();
-  startLight();
+  mqtt_setup();
+  light_start();
 
 }
 
