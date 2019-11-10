@@ -171,12 +171,16 @@ void setRemoteLED(CHSV newC) {
 }
 
 void testDevice() {
+
+  Serial.println("Testing  device for 30s");
   int TEST_TIME = 30000; // 30 seconds
 
   while (millis() < TEST_TIME) {
     int a = analogRead(inputPin);
     int v = a / 4;
     if (v > 255) v = 255;
+    Serial.print(millis());
+    Serial.print(" ");
     Serial.println(v);
     showAllLeds(v, v, v);
     delay(40);

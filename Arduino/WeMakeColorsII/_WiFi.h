@@ -18,7 +18,7 @@ String friendlyName = "";
 #define BLINK_DISCONNECTED 1
 #define BLINK_CONNECTION_ERROR 2
 
-int netStatus = 0; //0=undefined 1=WiFi connected 2=MQTT connected -1 WiFi not Connected
+//int netStatus = 0; //0=undefined 1=WiFi connected 2=MQTT connected -1 WiFi not Connected
 
 
 #if  (LAN_OTA)
@@ -56,9 +56,19 @@ void IoT_setup() {
 }
 
 
-
+void connectWiFi_Smart() {
+  Serial.println("Starting ESPTouch SmartConfig");
+  WiFi.beginSmartConfig();
+}
 
 void connectWiFi(String ssid, String password) {
+
+  if (ssid == "") {
+    Serial.println("Connecting to default AP");
+    ssid = defaultSSID;
+    password = defaultPassword;
+  }
+
   WiFi.disconnect();
   delay(100);
   // We start by connecting to a WiFi network

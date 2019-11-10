@@ -17,7 +17,6 @@ WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", mqttUsern
 WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassword.c_str(), MAX_PARAM);
 
 
-
 //---- file attribute functions----
 
 String readAttribute(String attributeName) {
@@ -124,7 +123,7 @@ void saveConfigCallback () {
 }
 
 
-void connectWiFi_or_AP(bool force_config) {
+void connectWiFi_Manager(bool force_config) {
 
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);

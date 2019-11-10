@@ -232,7 +232,7 @@ void connectMQTT() {
 
         subscribeMQTT();
         publishStatus = true;
-        netStatus = 2;
+       // netStatus = 2;
 
       } else {
          blink(BLINK_NO_MQTT);
@@ -240,11 +240,11 @@ void connectMQTT() {
         Serial.println(" will try again..." + String (millis()));
       }
     }
-    netStatus = 1;
+    //netStatus = 1;
   }
-  else {
-    netStatus = -1;
-  }
+  //else {
+   // netStatus = -1;
+  //}
 
 }
 

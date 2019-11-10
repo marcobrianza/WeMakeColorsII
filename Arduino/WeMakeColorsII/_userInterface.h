@@ -9,18 +9,18 @@
 #include <Ticker.h>
 Ticker T_UI;
 
-int c = 0;
+int blinkC = 0;
 bool LED_STATE = false;
 
 
-#define BOOT_TEST_LIGHT 2
+#define BOOT_TEST_DEVICE 2
 #define BOOT_RESET 3
 #define BOOT_DEFAULT_AP 4
 #define BOOT_ESPTOUCH 5
 
 void F_UI() {
-  c--;
-  if (c == 0) {
+  blinkC--;
+  if (blinkC == 0) {
     T_UI.detach();
   } else {
     LED_STATE = !LED_STATE;
@@ -29,7 +29,7 @@ void F_UI() {
 }
 void blink(int b) {
 
-  c = b * 2;
+  blinkC = b * 2;
   LED_STATE = LED_ON;
   digitalWrite(LED_BUILTIN, LED_STATE);
 
@@ -72,7 +72,9 @@ byte bootCount() {
 }
 
 
-//void setup_UI() {
-//
-//
-//}
+byte UI_setup() {
+  byte c = bootCount();
+  Serial.print("\nboot count=");
+  Serial.println(c);
+  return c;
+}

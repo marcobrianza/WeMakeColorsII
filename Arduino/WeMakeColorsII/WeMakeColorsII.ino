@@ -1,5 +1,5 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.6";
+String softwareVersion = "1.9.7";
 String softwareInfo = "";
 
 bool echoMode = true; //legacy =flase
@@ -16,8 +16,8 @@ void setup() {
   light_setup();
 
   Serial.begin(115200);  Serial.println();
-  softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5();// + " - " + String (__DATE__) + " - " + String(__TIME__);;
-  Serial.println(softwareInfo + +" @" + String (ESP.getCpuFreqMHz()) + "MHz" );
+  softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
+  Serial.println(softwareInfo);
 
   IoT_setup();
   Serial.println("thingId: " + thingId);
@@ -28,38 +28,33 @@ void setup() {
 
   WiFi.hostname(friendlyName);
 
-  byte c = bootCount();
-  Serial.print("\nboot count=");
-  Serial.println(c);
-
-  if (c == BOOT_TEST_LIGHT) {
-    Serial.println("Test mode");
-    testDevice();
-  }
-
+  byte bc = UI_setup();
+  if (bc == BOOT_TEST_DEVICE)  testDevice();
+  
   ledON();
 
   setWiFi() ;
 
   //connectWiFi("PucciThings", "Grandebellezza3");
 
-  switch  (c) {
-    case BOOT_DEFAULT_AP:
-      Serial.println("Reset parameters and connect to default AP");
-      saveParametersToFile();
-      connectWiFi(defaultSSID, defaultPassword);
-      break;
+  switch  (bc) {
     case BOOT_RESET:
       Serial.println("Reset parameters");
       saveParametersToFile();
-      connectWiFi_or_AP(true);
+      connectWiFi_Manager(true);
       break;
+
+    case BOOT_DEFAULT_AP:
+      Serial.println("Reset parameters and connecting to default AP");
+      saveParametersToFile();
+      connectWiFi("", "");
+      break;
+
     case BOOT_ESPTOUCH:
-      Serial.println("Starting ESPTouch SmartConfig");
-      WiFi.beginSmartConfig();
+      connectWiFi_Smart();
       break;
     default:
-      connectWiFi_or_AP(false);
+      connectWiFi_Manager(false);
   }
 
 
