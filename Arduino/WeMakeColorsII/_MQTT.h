@@ -13,6 +13,7 @@ PubSubClient mqttClient(wifiClient);
 int MQTT_PORT = 1883;
 
 #define QOS_AT_LEAST_1 1
+#define QOS_BEST_EFFORT 0
 
 #define BLINK_NO_MQTT 3
 
@@ -40,7 +41,7 @@ boolean publishStatus = false;
 Ticker T_connectMQTT;
 Ticker T_upTime;
 
-boolean B_connectMQTT=true;
+boolean B_connectMQTT = true;
 
 void F_connectMQTT() {
   T_connectMQTT.detach();
@@ -56,7 +57,7 @@ void upTimeInc() {
 
 void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
-  Serial.println("MQTT message arrived: " + String(length) + " " + Topic);
+  Serial.println("MQTT received: " + String(length) + " " + Topic);
 
   int p1 = mqttRoot.length() + 1;
   int p2 = Topic.indexOf("/", p1);
@@ -198,6 +199,9 @@ void subscribeMQTT() {
   mqttClient.subscribe(mqttSubscribe_config.c_str(), QOS_AT_LEAST_1);
   Serial.print("Subscibed to: ");
   Serial.println(mqttSubscribe_config);
+
+  mqttClient.subscribe(mqttPublish_status.c_str(), QOS_AT_LEAST_1); //***
+  
 }
 
 void prepareStatusMessage(int ut) {
@@ -223,7 +227,7 @@ void connectMQTT() {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
       //netStatus = 10;
       prepareStatusMessage(-1);
-      Serial.print("\nAttempting MQTT connection..." + String(millis()));
+      Serial.print("\nAttempting MQTT connection..." + String(millis())+" ");
 
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttPublish_status.c_str(), QOS_AT_LEAST_1, true, mqttDataStatus)) {
@@ -232,10 +236,10 @@ void connectMQTT() {
 
         subscribeMQTT();
         publishStatus = true;
-       // netStatus = 2;
+        // netStatus = 2;
 
       } else {
-         blink(BLINK_NO_MQTT);
+        blink(BLINK_NO_MQTT);
         Serial.print("MQTT connect failed, rc=" + mqttClient.state());
         Serial.println(" will try again..." + String (millis()));
       }
@@ -243,7 +247,7 @@ void connectMQTT() {
     //netStatus = 1;
   }
   //else {
-   // netStatus = -1;
+  // netStatus = -1;
   //}
 
 }
@@ -264,18 +268,19 @@ void publishRandomColor(CHSV c) {
     serializeJson(doc, mqttData);
 
     int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
-    Serial.println("MQTT message sent: " + mqttPublish_randomColor + " " + mqttData + " result: " + ret);
+    Serial.println(String(ret) + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttPublish_randomColor + " " + mqttData );
 
   } else Serial.println("publishRandomColor: MQTT not connected");
 }
 
 
-void publishStatusMQTT() {
 
+
+void publishStatusMQTT() {
   if (mqttClient.connected()) {
     prepareStatusMessage(upTime);
     int ret = mqttClient.publish(mqttPublish_status.c_str(), mqttDataStatus, true);
-    Serial.println("MQTT message sent: " + mqttPublish_status + " " + mqttDataStatus + " result: " + ret);
+    Serial.println(String(ret) + + " " + String( String(mqttDataStatus).length() ) + " MQTT sent: " + mqttPublish_status + " " + mqttDataStatus );
   } else Serial.println("publishStatusMQTT: MQTT not connected");
 
 }
@@ -297,7 +302,7 @@ void mqtt_setup() {
 
 void mqtt_loop() {
   mqttClient.loop();
-  
+
   if (publishStatus) {
     publishStatus = false;
     publishStatusMQTT();

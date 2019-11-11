@@ -1,8 +1,8 @@
 
 //Wi-FiManager
 #include "FS.h"
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
+#include <DNSServer.h> // built in ESP8266 Core
+#include <ESP8266WebServer.h> // built in ESP8266 Core
 #include <WiFiManager.h> // 0.14 
 
 #define MAX_PARAM 40

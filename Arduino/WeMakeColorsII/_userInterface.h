@@ -1,5 +1,5 @@
 
-#include <EEPROM.h> //boot Count
+#include <EEPROM.h> // built in ESP8266 Core
 #define COUNT_ADDR 0
 
 //led builtin

@@ -2,7 +2,7 @@
 //LED
 #include <FastLED.h> // version  3.3.2
 
-const int numReadings = 25;
+const int numReadings = 10;
 int readings[numReadings];      // the readings from the analog input
 int readIndex = 0;              // the index of the current reading
 int total = 0;                  // the running total
@@ -126,7 +126,7 @@ void checkLight() {
 
 void light_start() {
   T_globalBrighness.attach(1, setGlobalBrightness);
-  T_light.attach_ms(40, checkLight);
+  T_light.attach_ms(100, checkLight);
 }
 
 

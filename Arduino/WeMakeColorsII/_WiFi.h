@@ -3,7 +3,7 @@
 #define LAN_OTA false
 
 //Wi-Fi
-#include <ESP8266WiFi.h>  // ESP8266 core 2.5.2
+#include <ESP8266WiFi.h>  // built in ESP8266 Core
 WiFiClient wifiClient;
 
 //default ssid password
@@ -23,14 +23,14 @@ String friendlyName = "";
 
 #if  (LAN_OTA)
 //OTA
-#include <ESP8266mDNS.h>
-#include <ArduinoOTA.h>
+#include <ESP8266mDNS.h> // built in ESP8266 Core
+#include <ArduinoOTA.h> // built in ESP8266 Core
 String OTA_PASSWORD = "12345678";
 #endif
 
 //http update
-#include <ESP8266HTTPClient.h>
-#include <ESP8266httpUpdate.h>
+#include <ESP8266HTTPClient.h> // built in ESP8266 Core
+#include <ESP8266httpUpdate.h> // built in ESP8266 Core
 
 String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
