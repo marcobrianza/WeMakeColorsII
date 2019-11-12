@@ -1,6 +1,7 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.12";
+String softwareVersion = "1.9.13";
 String softwareInfo = "";
+String softwarePlatform = "";
 
 bool echoMode = true; //legacy =flase
 
@@ -15,9 +16,10 @@ void setup() {
   light_setup();
 
   Serial.begin(115200);  Serial.println();
-  softwareInfo = softwareName + " - " + softwareVersion + " - " + ESP.getCoreVersion() + " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
+  softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
+  softwarePlatform = ESP.getFullVersion();
   Serial.println(softwareInfo);
-  Serial.println(ESP.getFullVersion());
+  Serial.println(softwarePlatform);
 
   IoT_setup();
   Serial.println("thingId: " + thingId);

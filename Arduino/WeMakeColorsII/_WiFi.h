@@ -63,7 +63,7 @@ void connectWiFi_Smart() {
 
 void connectWiFi(String ssid, String password) {
 
-setWiFiRadio();
+  setWiFiRadio();
 
   if (ssid == "") {
     Serial.println("Connecting to default AP");
@@ -88,7 +88,7 @@ setWiFiRadio();
   Serial.print("IP address: ");
   Serial.println(ip);
 
-  
+
   Serial.println("-------WiFi connection status:-----");
   WiFi.printDiag(Serial);
   Serial.println("-----------------------------------");
@@ -172,6 +172,7 @@ void OTA_setup() {
   MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
   MDNS.addServiceTxt("arduino", "tcp", "friendlyName", friendlyName);
   MDNS.addServiceTxt("arduino", "tcp", "softwareInfo", softwareInfo);
+  MDNS.addServiceTxt("arduino", "tcp", "softwarePlatform", softwarePlatform);
   MDNS.update();
 
   Serial.println("OTA Ready");
