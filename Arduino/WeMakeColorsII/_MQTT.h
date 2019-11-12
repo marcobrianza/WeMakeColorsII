@@ -32,27 +32,17 @@ String mqttSubscribe_config = "";
 
 char mqttDataStatus[MQTT_MAX];
 
-unsigned int upTime = 0;
+unsigned long upTime = 0;
+unsigned long lastMinute = 0;
+
 //status
 #define STATUS_INTERVAL 5 //minutes
 boolean publishStatus = false;
 
-#include <Ticker.h>
-Ticker T_connectMQTT;
-Ticker T_upTime;
-
-boolean B_connectMQTT = true;
-
-void F_connectMQTT() {
-  T_connectMQTT.detach();
-  B_connectMQTT = true;
-}
-
-void upTimeInc() {
-  upTime++;
-  //publishStatus = true;
-  if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
-}
+int RECONNECT_INTERVAL = 5000;
+int CHECK_INTERVAL = 30000;
+int reconnectInterval = 0;
+unsigned long lastConnectTime = 0;
 
 
 void mqttReceive(char* topic, byte* payload, unsigned int length) {
@@ -200,8 +190,8 @@ void subscribeMQTT() {
   Serial.print("Subscibed to: ");
   Serial.println(mqttSubscribe_config);
 
-  mqttClient.subscribe(mqttPublish_status.c_str(), QOS_AT_LEAST_1); //***
-  
+  //mqttClient.subscribe(mqttPublish_status.c_str(), QOS_AT_LEAST_1); //***
+
 }
 
 void prepareStatusMessage(int ut) {
@@ -227,7 +217,7 @@ void connectMQTT() {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
       //netStatus = 10;
       prepareStatusMessage(-1);
-      Serial.print("\nAttempting MQTT connection..." + String(millis())+" ");
+      Serial.print("\nAttempting MQTT connection..." + String(millis()) + " ");
 
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttPublish_status.c_str(), QOS_AT_LEAST_1, true, mqttDataStatus)) {
@@ -237,9 +227,12 @@ void connectMQTT() {
         subscribeMQTT();
         publishStatus = true;
         // netStatus = 2;
+        reconnectInterval = CHECK_INTERVAL;
 
       } else {
         blink(BLINK_NO_MQTT);
+        reconnectInterval = RECONNECT_INTERVAL;
+
         Serial.print("MQTT connect failed, rc=" + mqttClient.state());
         Serial.println(" will try again..." + String (millis()));
       }
@@ -275,7 +268,6 @@ void publishRandomColor(CHSV c) {
 
 
 
-
 void publishStatusMQTT() {
   if (mqttClient.connected()) {
     prepareStatusMessage(upTime);
@@ -295,22 +287,32 @@ void mqtt_setup() {
   mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
   mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
 
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
-  T_upTime.attach(60, upTimeInc); //fires every minute
-
 }
+
 
 void mqtt_loop() {
   mqttClient.loop();
+
+  if ((millis() - lastConnectTime) > reconnectInterval ) {
+    lastConnectTime = millis();
+    connectMQTT() ;
+  }
+
+  unsigned long m = millis() / 60000;
+  if (m != lastMinute) {
+    lastMinute = m;
+    upTime++;
+
+    if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
+  }
+
 
   if (publishStatus) {
     publishStatus = false;
     publishStatusMQTT();
   }
 
-  if (B_connectMQTT) {
-    B_connectMQTT = false;
-    connectMQTT() ;
-    T_connectMQTT.attach(5, F_connectMQTT);
-  }
+
+
+
 }

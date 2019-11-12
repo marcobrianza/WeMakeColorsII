@@ -30,9 +30,12 @@ int inputPin = A0;
 
 boolean newColor = false;
 
-#include <Ticker.h>
-Ticker T_globalBrighness;
-Ticker T_light;
+
+int CHECK_LIGHT_TIME = 100;
+int GLOBAL_BRIGHTNESS_TIME = 1000;
+
+unsigned long lastLightTime = 0;
+unsigned long lastBrightnessTime = 0;
 
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
@@ -123,10 +126,22 @@ void checkLight() {
   // return change;
 }
 
+void light_loop() {
 
-void light_start() {
-  T_globalBrighness.attach(1, setGlobalBrightness);
-  T_light.attach_ms(100, checkLight);
+  unsigned long m = millis();
+
+  if ((m - lastLightTime) > CHECK_LIGHT_TIME)  {
+    lastLightTime = m;
+    checkLight();
+  }
+
+  if ((m - lastBrightnessTime) > GLOBAL_BRIGHTNESS_TIME) {
+    lastBrightnessTime = m;
+    setGlobalBrightness();
+  }
+
+
+
 }
 
 

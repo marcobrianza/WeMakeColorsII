@@ -6,34 +6,28 @@
 #define LED_ON LOW
 #define LED_OFF HIGH
 
-#include <Ticker.h>
-Ticker T_UI;
-
 int blinkC = 0;
 bool LED_STATE = false;
 
+bool blinkActive = false;
+int blinkTime = 200;
+int lastBlinkTime = 0;
 
 #define BOOT_TEST_DEVICE 2
 #define BOOT_RESET 3
 #define BOOT_DEFAULT_AP 4
 #define BOOT_ESPTOUCH 5
 
-void F_UI() {
-  blinkC--;
-  if (blinkC == 0) {
-    T_UI.detach();
-  } else {
-    LED_STATE = !LED_STATE;
-    digitalWrite(LED_BUILTIN, LED_STATE);
-  }
-}
+
+
 void blink(int b) {
 
   blinkC = b * 2;
   LED_STATE = LED_ON;
-  digitalWrite(LED_BUILTIN, LED_STATE);
+ // digitalWrite(LED_BUILTIN, LED_STATE);
 
-  T_UI.attach_ms(200, F_UI);
+  blinkActive = true;
+
 }
 
 void ledON() {
@@ -71,6 +65,21 @@ byte bootCount() {
   return boot_count;
 }
 
+
+void UI_loop() {
+
+  if ((blinkActive) && ((millis() - lastBlinkTime) > blinkTime)) {
+    lastBlinkTime=millis();
+    blinkC--;
+    if (blinkC == 0) {
+      blinkActive = false;
+    } else {
+      LED_STATE = !LED_STATE;
+      digitalWrite(LED_BUILTIN, LED_STATE);
+    }
+  }
+
+}
 
 byte UI_setup() {
   byte c = bootCount();

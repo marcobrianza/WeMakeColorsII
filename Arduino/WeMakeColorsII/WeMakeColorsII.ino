@@ -1,21 +1,14 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.10";
+String softwareVersion = "1.9.11";
 String softwareInfo = "";
 
 bool echoMode = true; //legacy =flase
-
-#define TEST false
 
 #include "_userInterface.h"
 #include "_light.h"
 #include "_WiFi.h"
 #include "_MQTT.h"
 #include "_WiFiManager.h"
-
-#if  (TEST)
-bool test = false;
-#include "_test.h"
-#endif
 
 void setup() {
 
@@ -32,7 +25,7 @@ void setup() {
 
   loadParametersFromFile();
   //mqttServer = "192.168.1.137";
-  //mqttServer = "192.168.1.4";
+ // mqttServer = "192.168.1.1";
 
   WiFi.hostname(friendlyName);
 
@@ -43,7 +36,7 @@ void setup() {
 
   setWiFi() ;
 
-  connectWiFi("PucciOffice", "Grandebellezza3");
+  // connectWiFi("PucciOffice", "Grandebellezza3");
   //connectWiFi("PucciThings", "Grandebellezza3");
 
   switch  (bc) {
@@ -80,16 +73,17 @@ void setup() {
 #endif
 
   mqtt_setup();
-  light_start();
-  
-#if  (TEST)
-  //test_setup();
-#endif
+
+
 }
 
 void loop() {
 
   mqtt_loop() ;
+
+  light_loop() ;
+
+  UI_loop();
 
   if (newColor) {
     newColor = false;
@@ -98,12 +92,6 @@ void loop() {
     publishRandomColor(c);
   }
 
-#if  (TEST)
-  if (test) {
-    test = false;
-    publishStatusMQTT() ;
-  }
-#endif
 
 #if  (LAN_OTA)
   ArduinoOTA.handle();
