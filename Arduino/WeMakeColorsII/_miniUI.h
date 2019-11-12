@@ -66,7 +66,7 @@ byte bootCount() {
 }
 
 
-void UI_loop() {
+void miniUI_loop() {
 
   if ((blinkActive) && ((millis() - lastBlinkTime) > blinkTime)) {
     lastBlinkTime=millis();
@@ -81,7 +81,7 @@ void UI_loop() {
 
 }
 
-byte UI_setup() {
+byte miniUI_setup() {
   byte c = bootCount();
   Serial.print("\nboot count=");
   Serial.println(c);

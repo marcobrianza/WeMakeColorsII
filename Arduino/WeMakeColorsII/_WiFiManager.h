@@ -125,6 +125,8 @@ void saveConfigCallback () {
 
 void connectWiFi_Manager(bool force_config) {
 
+  setWiFiRadio() ;
+
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);
   wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
@@ -149,4 +151,9 @@ void connectWiFi_Manager(bool force_config) {
     wifiManager.autoConnect(thingId.c_str());
     Serial.println("Captive portal timeout");
   }
+
+
+  Serial.println("-------WiFi connection status:-----");
+  WiFi.printDiag(Serial);
+  Serial.println("-----------------------------------");
 }

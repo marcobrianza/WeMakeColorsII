@@ -1,10 +1,10 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.11";
+String softwareVersion = "1.9.12";
 String softwareInfo = "";
 
 bool echoMode = true; //legacy =flase
 
-#include "_userInterface.h"
+#include "_miniUI.h"
 #include "_light.h"
 #include "_WiFi.h"
 #include "_MQTT.h"
@@ -25,16 +25,14 @@ void setup() {
 
   loadParametersFromFile();
   //mqttServer = "192.168.1.137";
- // mqttServer = "192.168.1.1";
+  // mqttServer = "192.168.1.1";
 
   WiFi.hostname(friendlyName);
 
-  byte bc = UI_setup();
+  byte bc = miniUI_setup();
   if (bc == BOOT_TEST_DEVICE)  testDevice();
 
   ledON();
-
-  setWiFi() ;
 
   // connectWiFi("PucciOffice", "Grandebellezza3");
   //connectWiFi("PucciThings", "Grandebellezza3");
@@ -59,31 +57,23 @@ void setup() {
       connectWiFi_Manager(false);
   }
 
-
-  Serial.println("-------WiFi connection status:-----");
-  WiFi.printDiag(Serial);
-  Serial.println("-----------------------------------");
-
   ledOFF();
 
   autoUpdate();
 
+  mqtt_setup();
+
 #if  (LAN_OTA)
   OTA_setup();
 #endif
-
-  mqtt_setup();
-
 
 }
 
 void loop() {
 
   mqtt_loop() ;
-
   light_loop() ;
-
-  UI_loop();
+  miniUI_loop();
 
   if (newColor) {
     newColor = false;

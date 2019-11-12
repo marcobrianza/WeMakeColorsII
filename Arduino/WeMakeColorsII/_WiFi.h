@@ -1,6 +1,6 @@
 
 
-#define LAN_OTA false
+#define LAN_OTA true
 
 //Wi-Fi
 #include <ESP8266WiFi.h>  // built in ESP8266 Core
@@ -36,7 +36,7 @@ String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 
-void setWiFi() {
+void setWiFiRadio() {
   WiFi.setOutputPower(20.5); // 20.5 is maximum power
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
@@ -63,6 +63,8 @@ void connectWiFi_Smart() {
 
 void connectWiFi(String ssid, String password) {
 
+setWiFiRadio();
+
   if (ssid == "") {
     Serial.println("Connecting to default AP");
     ssid = defaultSSID;
@@ -85,7 +87,11 @@ void connectWiFi(String ssid, String password) {
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
   Serial.println(ip);
-  WiFi.setAutoReconnect(true);
+
+  
+  Serial.println("-------WiFi connection status:-----");
+  WiFi.printDiag(Serial);
+  Serial.println("-----------------------------------");
 }
 
 
