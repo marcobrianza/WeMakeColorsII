@@ -199,11 +199,8 @@ void prepareStatusMessage(int ut) {
   StaticJsonDocument<MQTT_MAX> doc;
 
   doc["friendlyName"] = friendlyName;
-  doc["softwareName"] = softwareName;
   doc["softwareInfo"] = softwareInfo;
   doc["softwarePlatform"] = softwarePlatform;
-
-
 
   doc["upTime"] = ut;
   doc["lightLevel"] = average;
