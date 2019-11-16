@@ -200,7 +200,7 @@ void prepareStatusMessage(int ut) {
 
   doc["friendlyName"] = friendlyName;
   doc["softwareName"] = softwareName;
-  doc["softwareVersion"] = softwareVersion;
+  doc["softwareInfo"] = softwareInfo;
   doc["softwarePlatform"] = softwarePlatform;
 
 

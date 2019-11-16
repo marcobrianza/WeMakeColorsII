@@ -1,11 +1,11 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.13";
+String softwareVersion = "1.9.14";
 String softwareInfo = "";
 String softwarePlatform = "";
 
 bool echoMode = true; //legacy =flase
 
-#include "_miniUI.h"
+#include "_miniUI.h" 
 #include "_light.h"
 #include "_WiFi.h"
 #include "_MQTT.h"

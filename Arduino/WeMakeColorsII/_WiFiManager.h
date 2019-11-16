@@ -3,7 +3,7 @@
 #include "FS.h"
 #include <DNSServer.h> // built in ESP8266 Core
 #include <ESP8266WebServer.h> // built in ESP8266 Core
-#include <WiFiManager.h> // 0.14 
+#include <WiFiManager.h> // 0.15.0-beta 
 
 #define MAX_PARAM 40
 
