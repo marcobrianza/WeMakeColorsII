@@ -4,7 +4,7 @@ String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
 
-#include <PubSubClient.h> // version 2.7.0 in PubSubClient.h change #define MQTT_MAX_PACKET_SIZE 512 
+#include <PubSubClient.h> // version 2.7.0 in PubSubClient.h (line 26) change #define MQTT_MAX_PACKET_SIZE 512 (from 128)
 #include <ArduinoJson.h> // version 6.13.0
 PubSubClient mqttClient(wifiClient);
 
@@ -87,7 +87,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  if ((topic_id = thingId) && (topic_leaf == mqtt_config)) {
+  if ((topic_id == thingId) && (topic_leaf == mqtt_config)) {
     Serial.println("Config message:");
     DeserializationError error = deserializeJson(doc, payload);
     if (error)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
@@ -104,7 +104,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
          "option":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"
          }
     */
-    if (command = "update") {
+    if (command == "update") {
       showAllLeds(64, 0, 0);
       int u = httpUpdate(option);
       if (u != HTTP_UPDATE_OK) showAllLeds(64, 64, 0);
@@ -116,7 +116,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
          }
     */
 
-    if (command = "info") {
+    if (command == "info") {
       // send detailed information on the device
 
 
