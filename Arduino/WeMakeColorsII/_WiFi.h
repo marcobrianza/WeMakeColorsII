@@ -1,4 +1,4 @@
-
+//depends on _miniUI.h
 
 #define LAN_OTA true
 
@@ -9,10 +9,6 @@ WiFiClient wifiClient;
 //default ssid password
 String defaultSSID = "colors";
 String defaultPassword = "colors01";
-
-String thingId = "";
-String appId = "WMCII";
-String friendlyName = "";
 
 #define BLINK_NO_SSID 1
 #define BLINK_DISCONNECTED 1
@@ -36,6 +32,11 @@ String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 
+void disableWiFi() {
+  WiFi.mode(WIFI_OFF);
+}
+
+
 void setWiFiRadio() {
   WiFi.setOutputPower(20.5); // 20.5 is maximum power
   WiFi.mode(WIFI_STA);
@@ -50,10 +51,6 @@ void setWiFiRadio() {
 }
 
 
-void IoT_setup() {
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
-
-}
 
 
 void connectWiFi_Smart() {
@@ -217,11 +214,11 @@ void autoUpdate() {
       Serial.println(" Board md5: " + ESP.getSketchMD5());
       if ((ESP.getSketchMD5() != md5) && (md5.length() == 32) ) {
         Serial.println("Trying update...");
-        showAllLeds(64, 0, 0);
+        //showAllLeds(64, 0, 0);
         blink(10);
 
         int u = httpUpdate(FW_URL);
-        if (u != HTTP_UPDATE_OK) showAllLeds(64, 64, 0);
+        if (u != HTTP_UPDATE_OK)Serial.println("update error"); showAllLeds(64, 64, 0);
       }
       else {
         Serial.println("will not update");

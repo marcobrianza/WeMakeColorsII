@@ -30,7 +30,6 @@ int inputPin = A0;
 
 boolean newColor = false;
 
-
 int CHECK_LIGHT_TIME = 100;
 int GLOBAL_BRIGHTNESS_TIME = 1000;
 

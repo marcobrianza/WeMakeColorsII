@@ -1,3 +1,11 @@
+String softwareName = "WeMakeColorsII";
+String softwareVersion = "1.9.18";
+String softwareInfo = "";
+String softwarePlatform = "";
+
+String appId = "IPI";
+String thingId = "";
+String friendlyName = "";
 
 #include <EEPROM.h> // built in ESP8266 Core
 #define COUNT_ADDR 0
@@ -18,26 +26,51 @@ int lastBlinkTime = 0;
 #define BOOT_DEFAULT_AP 4
 #define BOOT_ESPTOUCH 5
 
+#include <ESP8266WiFi.h>  // built in ESP8266 Core
+
+void software_setup() {
+
+  Serial.begin(115200);  Serial.println();
+  softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
+  softwarePlatform = ESP.getFullVersion();
+  Serial.println(softwareInfo);
+  Serial.println(softwarePlatform);
+
+  Serial.println("ResetReason=" + ESP.getResetReason());
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  thingId = appId + "_" +  WiFi.macAddress().c_str();
+  Serial.println("thingId: " + thingId);
+  friendlyName = thingId;
+}
+
 
 
 void blink(int b) {
 
   blinkC = b * 2;
   LED_STATE = LED_ON;
- // digitalWrite(LED_BUILTIN, LED_STATE);
+  digitalWrite(LED_BUILTIN, LED_STATE);
 
   blinkActive = true;
-
+  lastBlinkTime = millis();
 }
 
 void ledON() {
   digitalWrite(LED_BUILTIN, LED_ON);
+  LED_STATE = LED_ON;
 }
 
 void ledOFF() {
   digitalWrite(LED_BUILTIN, LED_OFF);
+  LED_STATE = LED_OFF;
 }
 
+void ledInvert() {
+  LED_STATE = !LED_STATE;
+  digitalWrite(LED_BUILTIN, LED_STATE);
+}
 
 byte bootCount() {
 
@@ -69,7 +102,7 @@ byte bootCount() {
 void miniUI_loop() {
 
   if ((blinkActive) && ((millis() - lastBlinkTime) > blinkTime)) {
-    lastBlinkTime=millis();
+    lastBlinkTime = millis();
     blinkC--;
     if (blinkC == 0) {
       blinkActive = false;
@@ -81,7 +114,7 @@ void miniUI_loop() {
 
 }
 
-byte miniUI_setup() {
+byte miniUI_bootCount() {
   byte c = bootCount();
   Serial.print("\nboot count=");
   Serial.println(c);

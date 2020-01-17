@@ -1,11 +1,8 @@
-String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.16";
-String softwareInfo = "";
-String softwarePlatform = "";
+
 
 bool echoMode = true; //legacy =flase
 
-#include "_miniUI.h" 
+#include "_miniUI.h"
 #include "_light.h"
 #include "_WiFi.h"
 #include "_MQTT.h"
@@ -13,17 +10,9 @@ bool echoMode = true; //legacy =flase
 
 void setup() {
 
+  software_setup();
+
   light_setup();
-
-  Serial.begin(115200);  Serial.println();
-  softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
-  softwarePlatform = ESP.getFullVersion();
-  Serial.println(softwareInfo);
-  Serial.println(softwarePlatform);
-
-  IoT_setup();
-  Serial.println("thingId: " + thingId);
-  friendlyName = thingId;
 
   loadParametersFromFile();
   //mqttServer = "192.168.1.137";
@@ -31,12 +20,12 @@ void setup() {
 
   WiFi.hostname(friendlyName);
 
-  byte bc = miniUI_setup();
+  byte bc = miniUI_bootCount();
   if (bc == BOOT_TEST_DEVICE)  testDevice();
 
   ledON();
 
-  // connectWiFi("PucciOffice", "Grandebellezza3");
+  //connectWiFi("PucciOffice", "Grandebellezza3");
   //connectWiFi("PucciThings", "Grandebellezza3");
 
   switch  (bc) {
