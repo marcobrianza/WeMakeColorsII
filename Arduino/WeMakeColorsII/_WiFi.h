@@ -1,11 +1,12 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.19";
+String softwareVersion = "1.9.20";
 String softwareInfo = "";
 String softwarePlatform = "";
 
-String appId = "IPI";
+String appId = "WMC";
 String thingId = "";
 String friendlyName = "";
+
 
 #define LAN_OTA true
 

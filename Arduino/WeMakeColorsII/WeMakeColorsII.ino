@@ -11,7 +11,6 @@ bool echoMode = true; //legacy =flase
 void setup() {
 
   software_setup();
-
   light_setup();
 
   loadParametersFromFile();
@@ -25,8 +24,7 @@ void setup() {
 
   ledON();
 
-  //connectWiFi("PucciOffice", "Grandebellezza3");
-  //connectWiFi("PucciThings", "Grandebellezza3");
+  //connectWiFi("PucciThings2", "Grandebellezza3!");
 
   switch  (bc) {
     case BOOT_RESET:
@@ -48,11 +46,9 @@ void setup() {
       connectWiFi_Manager(false);
   }
 
+  autoUpdate();
   ledOFF();
 
-  autoUpdate();
-
-  mqtt_setup();
 
 #if  (LAN_OTA)
   OTA_setup();
