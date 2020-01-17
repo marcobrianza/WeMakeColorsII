@@ -1,11 +1,4 @@
-String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.18";
-String softwareInfo = "";
-String softwarePlatform = "";
 
-String appId = "IPI";
-String thingId = "";
-String friendlyName = "";
 
 #include <EEPROM.h> // built in ESP8266 Core
 #define COUNT_ADDR 0
@@ -25,26 +18,6 @@ int lastBlinkTime = 0;
 #define BOOT_RESET 3
 #define BOOT_DEFAULT_AP 4
 #define BOOT_ESPTOUCH 5
-
-#include <ESP8266WiFi.h>  // built in ESP8266 Core
-
-void software_setup() {
-
-  Serial.begin(115200);  Serial.println();
-  softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
-  softwarePlatform = ESP.getFullVersion();
-  Serial.println(softwareInfo);
-  Serial.println(softwarePlatform);
-
-  Serial.println("ResetReason=" + ESP.getResetReason());
-
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
-  Serial.println("thingId: " + thingId);
-  friendlyName = thingId;
-}
-
 
 
 void blink(int b) {

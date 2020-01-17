@@ -1,4 +1,11 @@
-//depends on _miniUI.h
+String softwareName = "WeMakeColorsII";
+String softwareVersion = "1.9.19";
+String softwareInfo = "";
+String softwarePlatform = "";
+
+String appId = "IPI";
+String thingId = "";
+String friendlyName = "";
 
 #define LAN_OTA true
 
@@ -30,6 +37,24 @@ String OTA_PASSWORD = "12345678";
 
 String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
+
+
+void software_setup() {
+
+  Serial.begin(115200);  Serial.println();
+  softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
+  softwarePlatform = ESP.getFullVersion();
+  Serial.println(softwareInfo);
+  Serial.println(softwarePlatform);
+
+  Serial.println("ResetReason=" + ESP.getResetReason());
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  thingId = appId + "_" +  WiFi.macAddress().c_str();
+  Serial.println("thingId: " + thingId);
+  friendlyName = thingId;
+}
 
 
 void disableWiFi() {
