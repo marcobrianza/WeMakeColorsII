@@ -1,5 +1,5 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.21";
+String softwareVersion = "1.10.1";
 String softwareInfo = "";
 String softwarePlatform = "";
 

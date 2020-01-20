@@ -48,10 +48,7 @@ void setup() {
       connectWiFi_Manager(false);
   }
 
-
   autoUpdate();
-
-
 
 #if  (LAN_OTA)
   OTA_setup();
