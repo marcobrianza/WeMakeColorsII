@@ -1,9 +1,9 @@
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.9.20";
+String softwareVersion = "1.9.21";
 String softwareInfo = "";
 String softwarePlatform = "";
 
-String appId = "WMC";
+String appId = "WMCII";
 String thingId = "";
 String friendlyName = "";
 
@@ -48,7 +48,7 @@ void software_setup() {
   Serial.println(softwareInfo);
   Serial.println(softwarePlatform);
 
-  Serial.println("ResetReason=" + ESP.getResetReason());
+  Serial.println("resetReason=" + ESP.getResetReason());
 
   pinMode(LED_BUILTIN, OUTPUT);
 

@@ -294,7 +294,6 @@ void publishStatusMQTT() {
 
 
 
-
 void mqtt_loop() {
   mqttClient.loop();
 
@@ -311,11 +310,9 @@ void mqtt_loop() {
     if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
   }
 
-
   if (publishStatus) {
     publishStatus = false;
     publishStatusMQTT();
   }
-
 
 }

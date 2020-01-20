@@ -11,21 +11,23 @@ bool echoMode = true; //legacy =flase
 void setup() {
 
   software_setup();
+  ledOFF();
   light_setup();
 
   loadParametersFromFile();
-  //mqttServer = "192.168.1.137";
-  // mqttServer = "192.168.1.1";
 
   WiFi.hostname(friendlyName);
 
   byte bc = miniUI_bootCount();
+  //byte bc = 0;
   if (bc == BOOT_TEST_DEVICE)  testDevice();
 
+
+  // test
+  //connectWiFi("PucciCube24", "Grandebellezza3!");
+  //mqttServer = "192.168.1.5";
+
   ledON();
-
-  //connectWiFi("PucciThings2", "Grandebellezza3!");
-
   switch  (bc) {
     case BOOT_RESET:
       Serial.println("Reset parameters");
@@ -46,14 +48,16 @@ void setup() {
       connectWiFi_Manager(false);
   }
 
+
   autoUpdate();
-  ledOFF();
+
 
 
 #if  (LAN_OTA)
   OTA_setup();
 #endif
 
+  ledOFF();
 }
 
 void loop() {

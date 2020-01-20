@@ -8,7 +8,7 @@
 #define LED_OFF HIGH
 
 int blinkC = 0;
-bool LED_STATE = false;
+bool LED_STATE = LED_OFF;
 
 bool blinkActive = false;
 int blinkTime = 200;
@@ -20,44 +20,47 @@ int lastBlinkTime = 0;
 #define BOOT_ESPTOUCH 5
 
 
-void blink(int b) {
-
-  blinkC = b * 2;
-  LED_STATE = LED_ON;
-  digitalWrite(LED_BUILTIN, LED_STATE);
-
-  blinkActive = true;
-  lastBlinkTime = millis();
-}
 
 void ledON() {
-  digitalWrite(LED_BUILTIN, LED_ON);
   LED_STATE = LED_ON;
+  digitalWrite(LED_BUILTIN, LED_STATE);
+  //Serial.println("LED_STATE " + String(LED_STATE));
 }
 
 void ledOFF() {
-  digitalWrite(LED_BUILTIN, LED_OFF);
   LED_STATE = LED_OFF;
+  digitalWrite(LED_BUILTIN, LED_STATE);
+  //Serial.println("LED_STATE " + String(LED_STATE));
 }
 
 void ledInvert() {
   LED_STATE = !LED_STATE;
   digitalWrite(LED_BUILTIN, LED_STATE);
+  //Serial.println("LED_STATE " + String(LED_STATE));
 }
+
+void blink(int b) {
+
+  blinkC = b * 2;
+  ledON();
+
+  blinkActive = true;
+  lastBlinkTime = millis();
+}
+
 
 byte bootCount() {
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LED_OFF);
+  void ledOFF() ;
   delay(500);
 
   EEPROM.begin(512);
   byte boot_count = EEPROM.read(COUNT_ADDR);
   boot_count++;
   for (int i = 0;  i  < boot_count; i++) {
-    digitalWrite(LED_BUILTIN, LED_ON);
+    ledON();
     delay(300);
-    digitalWrite(LED_BUILTIN, LED_OFF);
+    ledOFF();
     delay(300);
   }
 
@@ -80,8 +83,7 @@ void miniUI_loop() {
     if (blinkC == 0) {
       blinkActive = false;
     } else {
-      LED_STATE = !LED_STATE;
-      digitalWrite(LED_BUILTIN, LED_STATE);
+      ledInvert();
     }
   }
 
