@@ -32,7 +32,7 @@ boolean publishStatus = false;
 
 int RECONNECT_INTERVAL = 5000;
 int CHECK_INTERVAL = 20000;
-int reconnectInterval = 0;
+int reconnectInterval = RECONNECT_INTERVAL;
 unsigned long lastConnectTime = 0;
 
 
@@ -245,55 +245,50 @@ void connectMQTT() {
 
 }
 
-
-
-void publishRandomColor(CHSV c) {
+void publishJSON(String topicLeaf, StaticJsonDocument<MQTT_MAX> jdoc) {
   if (mqttClient.connected()) {
-    StaticJsonDocument<MQTT_MAX> doc;
-    doc["h"] = c.h;
-    doc["s"] = c.s;
-    doc["v"] = c.v;
-
-    doc["friendlyName"] = friendlyName;
-    doc["lightLevel"] = average;
 
     char mqttData[MQTT_MAX];
-    serializeJson(doc, mqttData);
+    serializeJson(jdoc, mqttData);
 
-    String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
+    String   mqttTopic = mqttRoot + "/" + thingId + "/" + topicLeaf;
     int ret = mqttClient.publish(mqttTopic.c_str(), mqttData);
     Serial.println(String(ret) + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttTopic + " " + mqttData );
 
-  } else Serial.println("publishRandomColor: MQTT not connected");
+  } else Serial.println("publish " + topicLeaf + ": MQTT not connected");
+}
+
+
+void publishRandomColor(CHSV c) {
+  StaticJsonDocument<MQTT_MAX> doc;
+  doc["h"] = c.h;
+  doc["s"] = c.s;
+  doc["v"] = c.v;
+
+  doc["friendlyName"] = friendlyName;
+  doc["lightLevel"] = average;
+
+  publishJSON(mqtt_randomColor, doc);
+
 }
 
 
 
 void publishStatusMQTT() {
-  if (mqttClient.connected()) {
+  StaticJsonDocument<MQTT_MAX> doc;
 
-    StaticJsonDocument<MQTT_MAX> doc;
+  doc["friendlyName"] = friendlyName;
+  doc["softwareInfo"] = softwareInfo;
+  doc["softwarePlatform"] = softwarePlatform;
+  doc["upTime"] = upTime;
 
-    doc["friendlyName"] = friendlyName;
-    doc["softwareInfo"] = softwareInfo;
-    doc["softwarePlatform"] = softwarePlatform;
-    doc["upTime"] = upTime;
+  doc["lightLevel"] = average;
 
-    doc["lightLevel"] = average;
+  if (upTime == 0) {
+    doc["resetReason"] = ESP.getResetReason();
+  }
 
-    if (upTime == 0) {
-      doc["resetReason"] = ESP.getResetReason();
-    }
-
-    //doc["freeHeap"] = ESP.getFreeHeap();
-    char mqttData[MQTT_MAX];
-    serializeJson(doc, mqttData);
-
-    String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
-    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData, true);
-
-    Serial.println(String(ret) + + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttTopic + " " + mqttData );
-  } else Serial.println("publishStatusMQTT: MQTT not connected");
+  publishJSON(mqtt_status, doc);
 
 }
 
