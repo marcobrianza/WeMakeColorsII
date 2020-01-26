@@ -5,7 +5,7 @@ String mqttUsername = "";
 String mqttPassword = "";
 
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h (line 26) change #define MQTT_MAX_PACKET_SIZE 512 (from 128)
-#include <ArduinoJson.h> // version 6.13.0
+#include <ArduinoJson.h> // version 6.14.0
 PubSubClient mqttClient(wifiClient);
 
 #define MQTT_MAX MQTT_MAX_PACKET_SIZE

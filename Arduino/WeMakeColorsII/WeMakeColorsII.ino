@@ -2,6 +2,7 @@
 
 bool echoMode = true; //legacy =flase
 
+#include "_softwareInfo.h"
 #include "_miniUI.h"
 #include "_light.h"
 #include "_WiFi.h"
@@ -10,7 +11,7 @@ bool echoMode = true; //legacy =flase
 
 void setup() {
 
-  software_setup();
+  softwareInfo_setup();
   ledOFF();
   light_setup();
 
@@ -22,6 +23,7 @@ void setup() {
   //byte bc = 0;
   if (bc == BOOT_TEST_DEVICE)  testDevice();
 
+  setWiFiRadio() ;
 
   // test
   //connectWiFi("PucciCube24", "Grandebellezza3!");
@@ -53,8 +55,9 @@ void setup() {
 #if  (LAN_OTA)
   OTA_setup();
 #endif
-
+  //setWiFiRadio() ;
   ledOFF();
+  Serial.println("starting Application");
 }
 
 void loop() {

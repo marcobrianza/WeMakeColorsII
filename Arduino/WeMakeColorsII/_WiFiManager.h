@@ -2,12 +2,12 @@
 #include "FS.h"
 #include <DNSServer.h> // built in ESP8266 Core
 #include <ESP8266WebServer.h> // built in ESP8266 Core
-#include <WiFiManager.h> // 0.15.0-beta 
+#include <WiFiManager.h> // 0.15.0 
 
 #define MAX_PARAM 40
 
-#define CAPTIVE_TIMEOUT 300
-#define CAPTIVE_SIGNAL_QUALITY 10
+#define CAPTIVE_TIMEOUT 300  //300s is 5 minutes
+#define CAPTIVE_SIGNAL_QUALITY 10 //default is 8
 
 // name, prompt, default, length
 WiFiManagerParameter wfm_friendlyName("friendlyName", "Friendly Name", friendlyName.c_str(), MAX_PARAM);
@@ -124,12 +124,11 @@ void saveConfigCallback () {
 
 void connectWiFi_Manager(bool force_config) {
 
-  setWiFiRadio() ;
 
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);
   wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
-  wifiManager.setMinimumSignalQuality(CAPTIVE_SIGNAL_QUALITY); //default is 8
+  wifiManager.setMinimumSignalQuality(CAPTIVE_SIGNAL_QUALITY); 
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
@@ -146,9 +145,10 @@ void connectWiFi_Manager(bool force_config) {
     wifiManager.startConfigPortal(thingId.c_str());
   } else
   {
-    wifiManager.setConfigPortalTimeout(CAPTIVE_TIMEOUT); //300s is 5 minutes
+    wifiManager.setConfigPortalTimeout(CAPTIVE_TIMEOUT);
     wifiManager.autoConnect(thingId.c_str());
-    Serial.println("Captive portal timeout");
+    Serial.println("WiFiManager end");
+    WiFi.begin(); // we need this otherwise it will not do autoreconnect
   }
 
 

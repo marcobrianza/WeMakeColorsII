@@ -1,11 +1,4 @@
-String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.10.1";
-String softwareInfo = "";
-String softwarePlatform = "";
 
-String appId = "WMCII";
-String thingId = "";
-String friendlyName = "";
 
 
 #define LAN_OTA true
@@ -40,24 +33,6 @@ String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
 
-void software_setup() {
-
-  Serial.begin(115200);  Serial.println();
-  softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
-  softwarePlatform = ESP.getFullVersion();
-  Serial.println(softwareInfo);
-  Serial.println(softwarePlatform);
-
-  Serial.println("resetReason=" + ESP.getResetReason());
-
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
-  Serial.println("thingId: " + thingId);
-  friendlyName = thingId;
-}
-
-
 void disableWiFi() {
   WiFi.mode(WIFI_OFF);
 }
@@ -85,8 +60,6 @@ void connectWiFi_Smart() {
 }
 
 void connectWiFi(String ssid, String password) {
-
-  setWiFiRadio();
 
   if (ssid == "") {
     Serial.println("Connecting to default AP");
@@ -151,8 +124,13 @@ int checkWiFiStatus() {
       break;
   }
 
-  if (c != WL_CONNECTED) Serial.println( "WiFi Status=" + String(c) + " " + s);
-  if (b > 0) blink(b);
+  if (c != WL_CONNECTED) {
+    Serial.println( "WiFi Status=" + String(c) + " " + s);
+    //delay(50); //let it connect
+    //WiFi.begin();
+    if (b > 0) blink(b);
+  }
+
   return c;
 }
 
