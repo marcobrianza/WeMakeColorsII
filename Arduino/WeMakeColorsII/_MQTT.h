@@ -96,9 +96,11 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
          }
     */
     if (command == "update") {
-      showAllLeds(64, 0, 0);
+      //showAllLeds(64, 0, 0);
       int u = httpUpdate(option);
-      if (u != HTTP_UPDATE_OK) showAllLeds(64, 64, 0);
+      if (u != HTTP_UPDATE_OK) {
+        //showAllLeds(64, 64, 0);
+      }
     }
 
     /*
@@ -174,15 +176,17 @@ int checkMQTTStatus () {
 
 void subscribeMQTT() {
 
-  String mqttSubscribe_randomColor = mqttRoot + "/+/" + mqtt_randomColor;
-  mqttClient.subscribe(mqttSubscribe_randomColor.c_str(), QOS_AT_LEAST_1);
-  Serial.print("Subscibed to: ");
-  Serial.println(mqttSubscribe_randomColor);
+  String mqttTopic;
 
-  String mqttSubscribe_config = mqttRoot + "/" + thingId + "/" + mqtt_config;
-  mqttClient.subscribe(mqttSubscribe_config.c_str(), QOS_AT_LEAST_1);
-  Serial.print("Subscibed to: ");
-  Serial.println(mqttSubscribe_config);
+  mqttTopic = mqttRoot + "/+/" + mqtt_randomColor;
+  mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
+  Serial.println("Subscibed to: " + mqttTopic);
+
+
+  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_config;
+  mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
+  Serial.println("Subscibed to: " + mqttTopic);
+
 
   //mqttClient.subscribe(mqttPublish_status.c_str(), QOS_AT_LEAST_1); //***
 
@@ -215,8 +219,8 @@ void connectMQTT() {
       mqttClient.setCallback(mqttReceive);
 
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
-      String  mqttPublish_status = mqttRoot + "/" + thingId + "/" + mqtt_status;
-      if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttPublish_status.c_str(), QOS_AT_LEAST_1, true, prepareLastWillMessage().c_str())) {
+      String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
+      if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttTopic.c_str(), QOS_AT_LEAST_1, true, prepareLastWillMessage().c_str())) {
         Serial.println("connected\n");
         Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));
 
@@ -256,9 +260,9 @@ void publishRandomColor(CHSV c) {
     char mqttData[MQTT_MAX];
     serializeJson(doc, mqttData);
 
-    String   mqttPublish_randomColor = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
-    int ret = mqttClient.publish(mqttPublish_randomColor.c_str(), mqttData);
-    Serial.println(String(ret) + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttPublish_randomColor + " " + mqttData );
+    String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
+    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData);
+    Serial.println(String(ret) + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttTopic + " " + mqttData );
 
   } else Serial.println("publishRandomColor: MQTT not connected");
 }
@@ -274,6 +278,7 @@ void publishStatusMQTT() {
     doc["softwareInfo"] = softwareInfo;
     doc["softwarePlatform"] = softwarePlatform;
     doc["upTime"] = upTime;
+
     doc["lightLevel"] = average;
 
     if (upTime == 0) {
@@ -284,10 +289,10 @@ void publishStatusMQTT() {
     char mqttData[MQTT_MAX];
     serializeJson(doc, mqttData);
 
-    String  mqttPublish_status = mqttRoot + "/" + thingId + "/" + mqtt_status;
-    int ret = mqttClient.publish(mqttPublish_status.c_str(), mqttData, true);
+    String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
+    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData, true);
 
-    Serial.println(String(ret) + + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttPublish_status + " " + mqttData );
+    Serial.println(String(ret) + + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttTopic + " " + mqttData );
   } else Serial.println("publishStatusMQTT: MQTT not connected");
 
 }
