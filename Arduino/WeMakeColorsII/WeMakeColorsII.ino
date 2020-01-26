@@ -55,7 +55,7 @@ void setup() {
 #if  (LAN_OTA)
   OTA_setup();
 #endif
-  //setWiFiRadio() ;
+  setWiFiRadio() ;
   ledOFF();
   Serial.println("starting Application");
 }

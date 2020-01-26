@@ -1,6 +1,5 @@
 
 
-
 #define LAN_OTA true
 
 //Wi-Fi
@@ -126,7 +125,7 @@ int checkWiFiStatus() {
 
   if (c != WL_CONNECTED) {
     Serial.println( "WiFi Status=" + String(c) + " " + s);
-    //delay(50); //let it connect
+    delay(50); //let it connect
     //WiFi.begin();
     if (b > 0) blink(b);
   }
