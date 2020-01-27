@@ -23,7 +23,7 @@ void setup() {
   //byte bc = 0;
   if (bc == BOOT_TEST_DEVICE)  testDevice();
 
-  setWiFiRadio() ;
+  WiFi_setup() ;
 
   // test
   //connectWiFi("PucciCube24", "Grandebellezza3!");
@@ -55,7 +55,8 @@ void setup() {
 #if  (LAN_OTA)
   OTA_setup();
 #endif
-  setWiFiRadio() ;
+  
+  
   ledOFF();
   Serial.println("starting Application");
 }

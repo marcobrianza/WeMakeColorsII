@@ -128,7 +128,7 @@ void connectWiFi_Manager(bool force_config) {
   WiFiManager wifiManager;
   wifiManager.setDebugOutput(true);
   wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
-  wifiManager.setMinimumSignalQuality(CAPTIVE_SIGNAL_QUALITY); 
+  wifiManager.setMinimumSignalQuality(CAPTIVE_SIGNAL_QUALITY);
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
@@ -148,7 +148,12 @@ void connectWiFi_Manager(bool force_config) {
     wifiManager.setConfigPortalTimeout(CAPTIVE_TIMEOUT);
     wifiManager.autoConnect(thingId.c_str());
     Serial.println("WiFiManager end");
-    WiFi.begin(); // we need this otherwise it will not do autoreconnect
+
+    if (WiFi.SSID() = "") {
+      Serial.println("no SSID found, connecting with previously saved credentials");
+      WiFi.begin(savedSSID, savedPassword);
+    }
+
   }
 
 

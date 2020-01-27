@@ -239,9 +239,9 @@ void connectMQTT() {
     }
     //netStatus = 1;
   }
-  //else {
-  // netStatus = -1;
-  //}
+  else {
+    reconnectInterval = RECONNECT_INTERVAL;
+  }
 
 }
 
@@ -253,7 +253,7 @@ void publishJSON(String topicLeaf, StaticJsonDocument<MQTT_MAX> jdoc) {
 
     String   mqttTopic = mqttRoot + "/" + thingId + "/" + topicLeaf;
     int ret = mqttClient.publish(mqttTopic.c_str(), mqttData);
-    Serial.println(String(ret) + " " + String( String(mqttData).length() ) + " MQTT sent: " + mqttTopic + " " + mqttData );
+    Serial.println(String(ret) + " " +  String(String(mqttData).length()) + " MQTT sent: " + mqttTopic + " " + mqttData );
 
   } else Serial.println("publish " + topicLeaf + ": MQTT not connected");
 }

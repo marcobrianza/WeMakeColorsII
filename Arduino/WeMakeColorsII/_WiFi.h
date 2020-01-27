@@ -10,9 +10,14 @@ WiFiClient wifiClient;
 String defaultSSID = "colors";
 String defaultPassword = "colors01";
 
+//saved ssid password from previous connection
+String  savedSSID;
+String  savedPassword;
+
 #define BLINK_NO_SSID 1
 #define BLINK_DISCONNECTED 1
 #define BLINK_CONNECTION_ERROR 2
+#define BLINK_IDLE_STATUS 1
 
 //int netStatus = 0; //0=undefined 1=WiFi connected 2=MQTT connected -1 WiFi not Connected
 
@@ -37,7 +42,13 @@ void disableWiFi() {
 }
 
 
-void setWiFiRadio() {
+void WiFi_setup() {
+
+  savedSSID = WiFi.SSID();
+  savedPassword = WiFi.psk();
+
+  Serial.println("Saved credentials: " + savedSSID + " " + savedPassword);
+
   WiFi.setOutputPower(20.5); // 20.5 is maximum power
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
@@ -92,8 +103,8 @@ void connectWiFi(String ssid, String password) {
 
 int checkWiFiStatus() {
 
-  String s = "";
   int c = WiFi.status();
+  String s = "";
   int b = 0;
 
   switch (c) {
@@ -110,6 +121,7 @@ int checkWiFiStatus() {
       break;
     case WL_IDLE_STATUS:
       s = "WL_IDLE_STATUS";
+      b = BLINK_IDLE_STATUS;
       break;
     case WL_DISCONNECTED:
       s = "WL_DISCONNECTED";
@@ -125,8 +137,6 @@ int checkWiFiStatus() {
 
   if (c != WL_CONNECTED) {
     Serial.println( "WiFi Status=" + String(c) + " " + s);
-    delay(50); //let it connect
-    //WiFi.begin();
     if (b > 0) blink(b);
   }
 
