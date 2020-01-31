@@ -96,10 +96,10 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
          }
     */
     if (command == "update") {
-      //showAllLeds(64, 0, 0);
+      showAllLeds(64, 0, 0);
       int u = httpUpdate(option);
       if (u != HTTP_UPDATE_OK) {
-        //showAllLeds(64, 64, 0);
+        showAllLeds(64, 64, 0);
       }
     }
 

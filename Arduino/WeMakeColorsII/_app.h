@@ -1,6 +1,5 @@
 
-//LED
-#include <FastLED.h> // version  3.3.2
+
 
 const int numReadings = 10;
 int readings[numReadings];      // the readings from the analog input
@@ -19,10 +18,6 @@ int LIGHT_TRIGGER = 100;
 
 int NEW_COLOR_TIME = 1000;
 
-int GLOBAL_BRIGHTNESS = 255;
-
-const int NUM_LEDS = 2;
-CRGB leds[NUM_LEDS];
 
 //presence
 unsigned long last_color_t = 0;
@@ -36,18 +31,6 @@ int GLOBAL_BRIGHTNESS_TIME = 1000;
 unsigned long lastLightTime = 0;
 unsigned long lastBrightnessTime = 0;
 
-void setupLEDs() {
-  FastLED.setBrightness(GLOBAL_BRIGHTNESS);
-  FastLED.addLeds<WS2812B, D1, GRB>(leds, NUM_LEDS); //D1 is GPIO5
-}
-
-
-void showAllLeds(int r, int g, int b ) {
-  for ( int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB(r, g, b);
-  }
-  FastLED.show();
-}
 
 void setupLightLevel() {
   int a = analogRead(inputPin);
@@ -66,7 +49,7 @@ void setupLightLevel() {
 }
 
 
-void light_setup() {
+void app_setup() {
   setupLEDs();
   showAllLeds(64, 64, 64);
   setupLightLevel() ;
@@ -125,41 +108,6 @@ void checkLight() {
   // return change;
 }
 
-void light_loop() {
-
-  unsigned long m = millis();
-
-  if ((m - lastLightTime) > CHECK_LIGHT_TIME)  {
-    lastLightTime = m;
-    checkLight();
-  }
-
-  if ((m - lastBrightnessTime) > GLOBAL_BRIGHTNESS_TIME) {
-    lastBrightnessTime = m;
-    setGlobalBrightness();
-  }
-
-
-
-}
-
-
-
-void applyColor() {
-
-  int mb = map(averageGB, 0, 512, 64, 255);
-  if (mb > 255) mb = 255;
-
-  //  Serial.print(averageGB);
-  //  Serial.print(" ");
-  //  Serial.println(mb);
-
-  FastLED.setBrightness(mb);
-  FastLED.show();
-}
-
-
-
 
 
 CHSV newRndColor() {
@@ -173,15 +121,28 @@ CHSV newRndColor() {
 }
 
 
+void showLLEDs() {
+
+  int mb = map(averageGB, 0, 512, 64, 255);
+  if (mb > 255) mb = 255;
+
+  //  Serial.print(averageGB);
+  //  Serial.print(" ");
+  //  Serial.println(mb);
+
+  FastLED.setBrightness(mb);
+  FastLED.show();
+}
+
 
 void setMyLED(CHSV newC) {
   leds[0] = newC;
-  applyColor();
+  showLLEDs();
 }
 
 void setRemoteLED(CHSV newC) {
   leds[1] = newC;
-  applyColor();
+  showLLEDs();
 }
 
 void testDevice() {
@@ -199,4 +160,13 @@ void testDevice() {
     showAllLeds(v, v, v);
     delay(40);
   }
+}
+
+
+void app_loop() {
+
+
+
+
+
 }

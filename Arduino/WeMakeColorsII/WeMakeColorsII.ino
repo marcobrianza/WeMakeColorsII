@@ -2,18 +2,21 @@
 
 bool echoMode = true; //legacy =flase
 
+#include "_LED.h"
 #include "_softwareInfo.h"
 #include "_miniUI.h"
-#include "_light.h"
 #include "_WiFi.h"
+#include "_app.h"
 #include "_MQTT.h"
+
 #include "_WiFiManager.h"
+
 
 void setup() {
 
   softwareInfo_setup();
   ledOFF();
-  light_setup();
+  app_setup();
 
   loadParametersFromFile();
 
@@ -55,17 +58,29 @@ void setup() {
 #if  (LAN_OTA)
   OTA_setup();
 #endif
-  
-  
+
+
   ledOFF();
   Serial.println("starting Application");
 }
 
 void loop() {
 
-  mqtt_loop() ;
-  light_loop() ;
   miniUI_loop();
+  WiFi_loop();
+  mqtt_loop() ;
+
+// app loop----------------
+  unsigned long m = millis();
+  if ((m - lastLightTime) > CHECK_LIGHT_TIME)  {
+    lastLightTime = m;
+    checkLight();
+  }
+
+  if ((m - lastBrightnessTime) > GLOBAL_BRIGHTNESS_TIME) {
+    lastBrightnessTime = m;
+    setGlobalBrightness();
+  }
 
   if (newColor) {
     newColor = false;
@@ -73,10 +88,5 @@ void loop() {
     setMyLED(c);
     publishRandomColor(c);
   }
-
-
-#if  (LAN_OTA)
-  ArduinoOTA.handle();
-#endif
 
 }

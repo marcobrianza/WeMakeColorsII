@@ -144,6 +144,14 @@ int checkWiFiStatus() {
 }
 
 
+void WiFi_loop(){
+  
+#if  (LAN_OTA)
+  ArduinoOTA.handle();
+#endif
+}
+
+
 
 // --------------- OTA Lan ---------------
 #if  (LAN_OTA)
@@ -159,6 +167,7 @@ void OTA_setup() {
 
   ArduinoOTA.onStart([]() {
     Serial.println("\nStart OTA");
+    //send MQTT message or at least close connection
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\nEnd OTA");
@@ -227,7 +236,7 @@ void autoUpdate() {
       Serial.println(" Board md5: " + ESP.getSketchMD5());
       if ((ESP.getSketchMD5() != md5) && (md5.length() == 32) ) {
         Serial.println("Trying update...");
-        //showAllLeds(64, 0, 0);
+        showAllLeds(64, 0, 0);
         blink(10);
 
         int u = httpUpdate(FW_URL);
