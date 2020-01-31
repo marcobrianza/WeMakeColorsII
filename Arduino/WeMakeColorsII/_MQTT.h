@@ -268,7 +268,7 @@ void publishRandomColor(CHSV c) {
   doc["v"] = c.v;
 
   doc["friendlyName"] = friendlyName;
-  doc["lightLevel"] = averageLightLevel;
+  doc["lightLevel"] = int(averageLightLevel);
 
   publishJSON(mqtt_randomColor, doc);
 
@@ -284,7 +284,7 @@ void publishStatusMQTT() {
   doc["softwarePlatform"] = softwarePlatform;
   doc["upTime"] = upTime;
 
-  doc["lightLevel"] = averageLightLevel;
+  doc["lightLevel"] = int(averageLightLevel);
 
   if (upTime == 0) {
     doc["resetReason"] = ESP.getResetReason();

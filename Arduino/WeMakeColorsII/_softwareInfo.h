@@ -1,7 +1,7 @@
 boolean DEBUG_SOFTWAREINFO = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.13.0";
+String softwareVersion = "1.13.1";
 String softwareInfo = "";
 String softwarePlatform = "";
 
