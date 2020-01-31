@@ -1,4 +1,4 @@
-boolean DEBUG_SOFTWAREINFO=false;
+boolean DEBUG_SOFTWAREINFO = false;
 
 String softwareName = "WeMakeColorsII";
 String softwareVersion = "1.12.2";
@@ -13,17 +13,21 @@ String friendlyName = "";
 
 void softwareInfo_setup() {
 
-  Serial.begin(115200);  Serial.println();
   softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
   softwarePlatform = ESP.getFullVersion();
-  Serial.println(softwareInfo);
-  Serial.println(softwarePlatform);
-
-  Serial.println("resetReason=" + ESP.getResetReason());
+  thingId = appId + "_" +  WiFi.macAddress().c_str();
+  friendlyName = thingId;
 
   pinMode(LED_BUILTIN, OUTPUT);
 
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
-  Serial.println("thingId: " + thingId);
-  friendlyName = thingId;
+  Serial.begin(115200);
+
+  if (DEBUG_SOFTWAREINFO) {
+    Serial.println("");
+    Serial.println(softwareInfo);
+    Serial.println(softwarePlatform);
+    Serial.println("resetReason=" + ESP.getResetReason());
+    Serial.println("thingId: " + thingId);
+  }
+
 }

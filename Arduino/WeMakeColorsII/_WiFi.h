@@ -47,7 +47,7 @@ void WiFi_setup() {
   savedSSID = WiFi.SSID();
   savedPassword = WiFi.psk();
 
-  Serial.println("Saved credentials: " + savedSSID + " " + savedPassword);
+  if (DEBUG_WIFI) Serial.println("Saved credentials: " + savedSSID + " " + savedPassword);
 
   WiFi.setOutputPower(20.5); // 20.5 is maximum power
   WiFi.mode(WIFI_STA);
@@ -67,14 +67,14 @@ void WiFi_setup() {
 
 
 void connectWiFi_Smart() {
-  Serial.println("Starting ESPTouch SmartConfig");
+  if (DEBUG_WIFI) Serial.println("Starting ESPTouch SmartConfig");
   WiFi.beginSmartConfig();
 }
 
 void connectWiFi(String ssid, String password) {
 
   if (ssid == "") {
-    Serial.println("Connecting to default AP");
+    if (DEBUG_WIFI)Serial.println("Connecting to default AP");
     ssid = defaultSSID;
     password = defaultPassword;
   }
@@ -82,24 +82,26 @@ void connectWiFi(String ssid, String password) {
   WiFi.disconnect();
   delay(100);
   // We start by connecting to a WiFi network
-  Serial.print("Connecting to: "); Serial.println(ssid);
+  if (DEBUG_WIFI)Serial.print("Connecting to: "); Serial.println(ssid);
 
   WiFi.begin(ssid.c_str(), password.c_str());
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
-    Serial.print(".");
+    if (DEBUG_WIFI) Serial.print(".");
   }
 
   IPAddress ip = WiFi.localIP();
-  Serial.println("WiFi connected");
-  Serial.print("IP address: ");
-  Serial.println(ip);
+  if (DEBUG_WIFI) {
+    Serial.println("WiFi connected");
+    Serial.print("IP address: ");
+    Serial.println(ip);
 
 
-  Serial.println("-------WiFi connection status:-----");
-  WiFi.printDiag(Serial);
-  Serial.println("-----------------------------------");
+    Serial.println("-------WiFi connection status:-----");
+    WiFi.printDiag(Serial);
+    Serial.println("-----------------------------------");
+  }
 }
 
 
@@ -138,7 +140,7 @@ int checkWiFiStatus() {
   }
 
   if (c != WL_CONNECTED) {
-    Serial.println( "WiFi Status=" + String(c) + " " + s);
+    if (DEBUG_WIFI)Serial.println( "WiFi Status=" + String(c) + " " + s);
     if (b > 0) blink(b);
   }
 
@@ -206,39 +208,42 @@ void OTA_setup() {
 
 int httpUpdate(String url) {
   t_httpUpdate_return ret = ESPhttpUpdate.update(url);
+  String result;
 
   switch (ret) {
     case HTTP_UPDATE_FAILED:
-      Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+      result = "HTTP_UPDATE_FAILD Error " + String(ESPhttpUpdate.getLastError()) + " " + ESPhttpUpdate.getLastErrorString().c_str();
       break;
     case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("HTTP_UPDATE_NO_UPDATES");
+      result = "HTTP_UPDATE_NO_UPDATES";
       break;
     case HTTP_UPDATE_OK:
-      Serial.println("HTTP_UPDATE_OK");
+      result = "HTTP_UPDATE_OK";
       break;
   }
+
+  if (DEBUG_WIFI) Serial.print(result);
 }
 
 
 void autoUpdate() {
-  Serial.println("Autoupdate...");
+  if (DEBUG_WIFI) Serial.println("Autoupdate...");
   HTTPClient http;
   http.begin(MD5_URL);
   int httpCode = http.GET();
 
   if (httpCode > 0) {
     // HTTP header has been send and Server response header has been handled
-    Serial.print("[HTTP] GET " + MD5_URL);
-    Serial.println("... code:" + String(httpCode));
+    if (DEBUG_WIFI)Serial.print("[HTTP] GET " + MD5_URL);
+    if (DEBUG_WIFI)Serial.println("... code:" + String(httpCode));
 
     // file found at server
     if (httpCode == HTTP_CODE_OK) {
       String md5 = http.getString();
-      Serial.println("Server md5: " + md5);
-      Serial.println(" Board md5: " + ESP.getSketchMD5());
+      if (DEBUG_WIFI)Serial.println("Server md5: " + md5);
+      if (DEBUG_WIFI) Serial.println(" Board md5: " + ESP.getSketchMD5());
       if ((ESP.getSketchMD5() != md5) && (md5.length() == 32) ) {
-        Serial.println("Trying update...");
+        if (DEBUG_WIFI) Serial.println("Trying update...");
         showAllLeds(64, 0, 0);
         blink(10);
 
@@ -246,14 +251,14 @@ void autoUpdate() {
         if (u != HTTP_UPDATE_OK)Serial.println("update error"); showAllLeds(64, 64, 0);
       }
       else {
-        Serial.println("will not update");
+        if (DEBUG_WIFI) Serial.println("will not update");
       }
 
     }
     else {
-      Serial.println( "[HTTP] GET... failed, error:" + String(http.errorToString(httpCode).c_str()));
+      if ( DEBUG_WIFI) Serial.println( "[HTTP] GET... failed, error:" + String(http.errorToString(httpCode).c_str()));
     }
     http.end();
   }
-  Serial.println();
+  if (DEBUG_WIFI) Serial.println();
 }

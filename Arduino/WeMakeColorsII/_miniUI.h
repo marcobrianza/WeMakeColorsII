@@ -1,4 +1,4 @@
-boolean DEBUG_MINIUI=false;
+boolean DEBUG_MINIUI = false;
 
 #include <EEPROM.h> // built in ESP8266 Core
 #define COUNT_ADDR 0
@@ -91,7 +91,6 @@ void miniUI_loop() {
 
 byte miniUI_bootCount() {
   byte c = bootCount();
-  Serial.print("\nboot count=");
-  Serial.println(c);
+  if (DEBUG_MINIUI)Serial.print("\nboot count=" + String(c));
   return c;
 }

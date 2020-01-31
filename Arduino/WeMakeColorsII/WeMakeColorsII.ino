@@ -1,4 +1,4 @@
-boolean DEBUG_MAIN=false;
+boolean DEBUG_MAIN = false;
 
 #include "_LED.h"
 #include "_softwareInfo.h"
@@ -29,13 +29,13 @@ void setup() {
 
   switch  (bc) {
     case BOOT_RESET:
-      Serial.println("Reset parameters");
+      if (DEBUG_MAIN) Serial.println("Reset parameters");
       saveParametersToFile();
       connectWiFi_Manager(true);
       break;
 
     case BOOT_DEFAULT_AP:
-      Serial.println("Reset parameters and connecting to default AP");
+      if (DEBUG_MAIN) Serial.println("Reset parameters and connecting to default AP");
       saveParametersToFile();
       connectWiFi("", "");
       break;
@@ -51,7 +51,7 @@ void setup() {
   OTA_setup();
 
   ledOFF();
-  Serial.println("starting loop");
+  if (DEBUG_MAIN) Serial.println("starting loop");
 }
 
 void loop() {

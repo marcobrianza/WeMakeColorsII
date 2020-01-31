@@ -1,4 +1,4 @@
-boolean DEBUG_WIFIMANAGER=false;
+boolean DEBUG_WIFIMANAGER = false;
 
 //Wi-FiManager
 #include "FS.h"
@@ -26,13 +26,13 @@ String readAttribute(String attributeName) {
     File configFile = SPIFFS.open(attributeName + ".txt", "r");
     if (configFile) {
       value = configFile.readString();
-      Serial.println("readAttribute: " + attributeName + "=" + value);
+      if (DEBUG_WIFIMANAGER) Serial.println("readAttribute: " + attributeName + "=" + value);
     } else {
-      Serial.println("readAttribute: " + attributeName + "= null" );
+      if (DEBUG_WIFIMANAGER) Serial.println("readAttribute: " + attributeName + "= null" );
     }
     configFile.close();
     SPIFFS.end();
-  } else Serial.println("readAttribute ERROR: cannot open file system");
+  } else  if (DEBUG_WIFIMANAGER) Serial.println("readAttribute ERROR: cannot open file system");
   return value;
 }
 
@@ -40,7 +40,7 @@ String deleteAttribute(String attributeName) {
   if (SPIFFS.begin()) {
     String value = "";
     SPIFFS.remove(attributeName + ".txt");
-  } else Serial.println("deleteAttribute ERROR: cannot open file system");
+  } else if (DEBUG_WIFIMANAGER)  Serial.println("deleteAttribute ERROR: cannot open file system");
 }
 
 void writeAttribute(String attributeName, String value) {
@@ -48,11 +48,11 @@ void writeAttribute(String attributeName, String value) {
     File configFile = SPIFFS.open(attributeName + ".txt", "w");
     if (configFile) {
       configFile.print(value);
-      Serial.println("writeAttribute: " + attributeName + "=" + value);
-    } else  Serial.println("writeAttribute: ERROR cannot open file " + attributeName);
+      if (DEBUG_WIFIMANAGER) Serial.println("writeAttribute: " + attributeName + "=" + value);
+    } else if (DEBUG_WIFIMANAGER)   Serial.println("writeAttribute: ERROR cannot open file " + attributeName);
     configFile.close();
     SPIFFS.end();
-  } else Serial.println("writeAttribute ERROR: cannot open file system");
+  } else if (DEBUG_WIFIMANAGER) Serial.println("writeAttribute ERROR: cannot open file system");
 }
 
 
@@ -62,7 +62,7 @@ void loadParametersFromFile() {
   // convert the old attribute
   temp = readAttribute("thingName");
   if (temp != "") {
-    Serial.println ("thingName=" + friendlyName);
+    if (DEBUG_WIFIMANAGER) Serial.println ("thingName=" + friendlyName);
     writeAttribute("friendlyName", temp);
     deleteAttribute("thingName");
   }
@@ -70,11 +70,11 @@ void loadParametersFromFile() {
 
   temp = readAttribute("friendlyName");
   if (temp != "") friendlyName = temp;
-  Serial.println ("friendlyName=" + friendlyName);
+  if (DEBUG_WIFIMANAGER) Serial.println ("friendlyName=" + friendlyName);
 
   temp = readAttribute("mqttServer");
   if (temp != "")  mqttServer = temp;
-  Serial.println ("mqttServer=" + mqttServer);
+  if (DEBUG_WIFIMANAGER) Serial.println ("mqttServer=" + mqttServer);
 
   temp = readAttribute("mqttUsername");
   if (temp != "") {
@@ -82,11 +82,11 @@ void loadParametersFromFile() {
   } else {
     mqttUsername = thingId; // if username is null it defaults to thingId
   }
-  Serial.println ("mqttUsername=" + mqttUsername);
+  if (DEBUG_WIFIMANAGER) Serial.println ("mqttUsername=" + mqttUsername);
 
   temp = readAttribute("mqttPassword");
   if (temp != "")  mqttPassword = temp;
-  Serial.println ("mqttPassword=" + mqttPassword);
+  if (DEBUG_WIFIMANAGER) Serial.println ("mqttPassword=" + mqttPassword);
 
 }
 
@@ -105,15 +105,18 @@ void saveParametersToFile() {
 // ------ Wi-Fi Manager functions-------------------------------------
 
 void configModeCallback (WiFiManager *myWiFiManager) {
-  Serial.println("Entered config mode");
-  Serial.println(WiFi.softAPIP());
-  Serial.println(myWiFiManager->getConfigPortalSSID());
+  if (DEBUG_WIFIMANAGER) {
+    Serial.println("Entered config mode");
+    Serial.println(WiFi.softAPIP());
+    Serial.println(myWiFiManager->getConfigPortalSSID());
+  }
+
   showAllLeds(0, 0, 255);
 }
 
 
 void saveConfigCallback () {
-  Serial.println("Config callback");
+  if (DEBUG_WIFIMANAGER)  Serial.println("Config callback");
   if (String(wfm_friendlyName.getValue()) != "") friendlyName = wfm_friendlyName.getValue();
   if (String(wfm_mqttServer.getValue()) != "")  mqttServer = wfm_mqttServer.getValue();
   if (String(wfm_mqttUsername.getValue()) != "") mqttUsername = wfm_mqttUsername.getValue();
@@ -128,7 +131,10 @@ void connectWiFi_Manager(bool force_config) {
 
 
   WiFiManager wifiManager;
-  wifiManager.setDebugOutput(true);
+  
+  if (DEBUG_WIFIMANAGER)  wifiManager.setDebugOutput(true);
+  else wifiManager.setDebugOutput(false);
+  
   wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
   wifiManager.setMinimumSignalQuality(CAPTIVE_SIGNAL_QUALITY);
   wifiManager.setAPCallback(configModeCallback);
@@ -149,17 +155,18 @@ void connectWiFi_Manager(bool force_config) {
   {
     wifiManager.setConfigPortalTimeout(CAPTIVE_TIMEOUT);
     wifiManager.autoConnect(thingId.c_str());
-    Serial.println("WiFiManager end");
+    if (DEBUG_WIFIMANAGER)  Serial.println("WiFiManager end");
 
     if (WiFi.SSID() = "") {
-      Serial.println("no SSID found, connecting with previously saved credentials");
+      if (DEBUG_WIFIMANAGER)  Serial.println("no SSID found, connecting with previously saved credentials");
       WiFi.begin(savedSSID, savedPassword);
     }
 
   }
 
-
-  Serial.println("-------WiFi connection status:-----");
-  WiFi.printDiag(Serial);
-  Serial.println("-----------------------------------");
+  if (DEBUG_WIFIMANAGER) {
+    Serial.println("-------WiFi connection status:-----");
+    WiFi.printDiag(Serial);
+    Serial.println("-----------------------------------");
+  }
 }
