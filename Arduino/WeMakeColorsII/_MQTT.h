@@ -1,5 +1,7 @@
 //MQTT
 
+boolean DEBUG_MQTT false
+
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
@@ -38,7 +40,7 @@ unsigned long lastConnectTime = 0;
 
 void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
-  Serial.println("MQTT received: " + String(length) + " " + Topic);
+  if (DEBUG_MQTT)  Serial.println("MQTT received: " + String(length) + " " + Topic);
 
   int p1 = mqttRoot.length() + 1;
   int p2 = Topic.indexOf("/", p1);
@@ -65,29 +67,29 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
       */
 
       DeserializationError error = deserializeJson(doc, payload);
-      if (error)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
+      if (error) if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
 
       int h = doc["h"];
       int s = doc["s"];
       int v = doc["v"];
 
-      if (topic_id == thingId) Serial.print("my message ");
-      Serial.println("hsv: " + String(h) + " " + String(s) + " " + String(v) );
+      if (topic_id == thingId) if (DEBUG_MQTT)  Serial.print("my message ");
+      if (DEBUG_MQTT)  Serial.println("hsv: " + String(h) + " " + String(s) + " " + String(v) );
 
       setRemoteLED(CHSV(h, s, v));
     }
   }
 
   if ((topic_id == thingId) && (topic_leaf == mqtt_config)) {
-    Serial.println("Config message:");
+    if (DEBUG_MQTT) Serial.println("Config message:");
     DeserializationError error = deserializeJson(doc, payload);
-    if (error)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
+    if (error) if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
 
     String command = doc["command"];
     String option = doc["option"];
 
-    Serial.println(command);
-    Serial.println(option);
+    if (DEBUG_MQTT) Serial.println(command + " " + option);
+
 
     /*
          {
@@ -169,7 +171,7 @@ int checkMQTTStatus () {
       s = "UNKNOWN";
   }
 
-  if (c != MQTT_CONNECTED) Serial.println( "MQTT Status=" + String(c) + " " + s);
+  if (c != MQTT_CONNECTED) if (DEBUG_MQTT)  Serial.println( "MQTT Status=" + String(c) + " " + s);
   return c;
 
 }
@@ -180,12 +182,12 @@ void subscribeMQTT() {
 
   mqttTopic = mqttRoot + "/+/" + mqtt_randomColor;
   mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
-  Serial.println("Subscibed to: " + mqttTopic);
+  if (DEBUG_MQTT) Serial.println("Subscibed to: " + mqttTopic);
 
 
   mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_config;
   mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
-  Serial.println("Subscibed to: " + mqttTopic);
+  if (DEBUG_MQTT) Serial.println("Subscibed to: " + mqttTopic);
 
 
   //mqttClient.subscribe(mqttPublish_status.c_str(), QOS_AT_LEAST_1); //***
@@ -213,7 +215,7 @@ void connectMQTT() {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
       //netStatus = 10;
 
-      Serial.print("\nAttempting MQTT connection..." + String(millis()) + " ");
+      if (DEBUG_MQTT)  Serial.print("\nAttempting MQTT connection..." + String(millis()) + " ");
 
       mqttClient.setServer(mqttServer.c_str(), MQTT_PORT);
       mqttClient.setCallback(mqttReceive);
@@ -253,9 +255,9 @@ void publishJSON(String topicLeaf, StaticJsonDocument<MQTT_MAX> jdoc) {
 
     String   mqttTopic = mqttRoot + "/" + thingId + "/" + topicLeaf;
     int ret = mqttClient.publish(mqttTopic.c_str(), mqttData);
-    Serial.println(String(ret) + " " +  String(String(mqttData).length()) + " MQTT sent: " + mqttTopic + " " + mqttData );
+    if (DEBUG_MQTT) Serial.println(String(ret) + " " +  String(String(mqttData).length()) + " MQTT sent: " + mqttTopic + " " + mqttData );
 
-  } else Serial.println("publish " + topicLeaf + ": MQTT not connected");
+  } else if (DEBUG_MQTT)  Serial.println("publish " + topicLeaf + ": MQTT not connected");
 }
 
 

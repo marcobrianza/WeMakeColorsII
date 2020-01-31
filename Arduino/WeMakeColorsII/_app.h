@@ -32,6 +32,10 @@ unsigned long lastLightTime = 0;
 unsigned long lastBrightnessTime = 0;
 
 
+float lightLevel = 512;
+float lighightLevelSamples = 10;
+
+
 void setupLightLevel() {
   int a = analogRead(inputPin);
 
@@ -74,11 +78,12 @@ void checkLight() {
   int l = analogRead(inputPin);
   int dl = l - average;
 
-  //  Serial.print(l);
-  //  Serial.print(" ");
-  //  Serial.print( average);
-  //  Serial.print(" ");
-  //  Serial.println(dl);
+  Serial.print(l);
+  Serial.print(" ");
+  Serial.print( average);
+  Serial.print(" ");
+  Serial.print(dl);
+
 
   total = total - readings[readIndex];
   readings[readIndex] = l;
@@ -87,6 +92,18 @@ void checkLight() {
 
   readIndex = readIndex + 1;
   if (readIndex >= numReadings)  readIndex = 0;
+
+  float ll = l;
+  lightLevel = (lightLevel * (lighightLevelSamples - 1)  + ll) / lighightLevelSamples;
+
+  float dl2 = ll - lightLevel;
+
+  Serial.print(" ");
+  Serial.print(lightLevel);
+  Serial.print(" ");
+  Serial.print(dl2);
+  Serial.println();
+
 
   boolean change = false;
 

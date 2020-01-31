@@ -50,7 +50,7 @@ void setup() {
   OTA_setup();
 
   ledOFF();
-  Serial.println("starting Application");
+  Serial.println("starting loop");
 }
 
 void loop() {
