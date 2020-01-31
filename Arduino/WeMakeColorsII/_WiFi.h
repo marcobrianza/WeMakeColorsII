@@ -1,4 +1,4 @@
-boolean DEBUG_WIFI = false;
+boolean DEBUG_WIFI = true;
 
 #define LAN_OTA true
 

@@ -1,4 +1,4 @@
-boolean DEBUG_WIFIMANAGER = false;
+boolean DEBUG_WIFIMANAGER = true;
 
 //Wi-FiManager
 #include "FS.h"

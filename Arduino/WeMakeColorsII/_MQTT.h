@@ -1,6 +1,6 @@
 //MQTT
 
-boolean DEBUG_MQTT=false;
+boolean DEBUG_MQTT=true;
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
@@ -223,7 +223,7 @@ void connectMQTT() {
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttTopic.c_str(), QOS_AT_LEAST_1, true, prepareLastWillMessage().c_str())) {
-        if (DEBUG_MQTT) Serial.println("connected\n"); Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));
+        if (DEBUG_MQTT) {Serial.println("connected\n"); Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));}
 
 
         subscribeMQTT();
@@ -268,7 +268,7 @@ void publishRandomColor(CHSV c) {
   doc["v"] = c.v;
 
   doc["friendlyName"] = friendlyName;
-  doc["lightLevel"] = average;
+  doc["lightLevel"] = averageLightLevel;
 
   publishJSON(mqtt_randomColor, doc);
 
@@ -284,7 +284,7 @@ void publishStatusMQTT() {
   doc["softwarePlatform"] = softwarePlatform;
   doc["upTime"] = upTime;
 
-  doc["lightLevel"] = average;
+  doc["lightLevel"] = averageLightLevel;
 
   if (upTime == 0) {
     doc["resetReason"] = ESP.getResetReason();

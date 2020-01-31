@@ -1,4 +1,4 @@
-boolean DEBUG_MINIUI = false;
+boolean DEBUG_MINIUI = true;
 
 #include <EEPROM.h> // built in ESP8266 Core
 #define COUNT_ADDR 0
@@ -18,7 +18,6 @@ int lastBlinkTime = 0;
 #define BOOT_RESET 3
 #define BOOT_DEFAULT_AP 4
 #define BOOT_ESPTOUCH 5
-
 
 
 void ledON() {
@@ -91,6 +90,6 @@ void miniUI_loop() {
 
 byte miniUI_bootCount() {
   byte c = bootCount();
-  if (DEBUG_MINIUI)Serial.print("\nboot count=" + String(c));
+  if (DEBUG_MINIUI)Serial.println("boot count=" + String(c));
   return c;
 }

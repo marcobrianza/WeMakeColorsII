@@ -1,4 +1,4 @@
-boolean DEBUG_MAIN = false;
+boolean DEBUG_MAIN = true;
 
 #include "_LED.h"
 #include "_softwareInfo.h"
@@ -67,10 +67,6 @@ void loop() {
     checkLight();
   }
 
-  if ((m - lastBrightnessTime) > GLOBAL_BRIGHTNESS_TIME) {
-    lastBrightnessTime = m;
-    setGlobalBrightness();
-  }
 
   if (newColor) {
     newColor = false;
