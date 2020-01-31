@@ -1,14 +1,10 @@
 
-
-bool echoMode = true; //legacy =flase
-
 #include "_LED.h"
 #include "_softwareInfo.h"
 #include "_miniUI.h"
 #include "_WiFi.h"
 #include "_app.h"
 #include "_MQTT.h"
-
 #include "_WiFiManager.h"
 
 
@@ -20,19 +16,16 @@ void setup() {
 
   loadParametersFromFile();
 
-  WiFi.hostname(friendlyName);
-
   byte bc = miniUI_bootCount();
-  //byte bc = 0;
-  if (bc == BOOT_TEST_DEVICE)  testDevice();
+  if (bc == BOOT_TEST_DEVICE)  app_testDevice();
 
-  WiFi_setup() ;
+  ledON();
+  WiFi_setup();
 
-  // test
+  // test parameters
   //connectWiFi("PucciCube24", "Grandebellezza3!");
   //mqttServer = "192.168.1.5";
 
-  ledON();
   switch  (bc) {
     case BOOT_RESET:
       Serial.println("Reset parameters");
@@ -54,11 +47,7 @@ void setup() {
   }
 
   autoUpdate();
-
-#if  (LAN_OTA)
   OTA_setup();
-#endif
-
 
   ledOFF();
   Serial.println("starting Application");
@@ -68,9 +57,9 @@ void loop() {
 
   miniUI_loop();
   WiFi_loop();
-  mqtt_loop() ;
+  mqtt_loop();
 
-// app loop----------------
+  // app loop----------------
   unsigned long m = millis();
   if ((m - lastLightTime) > CHECK_LIGHT_TIME)  {
     lastLightTime = m;

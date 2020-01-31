@@ -1,5 +1,5 @@
 
-
+bool ECHO_MODE = true; //legacy =flase
 
 const int numReadings = 10;
 int readings[numReadings];      // the readings from the analog input
@@ -145,7 +145,7 @@ void setRemoteLED(CHSV newC) {
   showLLEDs();
 }
 
-void testDevice() {
+void  app_testDevice() {
 
   Serial.println("Testing  device for 30s");
   int TEST_TIME = 30000; // 30 seconds
@@ -160,13 +160,4 @@ void testDevice() {
     showAllLeds(v, v, v);
     delay(40);
   }
-}
-
-
-void app_loop() {
-
-
-
-
-
 }

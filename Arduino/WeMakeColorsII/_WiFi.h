@@ -59,6 +59,8 @@ void WiFi_setup() {
   //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
   WiFi.setPhyMode(WIFI_PHY_MODE_11N);   // WIFI_PHY_MODE_11B = 1, WIFI_PHY_MODE_11G = 2, WIFI_PHY_MODE_11N = 3
   //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
+
+  WiFi.hostname(friendlyName);
 }
 
 
@@ -144,8 +146,8 @@ int checkWiFiStatus() {
 }
 
 
-void WiFi_loop(){
-  
+void WiFi_loop() {
+
 #if  (LAN_OTA)
   ArduinoOTA.handle();
 #endif
@@ -154,10 +156,10 @@ void WiFi_loop(){
 
 
 // --------------- OTA Lan ---------------
-#if  (LAN_OTA)
+
 
 void OTA_setup() {
-
+#if  (LAN_OTA)
 
   ArduinoOTA.setPort(8266); // Port defaults to 8266
   ArduinoOTA.setHostname(friendlyName.c_str());
@@ -195,9 +197,10 @@ void OTA_setup() {
   MDNS.update();
 
   Serial.println("OTA Ready");
+#endif
 }
 
-#endif
+
 
 // -----  http update ----------------
 

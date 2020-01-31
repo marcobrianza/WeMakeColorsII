@@ -54,7 +54,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   StaticJsonDocument<MQTT_MAX> doc;
 
   if (topic_leaf == mqtt_randomColor) {
-    if ((topic_id == thingId) && (echoMode) || (topic_id != thingId) ) {
+    if ((topic_id == thingId) && (ECHO_MODE) || (topic_id != thingId) ) {
 
       /*
         {
