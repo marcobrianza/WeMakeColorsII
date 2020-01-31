@@ -1,3 +1,5 @@
+boolean DEBUG_WIFIMANAGER=false;
+
 //Wi-FiManager
 #include "FS.h"
 #include <DNSServer.h> // built in ESP8266 Core

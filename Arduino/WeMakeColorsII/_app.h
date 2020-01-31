@@ -1,4 +1,4 @@
-
+boolean DEBUG_APP=false;
 bool ECHO_MODE = true; //legacy =flase
 
 const int numReadings = 10;

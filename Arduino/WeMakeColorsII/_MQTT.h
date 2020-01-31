@@ -1,6 +1,6 @@
 //MQTT
 
-boolean DEBUG_MQTT false
+boolean DEBUG_MQTT=false;
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
@@ -223,8 +223,8 @@ void connectMQTT() {
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttTopic.c_str(), QOS_AT_LEAST_1, true, prepareLastWillMessage().c_str())) {
-        Serial.println("connected\n");
-        Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));
+        if (DEBUG_MQTT) Serial.println("connected\n"); Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));
+
 
         subscribeMQTT();
         publishStatus = true;
@@ -235,8 +235,8 @@ void connectMQTT() {
         blink(BLINK_NO_MQTT);
         reconnectInterval = RECONNECT_INTERVAL;
 
-        Serial.print("MQTT connect failed, rc=" + mqttClient.state());
-        Serial.println(" will try again..." + String (millis()));
+        if (DEBUG_MQTT) Serial.print("MQTT connect failed, rc=" + mqttClient.state()); Serial.println(" will try again..." + String (millis()));
+
       }
     }
     //netStatus = 1;

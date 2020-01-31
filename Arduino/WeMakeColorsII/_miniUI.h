@@ -1,4 +1,4 @@
-
+boolean DEBUG_MINIUI=false;
 
 #include <EEPROM.h> // built in ESP8266 Core
 #define COUNT_ADDR 0

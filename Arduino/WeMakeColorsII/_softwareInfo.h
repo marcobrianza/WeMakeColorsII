@@ -1,3 +1,5 @@
+boolean DEBUG_SOFTWAREINFO=false;
+
 String softwareName = "WeMakeColorsII";
 String softwareVersion = "1.12.2";
 String softwareInfo = "";

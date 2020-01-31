@@ -1,3 +1,4 @@
+boolean DEBUG_MAIN=false;
 
 #include "_LED.h"
 #include "_softwareInfo.h"
