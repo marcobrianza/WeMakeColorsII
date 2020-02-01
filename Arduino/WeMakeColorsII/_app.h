@@ -3,44 +3,32 @@ boolean DEBUG_APP = true;
 bool ECHO_MODE = true; //legacy =flase
 
 int LIGHT_TRIGGER = 100;
-
 int NEW_COLOR_TIME = 1000;
 
 //presence
-unsigned long last_color_t = 0;
+unsigned long lastColorTime = 0;
 int inputPin = A0;
 
-boolean newColor = false;
-
 int CHECK_LIGHT_TIME = 100;
-
 unsigned long lastLightTime = 0;
 
 
-float averageLightLevel = 512;
+float averageLightLevel = 0;
 float averageLightLevelW = 0.2;
 
 float globalLightLevel = 1023;
 float globalLightLevelW = 0.004;
 
-void setupLightLevel() {
-  int a = analogRead(inputPin);
-
-  averageLightLevel = a;
-  globalLightLevel = a;
-}
-
 
 void app_setup() {
   setupLEDs();
-  showAllLeds(64, 64, 64);
-  setupLightLevel() ;
+  showAllLeds(255, 255, 255);
+  globalLightLevel = analogRead(inputPin);
 }
 
 
 
-
-void checkLight() {
+boolean checkLight() {
 
   float ll = analogRead(inputPin);
   int dl = ll - averageLightLevel;
@@ -59,10 +47,13 @@ void checkLight() {
   //    change = true;
   //  }
 
-  if (change && (millis() - last_color_t > NEW_COLOR_TIME)) {
-    last_color_t = millis();
+  boolean newColor = false;
+  if (change && (millis() - lastColorTime > NEW_COLOR_TIME)) {
+    lastColorTime = millis();
     newColor = true;
   }
+
+  return newColor;
   //
   //  Serial.print(ll);
   //  Serial.print(" ");
@@ -84,6 +75,7 @@ CHSV newRndColor() {
   int v = random(128, 255);
 
   //Serial.print(h); Serial.print(" "); Serial.print(s); Serial.print(" "); Serial.println(v);
+
   return CHSV(h, s, v);
 }
 
@@ -92,14 +84,13 @@ void showLLEDs() {
 
   int mb = map(globalLightLevel, 0, 512, 64, 255);
   if (mb > 255) mb = 255;
-
-//  Serial.print("globalLightLevel: ");
-//  Serial.print(globalLightLevel);
-//  Serial.print(" ");
-//  Serial.println(mb);
-
   FastLED.setBrightness(mb);
   FastLED.show();
+
+  //  Serial.print("globalLightLevel: ");
+  //  Serial.print(globalLightLevel);
+  //  Serial.print(" ");
+  //  Serial.println(mb);
 }
 
 

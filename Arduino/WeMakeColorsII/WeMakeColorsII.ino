@@ -61,18 +61,13 @@ void loop() {
   mqtt_loop();
 
   // app loop----------------
-  unsigned long m = millis();
-  if ((m - lastLightTime) > CHECK_LIGHT_TIME)  {
-    lastLightTime = m;
-    checkLight();
-  }
-
-
-  if (newColor) {
-    newColor = false;
-    CHSV c = newRndColor();
-    setMyLED(c);
-    publishRandomColor(c);
+  if ((millis() - lastLightTime) > CHECK_LIGHT_TIME)  {
+    lastLightTime = millis();
+    if (checkLight()) {
+      CHSV c = newRndColor();
+      setMyLED(c);
+      publishRandomColor(c);
+    }
   }
 
 }

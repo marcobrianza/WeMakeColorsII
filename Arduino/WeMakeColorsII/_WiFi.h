@@ -65,7 +65,6 @@ void WiFi_setup() {
 
 
 
-
 void connectWiFi_Smart() {
   if (DEBUG_WIFI) Serial.println("Starting ESPTouch SmartConfig");
   WiFi.beginSmartConfig();
