@@ -3,7 +3,7 @@ boolean DEBUG_APP = true;
 bool ECHO_MODE = true; //legacy =flase
 
 int LIGHT_TRIGGER = 100;
-int NEW_COLOR_TIME = 1000;
+int NEW_COLOR_TIME = 2000;
 
 //presence
 unsigned long lastColorTime = 0;
@@ -19,6 +19,8 @@ float averageLightLevelW = 0.2;
 float globalLightLevel = 1023;
 float globalLightLevelW = 0.004;
 
+
+#define abs2(x) ((x)>0?(x):-(x))
 
 void app_setup() {
   setupLEDs();
@@ -37,15 +39,20 @@ boolean checkLight() {
   globalLightLevel = globalLightLevel * (1 - globalLightLevelW) + ll * globalLightLevelW;
 
   boolean change = false;
-  if (abs(dl) > LIGHT_TRIGGER) {
-    //Serial.println("day trigger");
+
+  //trigger 1.0
+//  if (abs(dl) > LIGHT_TRIGGER) {
+//    //Serial.println("light trigger");
+//    change = true;
+//  }
+
+  //trigger 2.0
+  float pa = abs2( dl / averageLightLevel);
+  if ((pa > 0.2) && (averageLightLevel > 10)) {
+    //Serial.println("light trigger");
     change = true;
   }
 
-  //  if ((abs(dl) > average / 2 ) && (average < 150)) {
-  //    Serial.println("night trigger");
-  //    change = true;
-  //  }
 
   boolean newColor = false;
   if (change && (millis() - lastColorTime > NEW_COLOR_TIME)) {
@@ -53,7 +60,16 @@ boolean checkLight() {
     newColor = true;
   }
 
-  return newColor;
+
+
+  //  Serial.print(pa, 4);
+  //
+  //  Serial.print(" ");
+  //  Serial.print(change);
+  //
+  //
+  // Serial.println();
+
   //
   //  Serial.print(ll);
   //  Serial.print(" ");
@@ -64,6 +80,8 @@ boolean checkLight() {
   //  Serial.print(change * 100);
   //  Serial.println();
 
+
+  return newColor;
 }
 
 

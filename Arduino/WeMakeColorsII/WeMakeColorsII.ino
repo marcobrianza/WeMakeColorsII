@@ -61,6 +61,7 @@ void loop() {
   mqtt_loop();
 
   // app loop----------------
+
   if ((millis() - lastLightTime) > CHECK_LIGHT_TIME)  {
     lastLightTime = millis();
     if (checkLight()) {
