@@ -1,5 +1,5 @@
 //LED
-#include <FastLED.h> // version  3.3.2
+#include <FastLED.h> // version  3.3.3
 
 int GLOBAL_BRIGHTNESS = 255;
 

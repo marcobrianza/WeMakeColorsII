@@ -1,16 +1,15 @@
 //MQTT
 
-boolean DEBUG_MQTT=true;
+boolean DEBUG_MQTT = true;
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
 
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h (line 26) change #define MQTT_MAX_PACKET_SIZE 512 (from 128)
-#include <ArduinoJson.h> // version 6.14.0
+#include <ArduinoJson.h> // version 6.14.1
 PubSubClient mqttClient(wifiClient);
 
-#define MQTT_MAX MQTT_MAX_PACKET_SIZE
 
 int MQTT_PORT = 1883;
 
@@ -40,7 +39,10 @@ unsigned long lastConnectTime = 0;
 
 void mqttReceive(char* topic, byte* payload, unsigned int length) {
   String Topic = String(topic);
-  if (DEBUG_MQTT)  Serial.println("MQTT received: " + String(length) + " " + Topic);
+  payload[length] = 0;
+  String Payload = String((char*)payload);
+
+  if (DEBUG_MQTT)  Serial.println("MQTT received: " + String(length) + " " + Topic + " " + Payload);
 
   int p1 = mqttRoot.length() + 1;
   int p2 = Topic.indexOf("/", p1);
@@ -53,7 +55,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   //Serial.println(topic_id);
   //Serial.println(topic_leaf);
 
-  StaticJsonDocument<MQTT_MAX> doc;
+  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
   if (topic_leaf == mqtt_randomColor) {
     if ((topic_id == thingId) && (ECHO_MODE) || (topic_id != thingId) ) {
@@ -196,7 +198,7 @@ void subscribeMQTT() {
 
 
 String prepareLastWillMessage() {
-  StaticJsonDocument<MQTT_MAX> doc;
+  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
   doc["friendlyName"] = friendlyName;
   doc["softwareInfo"] = softwareInfo;
@@ -223,7 +225,10 @@ void connectMQTT() {
       //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
       String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttTopic.c_str(), QOS_AT_LEAST_1, true, prepareLastWillMessage().c_str())) {
-        if (DEBUG_MQTT) {Serial.println("connected\n"); Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));}
+        if (DEBUG_MQTT) {
+          Serial.println("connected\n");
+          Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));
+        }
 
 
         subscribeMQTT();
@@ -247,10 +252,10 @@ void connectMQTT() {
 
 }
 
-void publishJSON(String topicLeaf, StaticJsonDocument<MQTT_MAX> jdoc) {
+void publishJSON(String topicLeaf, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc) {
   if (mqttClient.connected()) {
 
-    char mqttData[MQTT_MAX];
+    char mqttData[MQTT_MAX_PACKET_SIZE];
     serializeJson(jdoc, mqttData);
 
     String   mqttTopic = mqttRoot + "/" + thingId + "/" + topicLeaf;
@@ -262,7 +267,7 @@ void publishJSON(String topicLeaf, StaticJsonDocument<MQTT_MAX> jdoc) {
 
 
 void publishRandomColor(CHSV c) {
-  StaticJsonDocument<MQTT_MAX> doc;
+  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
   doc["h"] = c.h;
   doc["s"] = c.s;
   doc["v"] = c.v;
@@ -277,7 +282,7 @@ void publishRandomColor(CHSV c) {
 
 
 void publishStatusMQTT() {
-  StaticJsonDocument<MQTT_MAX> doc;
+  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
   doc["friendlyName"] = friendlyName;
   doc["softwareInfo"] = softwareInfo;
