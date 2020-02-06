@@ -131,10 +131,10 @@ void connectWiFi_Manager(bool force_config) {
 
 
   WiFiManager wifiManager;
-  
+
   if (DEBUG_WIFIMANAGER)  wifiManager.setDebugOutput(true);
   else wifiManager.setDebugOutput(false);
-  
+
   wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
   wifiManager.setMinimumSignalQuality(CAPTIVE_SIGNAL_QUALITY);
   wifiManager.setAPCallback(configModeCallback);
@@ -157,9 +157,11 @@ void connectWiFi_Manager(bool force_config) {
     wifiManager.autoConnect(thingId.c_str());
     if (DEBUG_WIFIMANAGER)  Serial.println("WiFiManager end");
 
-    if (WiFi.SSID() = "") {
+    if (WiFi.SSID() == "") {
       if (DEBUG_WIFIMANAGER)  Serial.println("no SSID found, connecting with previously saved credentials");
       WiFi.begin(savedSSID, savedPassword);
+    } else {
+      if (DEBUG_WIFIMANAGER)  Serial.println("new network credentials: " + WiFi.SSID() + " " + WiFi.psk() );
     }
 
   }
