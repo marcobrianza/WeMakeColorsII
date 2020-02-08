@@ -243,11 +243,10 @@ void autoUpdate() {
       if (DEBUG_WIFI) Serial.println(" Board md5: " + ESP.getSketchMD5());
       if ((ESP.getSketchMD5() != md5) && (md5.length() == 32) ) {
         if (DEBUG_WIFI) Serial.println("Trying update...");
-        showAllLeds(64, 0, 0);
-        blink(10);
-
+        showState(AUTO_UPDATE);
+        
         int u = httpUpdate(FW_URL);
-        if (u != HTTP_UPDATE_OK)Serial.println("update error"); showAllLeds(64, 64, 0);
+        if (u != HTTP_UPDATE_OK)Serial.println("update error"); showState(UPDATE_ERROR) ;
       }
       else {
         if (DEBUG_WIFI) Serial.println("will not update");

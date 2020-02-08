@@ -11,10 +11,13 @@ void setupLEDs() {
   FastLED.addLeds<WS2812B, D1, GRB>(leds, NUM_LEDS); //D1 is GPIO5
 }
 
-
-void showAllLeds(int r, int g, int b ) {
+void showAllLeds(CRGB c ) {
   for ( int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB(r, g, b);
+    leds[i] = c;
   }
   FastLED.show();
+}
+
+void showAllLeds(int r, int g, int b ) {
+  showAllLeds (CRGB(r, g, b));
 }

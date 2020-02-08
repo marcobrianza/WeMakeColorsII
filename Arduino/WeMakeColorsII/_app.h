@@ -1,17 +1,19 @@
 boolean DEBUG_APP = true;
 
+unsigned long lastAppTime = 0;
+int APP_INTERVAL = 100;
+
+//------
+
+
 bool ECHO_MODE = true; //legacy =flase
 
-int LIGHT_TRIGGER = 100;
-int NEW_COLOR_TIME = 2000;
-
-//presence
-unsigned long lastColorTime = 0;
 int inputPin = A0;
+unsigned long lastColorTime = 0;
 
-int CHECK_LIGHT_TIME = 100;
-unsigned long lastLightTime = 0;
-
+int NEW_COLOR_TIME = 2000;
+float LIGHT_AVERAGE_DIFFERENCE = 0.3;
+float LIGHT_TRIGGER_MINIMUM = 15;
 
 float averageLightLevel = 0;
 float averageLightLevelW = 0.2;
@@ -24,7 +26,7 @@ float globalLightLevelW = 0.004;
 
 void app_setup() {
   setupLEDs();
-  showAllLeds(255, 255, 255);
+  showState(APP_START);
   globalLightLevel = analogRead(inputPin);
 }
 
@@ -38,24 +40,36 @@ boolean checkLight() {
   averageLightLevel = averageLightLevel * (1 - averageLightLevelW)   + ll * averageLightLevelW;
   globalLightLevel = globalLightLevel * (1 - globalLightLevelW) + ll * globalLightLevelW;
 
-  boolean change = false;
 
   //trigger 1.0
-//  if (abs(dl) > LIGHT_TRIGGER) {
-//    //Serial.println("light trigger");
-//    change = true;
-//  }
+  //  if (abs(dl) > LIGHT_TRIGGER) {
+  //    //Serial.println("light trigger");
+  //    change = true;
+  //  }
 
   //trigger 2.0
+  boolean trig_difference = false;
   float pa = abs2( dl / averageLightLevel);
-  if ((pa > 0.2) && (averageLightLevel > 10)) {
-    //Serial.println("light trigger");
-    change = true;
+  if (pa > LIGHT_AVERAGE_DIFFERENCE)  {
+    trig_difference = true;
+    // Serial.println("trig_difference:" + String(pa));
+  }
+
+  boolean trig_level = false;
+  if (averageLightLevel > LIGHT_TRIGGER_MINIMUM)  {
+    trig_level = true;
+    //Serial.println("trig_level");
+  }
+
+  boolean trig_time = false;
+  if (millis() - lastColorTime > NEW_COLOR_TIME) {
+    trig_time = true;
+    // Serial.println("trig_time");
   }
 
 
   boolean newColor = false;
-  if (change && (millis() - lastColorTime > NEW_COLOR_TIME)) {
+  if (trig_difference && trig_level && trig_time) {
     lastColorTime = millis();
     newColor = true;
   }

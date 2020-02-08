@@ -1,8 +1,8 @@
 boolean DEBUG_MAIN = true;
 
-#include "_LED.h"
 #include "_softwareInfo.h"
 #include "_miniUI.h"
+#include "_status.h"
 #include "_WiFi.h"
 #include "_app.h"
 #include "_MQTT.h"
@@ -62,8 +62,8 @@ void loop() {
 
   // app loop----------------
 
-  if ((millis() - lastLightTime) > CHECK_LIGHT_TIME)  {
-    lastLightTime = millis();
+  if ((millis() - lastAppTime) > APP_INTERVAL)  {
+    lastAppTime = millis();
     if (checkLight()) {
       CHSV c = newRndColor();
       setMyLED(c);

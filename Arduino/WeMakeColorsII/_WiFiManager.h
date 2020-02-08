@@ -110,8 +110,7 @@ void configModeCallback (WiFiManager *myWiFiManager) {
     Serial.println(WiFi.softAPIP());
     Serial.println(myWiFiManager->getConfigPortalSSID());
   }
-
-  showAllLeds(0, 0, 255);
+  showState(WIFI_MANAGER_AP);
 }
 
 
@@ -123,7 +122,8 @@ void saveConfigCallback () {
   if (String(wfm_mqttPassword.getValue()) != "") mqttPassword = wfm_mqttPassword.getValue();
 
   saveParametersToFile();
-  showAllLeds(0, 255, 255);
+  showState(WIFI_MANAGER_SAVE);
+
 }
 
 

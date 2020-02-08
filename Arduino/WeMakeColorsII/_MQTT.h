@@ -1,10 +1,18 @@
-//MQTT
-
 boolean DEBUG_MQTT = true;
 
 String mqttServer = "wmc.marcobrianza.it";
 String mqttUsername = "";
 String mqttPassword = "";
+
+String mqttRoot =   "WeMakeColorsII";
+
+String mqtt_randomColor = "randomColor";
+String mqtt_status = "status";
+String mqtt_config = "config";
+
+
+
+//-----
 
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h (line 26) change #define MQTT_MAX_PACKET_SIZE 512 (from 128)
 #include <ArduinoJson.h> // version 6.14.1
@@ -17,12 +25,6 @@ int MQTT_PORT = 1883;
 #define QOS_BEST_EFFORT 0
 
 #define BLINK_NO_MQTT 3
-
-String mqttRoot =   "WeMakeColorsII";
-
-String mqtt_randomColor = "randomColor";
-String mqtt_status = "status";
-String mqtt_config = "config";
 
 unsigned long upTime = 0;
 unsigned long lastMinute = 0;
@@ -100,10 +102,11 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
          }
     */
     if (command == "update") {
-      showAllLeds(64, 0, 0);
+      showState(UPDATE);
+
       int u = httpUpdate(option);
       if (u != HTTP_UPDATE_OK) {
-        showAllLeds(64, 64, 0);
+        showState(UPDATE_OK);
       }
     }
 
