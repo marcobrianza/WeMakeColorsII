@@ -1,25 +1,10 @@
 boolean DEBUG_MQTT = true;
 
-String mqttServer = "wmc.marcobrianza.it";
-String mqttUsername = "";
-String mqttPassword = "";
-
-String mqttRoot =   "WeMakeColorsII";
-
-String mqtt_randomColor = "randomColor";
-String mqtt_status = "status";
-String mqtt_config = "config";
-
-
-
-//-----
 
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h (line 26) change #define MQTT_MAX_PACKET_SIZE 512 (from 128)
 #include <ArduinoJson.h> // version 6.14.1
 PubSubClient mqttClient(wifiClient);
 
-
-int MQTT_PORT = 1883;
 
 #define QOS_AT_LEAST_1 1
 #define QOS_BEST_EFFORT 0
@@ -38,101 +23,40 @@ int CHECK_INTERVAL = 20000;
 int reconnectInterval = RECONNECT_INTERVAL;
 unsigned long lastConnectTime = 0;
 
+void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc) {
+  if (mqttClient.connected()) {
 
-void mqttReceive(char* topic, byte* payload, unsigned int length) {
-  String Topic = String(topic);
-  payload[length] = 0;
-  String Payload = String((char*)payload);
+    char mqttData[MQTT_MAX_PACKET_SIZE];
+    serializeJson(jdoc, mqttData);
 
-  if (DEBUG_MQTT)  Serial.println("MQTT received: " + String(length) + " " + Topic + " " + Payload);
+ 
+    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData);
+    if (DEBUG_MQTT) Serial.println(String(ret) + " " +  String(String(mqttData).length()) + " MQTT sent: " + mqttTopic + " " + mqttData );
 
-  int p1 = mqttRoot.length() + 1;
-  int p2 = Topic.indexOf("/", p1);
+  } else if (DEBUG_MQTT)  Serial.println("publish " + mqttTopic + ": MQTT not connected");
+}
 
-  // String topic_root = String(topic).substring(0, p1-1);
-  String topic_id = String(topic).substring(p1, p2);
-  String topic_leaf = String(topic).substring(p2 + 1);
-
-  //Serial.println(topic_root);
-  //Serial.println(topic_id);
-  //Serial.println(topic_leaf);
-
+String prepareLastWillMessage() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-  if (topic_leaf == mqtt_randomColor) {
-    if ((topic_id == thingId) && (ECHO_MODE) || (topic_id != thingId) ) {
+  doc["friendlyName"] = friendlyName;
+  doc["softwareInfo"] = softwareInfo;
+  doc["softwarePlatform"] = softwarePlatform;
+  doc["upTime"] = -1;
 
-      /*
-        {
-        "h": 0,
-        "s": 128,
-        "v": 255
-        }
-      */
+  String lastWillMessage;
 
-      DeserializationError error = deserializeJson(doc, payload);
-      if (error) if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
-
-      int h = doc["h"];
-      int s = doc["s"];
-      int v = doc["v"];
-
-      if (topic_id == thingId) if (DEBUG_MQTT)  Serial.print("my message ");
-      if (DEBUG_MQTT)  Serial.println("hsv: " + String(h) + " " + String(s) + " " + String(v) );
-
-      setRemoteLED(CHSV(h, s, v));
-    }
-  }
-
-  if ((topic_id == thingId) && (topic_leaf == mqtt_config)) {
-    if (DEBUG_MQTT) Serial.println("Config message:");
-    DeserializationError error = deserializeJson(doc, payload);
-    if (error) if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
-
-    String command = doc["command"];
-    String option = doc["option"];
-
-    if (DEBUG_MQTT) Serial.println(command + " " + option);
-
-
-    /*
-         {
-         "command":"update",
-         "option":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"
-         }
-    */
-    if (command == "update") {
-      showState(UPDATE);
-
-      int u = httpUpdate(option);
-      if (u != HTTP_UPDATE_OK) {
-        showState(UPDATE_OK);
-      }
-    }
-
-    /*
-         {
-         "command":"info"
-         }
-    */
-
-    if (command == "info") {
-      // send detailed information on the device
-
-
-      //int fh = ESP.getFreeHeap();
-      //Serial.print("FreeHeap: ");
-      //Serial.println(fh);
-      //doc["FreeHeap"] = fh;
-      //doc["MD5"] = ESP.getSketchMD5();
-
-
-      //String  savedSSID = WiFi.SSID();
-      //String  savedPassword = WiFi.psk();
-    }
-
-  }
+  serializeJson(doc, lastWillMessage);
+  return (lastWillMessage);
 }
+
+
+//----------------------
+
+#include "_app_mqtt.h"
+
+
+//-------------------------
 
 
 
@@ -181,38 +105,6 @@ int checkMQTTStatus () {
 
 }
 
-void subscribeMQTT() {
-
-  String mqttTopic;
-
-  mqttTopic = mqttRoot + "/+/" + mqtt_randomColor;
-  mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
-  if (DEBUG_MQTT) Serial.println("Subscibed to: " + mqttTopic);
-
-
-  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_config;
-  mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
-  if (DEBUG_MQTT) Serial.println("Subscibed to: " + mqttTopic);
-
-
-  //mqttClient.subscribe(mqttPublish_status.c_str(), QOS_AT_LEAST_1); //***
-
-}
-
-
-String prepareLastWillMessage() {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-
-  doc["friendlyName"] = friendlyName;
-  doc["softwareInfo"] = softwareInfo;
-  doc["softwarePlatform"] = softwarePlatform;
-  doc["upTime"] = -1;
-
-  String lastWillMessage;
-
-  serializeJson(doc, lastWillMessage);
-  return (lastWillMessage);
-}
 
 void connectMQTT() {
 
@@ -254,54 +146,6 @@ void connectMQTT() {
   }
 
 }
-
-void publishJSON(String topicLeaf, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc) {
-  if (mqttClient.connected()) {
-
-    char mqttData[MQTT_MAX_PACKET_SIZE];
-    serializeJson(jdoc, mqttData);
-
-    String   mqttTopic = mqttRoot + "/" + thingId + "/" + topicLeaf;
-    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData);
-    if (DEBUG_MQTT) Serial.println(String(ret) + " " +  String(String(mqttData).length()) + " MQTT sent: " + mqttTopic + " " + mqttData );
-
-  } else if (DEBUG_MQTT)  Serial.println("publish " + topicLeaf + ": MQTT not connected");
-}
-
-
-void publishRandomColor(CHSV c) {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-  doc["h"] = c.h;
-  doc["s"] = c.s;
-  doc["v"] = c.v;
-
-  doc["friendlyName"] = friendlyName;
-  doc["lightLevel"] = int(averageLightLevel);
-
-  publishJSON(mqtt_randomColor, doc);
-
-}
-
-
-
-void publishStatusMQTT() {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
-
-  doc["friendlyName"] = friendlyName;
-  doc["softwareInfo"] = softwareInfo;
-  doc["softwarePlatform"] = softwarePlatform;
-  doc["upTime"] = upTime;
-
-  doc["lightLevel"] = int(averageLightLevel);
-
-  if (upTime == 0) {
-    doc["resetReason"] = ESP.getResetReason();
-  }
-
-  publishJSON(mqtt_status, doc);
-
-}
-
 
 
 void mqtt_loop() {
