@@ -111,7 +111,6 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
     if (command == "info") {
       // send detailed information on the device
 
-
       //int fh = ESP.getFreeHeap();
       //Serial.print("FreeHeap: ");
       //Serial.println(fh);
