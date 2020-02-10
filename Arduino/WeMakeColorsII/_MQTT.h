@@ -23,14 +23,14 @@ int CHECK_INTERVAL = 20000;
 int reconnectInterval = RECONNECT_INTERVAL;
 unsigned long lastConnectTime = 0;
 
-void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc) {
+void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc, bool retained) {
   if (mqttClient.connected()) {
 
     char mqttData[MQTT_MAX_PACKET_SIZE];
     serializeJson(jdoc, mqttData);
 
- 
-    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData);
+
+    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData, retained);
     if (DEBUG_MQTT) Serial.println(String(ret) + " " +  String(String(mqttData).length()) + " MQTT sent: " + mqttTopic + " " + mqttData );
 
   } else if (DEBUG_MQTT)  Serial.println("publish " + mqttTopic + ": MQTT not connected");

@@ -142,7 +142,7 @@ void publishStatusMQTT() {
   }
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
-  publishJSON(mqttTopic, doc);
+  publishJSON(mqttTopic, doc, true);
 
 }
 
@@ -158,6 +158,6 @@ void publishRandomColor(CHSV c) {
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
 
-  publishJSON(mqttTopic, doc);
+  publishJSON(mqttTopic, doc, false);
 
 }
