@@ -15,11 +15,16 @@ unsigned long upTime = 0;
 unsigned long lastMinute = 0;
 
 //status
-#define STATUS_INTERVAL 5 //minutes
+#define STATUS_INTERVAL 15 //minutes
 boolean publishStatus = false;
 
-int RECONNECT_INTERVAL = 5000;
-int CHECK_INTERVAL = 20000;
+//sensor
+unsigned int lastSensorSend = 0;
+
+
+//
+int RECONNECT_INTERVAL = 5000; //ms
+int CHECK_INTERVAL = 20000; //ms
 int reconnectInterval = RECONNECT_INTERVAL;
 unsigned long lastConnectTime = 0;
 
@@ -40,15 +45,18 @@ String prepareLastWillMessage() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
   doc["friendlyName"] = friendlyName;
+  doc["upTime"] = -1;
+
   doc["softwareInfo"] = softwareInfo;
   doc["softwarePlatform"] = softwarePlatform;
-  doc["upTime"] = -1;
 
   String lastWillMessage;
 
   serializeJson(doc, lastWillMessage);
   return (lastWillMessage);
 }
+
+
 
 
 //----------------------
@@ -58,7 +66,22 @@ String prepareLastWillMessage() {
 
 //-------------------------
 
+void publishStatusMQTT() {
+  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
+  doc["friendlyName"] = friendlyName;
+  doc["upTime"] = upTime;
+  if (upTime == 0) {
+    doc["resetReason"] = ESP.getResetReason();
+  }
+  doc["softwareInfo"] = softwareInfo;
+  doc["softwarePlatform"] = softwarePlatform;
+
+
+  String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicStatus;
+  publishJSON(mqttTopic, doc, true);
+
+}
 
 
 int checkMQTTStatus () {
@@ -112,19 +135,18 @@ void connectMQTT() {
     if (checkMQTTStatus () != MQTT_CONNECTED) {
       //netStatus = 10;
 
-      if (DEBUG_MQTT)  Serial.print("\nAttempting MQTT connection..." + String(millis()) + " ");
+
+      if (DEBUG_MQTT)  Serial.print(String(millis()) + " MQTT connecting: " + mqttUsername + ":" + mqttPassword + "@" + mqttServer + ":" + MQTT_PORT + " ... " );
 
       mqttClient.setServer(mqttServer.c_str(), MQTT_PORT);
       mqttClient.setCallback(mqttReceive);
 
-      //if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str())) {
-      String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
+      String  mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicStatus;
       if (mqttClient.connect( thingId.c_str(), mqttUsername.c_str(), mqttPassword.c_str(), mqttTopic.c_str(), QOS_AT_LEAST_1, true, prepareLastWillMessage().c_str())) {
         if (DEBUG_MQTT) {
-          Serial.println("connected\n");
+          Serial.println("connected");
           Serial.println("FreeHeap: " + String(ESP.getFreeHeap()));
         }
-
 
         subscribeMQTT();
         publishStatus = true;
@@ -161,12 +183,20 @@ void mqtt_loop() {
     lastMinute = m;
     upTime++;
 
-    if (upTime % STATUS_INTERVAL == 0 )publishStatus = true;
+    if (upTime % STATUS_INTERVAL == 0 && STATUS_INTERVAL > 0 )publishStatus = true;
   }
 
   if (publishStatus) {
     publishStatus = false;
     publishStatusMQTT();
   }
+
+  if ((millis() - lastSensorSend > SENSOR_INTERVAL * 1000) && (SENSOR_INTERVAL > 0) ) {
+    lastSensorSend = millis();
+    publishSensor();
+  }
+
+
+
 
 }

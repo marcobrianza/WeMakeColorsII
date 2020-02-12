@@ -6,9 +6,14 @@ String mqttPassword = "";
 
 String mqttRoot =   "WeMakeColorsII";
 
-String mqtt_randomColor = "randomColor";
-String mqtt_status = "status";
-String mqtt_config = "config";
+String mqttTopicStatus = "status";
+String mqttTopicSensor = "sensor";
+String mqttTopicEvent = "randomColor";
+
+String mqttTopicConfig = "config";
+
+//sensor
+#define SENSOR_INTERVAL 300 //seconds
 
 
 //-----MQTT subscribe --------------
@@ -17,12 +22,11 @@ void subscribeMQTT() {
 
   String mqttTopic;
 
-  mqttTopic = mqttRoot + "/+/" + mqtt_randomColor;
+  mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicConfig;
   mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
   if (DEBUG_MQTT) Serial.println("Subscibed to: " + mqttTopic);
 
-
-  mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_config;
+  mqttTopic = mqttRoot + "/+/" + mqttTopicEvent;
   mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
   if (DEBUG_MQTT) Serial.println("Subscibed to: " + mqttTopic);
 
@@ -51,7 +55,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
 
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-  if (topic_leaf == mqtt_randomColor) {
+  if (topic_leaf == mqttTopicEvent) {
     if ((topic_id == thingId) && (ECHO_MODE) || (topic_id != thingId) ) {
 
       /*
@@ -76,7 +80,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
     }
   }
 
-  if ((topic_id == thingId) && (topic_leaf == mqtt_config)) {
+  if ((topic_id == thingId) && (topic_leaf == mqttTopicConfig)) {
     if (DEBUG_MQTT) Serial.println("Config message:");
     DeserializationError error = deserializeJson(doc, payload);
     if (error) if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
@@ -127,28 +131,23 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
 
 //-----MQTT publish --------------
 
-void publishStatusMQTT() {
+
+void publishSensor() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-  doc["friendlyName"] = friendlyName;
-  doc["softwareInfo"] = softwareInfo;
-  doc["softwarePlatform"] = softwarePlatform;
-  doc["upTime"] = upTime;
 
   doc["lightLevel"] = int(averageLightLevel);
 
-  if (upTime == 0) {
-    doc["resetReason"] = ESP.getResetReason();
-  }
+  String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicSensor;
 
-  String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_status;
-  publishJSON(mqttTopic, doc, true);
+  publishJSON(mqttTopic, doc, false);
 
 }
 
 
-void publishRandomColor(CHSV c) {
+void publishEvent(CHSV c) {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+
   doc["h"] = c.h;
   doc["s"] = c.s;
   doc["v"] = c.v;
@@ -156,7 +155,7 @@ void publishRandomColor(CHSV c) {
   doc["friendlyName"] = friendlyName;
   doc["lightLevel"] = int(averageLightLevel);
 
-  String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqtt_randomColor;
+  String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicEvent;
 
   publishJSON(mqttTopic, doc, false);
 
