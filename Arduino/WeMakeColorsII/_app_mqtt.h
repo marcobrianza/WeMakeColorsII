@@ -13,7 +13,8 @@ String mqttTopicEvent = "randomColor";
 String mqttTopicConfig = "config";
 
 //sensor
-#define SENSOR_INTERVAL 300 //seconds
+unsigned long SENSOR_INTERVAL = 300; //seconds
+unsigned long lastSensorSend = 0;
 
 
 //-----MQTT subscribe --------------
@@ -30,7 +31,6 @@ void subscribeMQTT() {
   mqttClient.subscribe(mqttTopic.c_str(), QOS_AT_LEAST_1);
   if (DEBUG_MQTT) Serial.println("Subscibed to: " + mqttTopic);
 
-  //mqttClient.subscribe(mqttPublish_status.c_str(), QOS_AT_LEAST_1); //***
 
 }
 
@@ -135,7 +135,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
 void publishSensor() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-
+  doc["friendlyName"] = friendlyName;
   doc["lightLevel"] = int(averageLightLevel);
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicSensor;

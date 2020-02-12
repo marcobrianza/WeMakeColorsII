@@ -18,8 +18,7 @@ unsigned long lastMinute = 0;
 #define STATUS_INTERVAL 15 //minutes
 boolean publishStatus = false;
 
-//sensor
-unsigned int lastSensorSend = 0;
+
 
 
 //
