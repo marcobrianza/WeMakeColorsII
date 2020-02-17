@@ -135,7 +135,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
 void publishSensor() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-  doc["friendlyName"] = friendlyName;
+  doc["name"] = name;
   doc["lightLevel"] = int(averageLightLevel);
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicSensor;
@@ -152,7 +152,7 @@ void publishEvent(CHSV c) {
   doc["s"] = c.s;
   doc["v"] = c.v;
 
-  doc["friendlyName"] = friendlyName;
+  doc["name"] = name;
   doc["lightLevel"] = int(averageLightLevel);
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicEvent;

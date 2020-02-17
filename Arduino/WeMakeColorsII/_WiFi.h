@@ -60,7 +60,7 @@ void WiFi_setup() {
   WiFi.setPhyMode(WIFI_PHY_MODE_11N);   // WIFI_PHY_MODE_11B = 1, WIFI_PHY_MODE_11G = 2, WIFI_PHY_MODE_11N = 3
   //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
 
-  WiFi.hostname(friendlyName);
+  WiFi.hostname(name);
 }
 
 
@@ -163,7 +163,7 @@ void OTA_setup() {
 #if  (LAN_OTA)
 
   ArduinoOTA.setPort(8266); // Port defaults to 8266
-  ArduinoOTA.setHostname(friendlyName.c_str());
+  ArduinoOTA.setHostname(name.c_str());
 
   //ArduinoOTA.setPassword((const char *) OTA_PASSWORD.c_str());
   ArduinoOTA.setPassword(OTA_PASSWORD.c_str());
@@ -192,7 +192,7 @@ void OTA_setup() {
 
   //MDNS discovery additiona info
   MDNS.addServiceTxt("arduino", "tcp", "thingId", thingId);
-  MDNS.addServiceTxt("arduino", "tcp", "friendlyName", friendlyName);
+  MDNS.addServiceTxt("arduino", "tcp", "name", name);
   MDNS.addServiceTxt("arduino", "tcp", "softwareInfo", softwareInfo);
   MDNS.addServiceTxt("arduino", "tcp", "softwarePlatform", softwarePlatform);
   MDNS.update();

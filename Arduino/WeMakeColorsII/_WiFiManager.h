@@ -12,7 +12,7 @@ boolean DEBUG_WIFIMANAGER = true;
 #define CAPTIVE_SIGNAL_QUALITY 10 //default is 8
 
 // name, prompt, default, length
-WiFiManagerParameter wfm_friendlyName("friendlyName", "Friendly Name", friendlyName.c_str(), MAX_PARAM);
+WiFiManagerParameter wfm_name("name", "name", name.c_str(), MAX_PARAM);
 WiFiManagerParameter wfm_mqttServer("mqttServer", "MQTT Server", mqttServer.c_str(), MAX_PARAM);
 WiFiManagerParameter wfm_mqttUsername("mqttUsername", "MQTT Username", mqttUsername.c_str(), MAX_PARAM);
 WiFiManagerParameter wfm_mqttPassword("mqttPassword", "MQTT Password", mqttPassword.c_str(), MAX_PARAM);
@@ -59,18 +59,26 @@ void writeAttribute(String attributeName, String value) {
 void loadParametersFromFile() {
   String temp = "";
 
-  // convert the old attribute
+  // convert the old attributes
   temp = readAttribute("thingName");
   if (temp != "") {
-    if (DEBUG_WIFIMANAGER) Serial.println ("thingName=" + friendlyName);
-    writeAttribute("friendlyName", temp);
+    if (DEBUG_WIFIMANAGER) Serial.println ("thingName=" + name);
+    writeAttribute("name", temp);
     deleteAttribute("thingName");
   }
 
-
   temp = readAttribute("friendlyName");
-  if (temp != "") friendlyName = temp;
-  if (DEBUG_WIFIMANAGER) Serial.println ("friendlyName=" + friendlyName);
+  if (temp != "") {
+    if (DEBUG_WIFIMANAGER) Serial.println ("friendlyName=" + name);
+    writeAttribute("name", temp);
+    deleteAttribute("friendlyName");
+  }
+
+
+
+  temp = readAttribute("name");
+  if (temp != "") name = temp;
+  if (DEBUG_WIFIMANAGER) Serial.println ("name=" + name);
 
   temp = readAttribute("mqttServer");
   if (temp != "")  mqttServer = temp;
@@ -95,7 +103,7 @@ void saveParametersToFile() {
   writeAttribute("mqttServer", mqttServer);
   writeAttribute("mqttUsername", mqttUsername);
   writeAttribute("mqttPassword", mqttPassword);
-  writeAttribute("friendlyName", friendlyName);
+  writeAttribute("name", name);
 }
 
 // -------------------------------------------
@@ -116,7 +124,7 @@ void configModeCallback (WiFiManager *myWiFiManager) {
 
 void saveConfigCallback () {
   if (DEBUG_WIFIMANAGER)  Serial.println("Config callback");
-  if (String(wfm_friendlyName.getValue()) != "") friendlyName = wfm_friendlyName.getValue();
+  if (String(wfm_name.getValue()) != "") name = wfm_name.getValue();
   if (String(wfm_mqttServer.getValue()) != "")  mqttServer = wfm_mqttServer.getValue();
   if (String(wfm_mqttUsername.getValue()) != "") mqttUsername = wfm_mqttUsername.getValue();
   if (String(wfm_mqttPassword.getValue()) != "") mqttPassword = wfm_mqttPassword.getValue();
@@ -140,7 +148,7 @@ void connectWiFi_Manager(bool force_config) {
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
-  wifiManager.addParameter(&wfm_friendlyName);
+  wifiManager.addParameter(&wfm_name);
   wifiManager.addParameter(&wfm_mqttServer);
   wifiManager.addParameter(&wfm_mqttUsername);
   wifiManager.addParameter(&wfm_mqttPassword);

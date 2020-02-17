@@ -1,14 +1,14 @@
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.19.3";
+String softwareVersion = "1.21.0";
 String appId = "WMCII";
 
 String softwareInfo = "";
 String softwarePlatform = "";
 
 String thingId = "";
-String friendlyName = "";
+String name = "";
 
 #include <ESP8266WiFi.h>  // built in ESP8266 Core
 
@@ -93,7 +93,7 @@ void softwareInfo_setup() {
   softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
   softwarePlatform = ESP.getFullVersion();
   thingId = appId + "_" +  WiFi.macAddress().c_str();
-  friendlyName = thingId;
+  name = thingId;
 
   pinMode(LED_BUILTIN, OUTPUT);
 

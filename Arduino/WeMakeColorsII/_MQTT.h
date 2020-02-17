@@ -15,11 +15,8 @@ unsigned long upTime = 0;
 unsigned long lastMinute = 0;
 
 //status
-#define STATUS_INTERVAL 15 //minutes
+int STATUS_INTERVAL = 15; //minutes
 boolean publishStatus = false;
-
-
-
 
 //
 int RECONNECT_INTERVAL = 5000; //ms
@@ -43,7 +40,7 @@ void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc
 String prepareLastWillMessage() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-  doc["friendlyName"] = friendlyName;
+  doc["name"] = name;
   doc["upTime"] = -1;
 
   doc["softwareInfo"] = softwareInfo;
@@ -68,7 +65,7 @@ String prepareLastWillMessage() {
 void publishStatusMQTT() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-  doc["friendlyName"] = friendlyName;
+  doc["name"] = name;
   doc["upTime"] = upTime;
   if (upTime == 0) {
     doc["resetReason"] = ESP.getResetReason();
