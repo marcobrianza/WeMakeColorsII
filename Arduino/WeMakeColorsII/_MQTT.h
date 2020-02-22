@@ -5,9 +5,9 @@ boolean DEBUG_MQTT = true;
 #include <ArduinoJson.h> // version 6.14.1
 PubSubClient mqttClient(wifiClient);
 
-
-#define QOS_AT_LEAST_1 1
 #define QOS_BEST_EFFORT 0
+#define QOS_AT_LEAST_1 1
+#define QOS_EXACTLY_ONE 2;
 
 #define BLINK_NO_MQTT 3
 
@@ -67,6 +67,8 @@ void publishStatusMQTT() {
 
   doc["name"] = name;
   doc["upTime"] = upTime;
+  doc["RSSI"] = WiFi.RSSI();
+
   if (upTime == 0) {
     doc["resetReason"] = ESP.getResetReason();
   }
