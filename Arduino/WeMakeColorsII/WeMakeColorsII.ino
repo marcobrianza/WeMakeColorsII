@@ -1,7 +1,7 @@
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.22.0";
+String softwareVersion = "1.24.0";
 String appId = "WMCII";
 
 String softwareInfo = "";

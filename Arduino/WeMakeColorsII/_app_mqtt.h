@@ -107,6 +107,15 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
     }
 
     /*
+      {
+      "command":"status"
+      }
+    */
+    if (command == "status") {
+      publishStatus = true;
+    }
+
+    /*
          {
          "command":"info"
          }

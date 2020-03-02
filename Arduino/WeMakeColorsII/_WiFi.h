@@ -10,6 +10,11 @@ WiFiClient wifiClient;
 String defaultSSID = "colors";
 String defaultPassword = "colors01";
 
+//optional parameterf for static ip
+String network = "192.168.3.";
+String gateway = "254";
+String dns = "8.8.8.8";
+
 //saved ssid password from previous connection
 String  savedSSID;
 String  savedPassword;
@@ -42,7 +47,7 @@ void disableWiFi() {
 }
 
 
-void WiFi_setup() {
+void WiFi_setup(String ip="") {
 
   savedSSID = WiFi.SSID();
   savedPassword = WiFi.psk();
@@ -61,6 +66,17 @@ void WiFi_setup() {
   //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
 
   WiFi.hostname(name);
+
+  if (ip != "") {
+    IPAddress IP, GW, DNS ;
+
+    IP.fromString(network + ip);
+    GW.fromString(network + gateway);
+    DNS.fromString(dns);
+
+    WiFi.config(IP, DNS, GW );
+
+  }
 }
 
 
@@ -244,7 +260,7 @@ void autoUpdate() {
       if ((ESP.getSketchMD5() != md5) && (md5.length() == 32) ) {
         if (DEBUG_WIFI) Serial.println("Trying update...");
         showState(AUTO_UPDATE);
-        
+
         int u = httpUpdate(FW_URL);
         if (u != HTTP_UPDATE_OK)Serial.println("update error"); showState(UPDATE_ERROR) ;
       }
