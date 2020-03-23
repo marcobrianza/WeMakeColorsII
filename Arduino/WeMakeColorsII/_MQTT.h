@@ -2,7 +2,7 @@ boolean DEBUG_MQTT = true;
 
 
 #include <PubSubClient.h> // version 2.7.0 in PubSubClient.h (line 26) change #define MQTT_MAX_PACKET_SIZE 512 (from 128)
-#include <ArduinoJson.h> // version 6.14.1
+#include <ArduinoJson.h> // version 6.15.0
 PubSubClient mqttClient(wifiClient);
 
 #define QOS_BEST_EFFORT 0
@@ -30,12 +30,21 @@ void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc
     char mqttData[MQTT_MAX_PACKET_SIZE];
     serializeJson(jdoc, mqttData);
 
-
     int ret = mqttClient.publish(mqttTopic.c_str(), mqttData, retained);
-    if (DEBUG_MQTT) Serial.println(String(ret) + " " +  String(String(mqttData).length()) + " MQTT sent: " + mqttTopic + " " + mqttData );
+    if (DEBUG_MQTT) Serial.println(String(ret) + "   MQTT sent: " +  String(String(mqttData).length()) + " " + mqttTopic + " " + mqttData );
 
   } else if (DEBUG_MQTT)  Serial.println("publish " + mqttTopic + ": MQTT not connected");
 }
+
+
+
+
+//----------------------
+
+#include "_app_mqtt.h"
+
+
+//-------------------------
 
 String prepareLastWillMessage() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
@@ -52,15 +61,6 @@ String prepareLastWillMessage() {
   return (lastWillMessage);
 }
 
-
-
-
-//----------------------
-
-#include "_app_mqtt.h"
-
-
-//-------------------------
 
 void publishStatusMQTT() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;

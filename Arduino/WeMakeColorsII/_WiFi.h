@@ -47,6 +47,8 @@ void disableWiFi() {
 }
 
 
+
+
 void WiFi_setup(String ip="") {
 
   savedSSID = WiFi.SSID();
@@ -79,7 +81,26 @@ void WiFi_setup(String ip="") {
   }
 }
 
+IPAddress AP_local_IP(192, 168, 42, 254);
+IPAddress AP_gateway(192, 168, 42, 254);
+IPAddress AP_subnet(255, 255, 255, 0);
 
+void startAP(String APssid , String APpassword) {
+  WiFi.mode(WIFI_AP);
+
+  Serial.println();
+  Serial.print("Configuring access point: " + APssid + " ");
+  /* You can remove the password parameter if you want the AP to be open. */
+  WiFi.softAPConfig(AP_local_IP, AP_gateway, AP_subnet);
+  if (WiFi.softAP(APssid.c_str(), APpassword.c_str(), 1, false, 8)) { //ssid,pass,channel,hidden, clients
+    Serial.println("OK");
+  } else {
+    Serial.println("ERROR");
+  }
+  delay(200);
+  Serial.println("AP IP address: " + WiFi.softAPIP().toString());
+
+}
 
 void connectWiFi_Smart() {
   if (DEBUG_WIFI) Serial.println("Starting ESPTouch SmartConfig");
