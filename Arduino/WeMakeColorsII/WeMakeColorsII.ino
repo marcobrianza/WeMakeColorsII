@@ -1,7 +1,7 @@
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.26.0";
+String softwareVersion = "1.27.0";
 String appId = "WMCII";
 
 String softwareInfo = "";
@@ -79,7 +79,7 @@ void loop() {
     lastAppTime = millis();
     if (checkLight()) {
       CHSV c = newRndColor();
-      setMyLED(c);
+      setLED(MY_LED, c);
       publishEvent(c);
     }
   }

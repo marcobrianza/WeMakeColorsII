@@ -21,8 +21,13 @@ float averageLightLevelW = 0.2;
 float globalLightLevel = 1023;
 float globalLightLevelW = 0.004;
 
+bool AUTO_BRIGHTNESS = true;
+
 
 #define abs2(x) ((x)>0?(x):-(x))
+
+#define MY_LED 0
+#define REMOTE_LED 1
 
 void app_setup() {
   setupLEDs();
@@ -112,29 +117,33 @@ CHSV newRndColor() {
 }
 
 
-void showLLEDs() {
+void showLEDs() {
 
-  int mb = map(globalLightLevel, 0, 512, 64, 255);
-  if (mb > 255) mb = 255;
-  FastLED.setBrightness(mb);
+  if (AUTO_BRIGHTNESS) {
+    //Serial.println("Setting AUTO_BRIGHTNESS");
+    GLOBAL_BRIGHTNESS = map(globalLightLevel, 0, 512, 64, 255);
+  }
+  if (GLOBAL_BRIGHTNESS > 255) GLOBAL_BRIGHTNESS = 255;
+
+  FastLED.setBrightness(GLOBAL_BRIGHTNESS);
   FastLED.show();
 
-  //  Serial.print("globalLightLevel: ");
-  //  Serial.print(globalLightLevel);
-  //  Serial.print(" ");
-  //  Serial.println(mb);
+  Serial.println("AUTO_BRIGHTNESS: " + String(AUTO_BRIGHTNESS));
+  Serial.println("globalLightLevel: " + String(globalLightLevel));
+  Serial.println("GLOBAL_BRIGHTNESS " + String(GLOBAL_BRIGHTNESS));
+
 }
 
 
-void setMyLED(CHSV newC) {
-  leds[0] = newC;
-  showLLEDs();
+
+void setLED(int i, CHSV newC) {
+  if (i < NUM_LEDS) {
+    leds[i] = newC;
+    showLEDs();
+  } else if (DEBUG_APP) Serial.println("pixel index to high");
+
 }
 
-void setRemoteLED(CHSV newC) {
-  leds[1] = newC;
-  showLLEDs();
-}
 
 void  app_testDevice() {
 
