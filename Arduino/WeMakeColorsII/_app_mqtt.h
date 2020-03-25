@@ -43,9 +43,11 @@ void subscribeMQTT() {
 
 // ---- MQTT receive-------------------
 
-// { "globalBrightness":255, "pixel":0, "h": 0,"s": 128,"v": 255}
+
 
 void processAction(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
+
+  // { "globalBrightness":255, "pixel":0, "h": 0,"s": 128,"v": 255}
   if (doc.containsKey("globalBrightness")) {
     int l = doc["globalBrightness"];
     l = constrain(l, 0, 255);
@@ -71,10 +73,36 @@ void processAction(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
     setLED(p, CHSV(h, s, v));
   }
 
+  // {"pixels":"255 0 0 0 0 255"}
   if (doc.containsKey("pixels")) {
-    if (DEBUG_MQTT)  Serial.println("pixels: ");
-  }
+    String p = doc["pixels"];
 
+    if (DEBUG_MQTT)  Serial.println("pixels: " + p);
+
+    char sep=' ';
+    p = p + sep;
+    int l = 0;
+    String s = "";
+    int b =  NUM_LEDS * 3;
+    byte newPixels[b];
+
+    for (int i = 0; i < p.length() ; i++) {
+      char c = p.charAt(i);
+      if (c == sep) {
+        byte v = s.toInt();
+        newPixels[l] = v;
+        Serial.println (v);
+        s = "";
+        l++;
+        if (l == b) break;
+      } else s = s + c;
+    }
+    Serial.println(l);
+    if (l == b) {
+      memmove(&leds[0], &newPixels[0], b);
+      FastLED.show();
+    }
+  }
 
 
 }
@@ -140,6 +168,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
     if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
   }
   else {
+
     //Serial.println("deserializeJson():ok");
     //--------------event---------------------
     if (topic_leaf == mqttTopicEvent) {

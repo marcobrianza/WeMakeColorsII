@@ -128,9 +128,9 @@ void showLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
   FastLED.show();
 
-  Serial.println("AUTO_BRIGHTNESS: " + String(AUTO_BRIGHTNESS));
-  Serial.println("globalLightLevel: " + String(globalLightLevel));
-  Serial.println("GLOBAL_BRIGHTNESS " + String(GLOBAL_BRIGHTNESS));
+//  Serial.println("AUTO_BRIGHTNESS: " + String(AUTO_BRIGHTNESS));
+//  Serial.println("globalLightLevel: " + String(globalLightLevel));
+//  Serial.println("GLOBAL_BRIGHTNESS " + String(GLOBAL_BRIGHTNESS));
 
 }
 
