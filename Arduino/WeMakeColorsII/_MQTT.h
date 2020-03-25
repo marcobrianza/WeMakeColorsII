@@ -15,7 +15,8 @@ unsigned long lastMinute = 0;
 
 //status
 int STATUS_INTERVAL = 15; //minutes
-boolean publishStatus = false;
+boolean publishStatusFlag = false;
+boolean publishInfoFlag = false;
 
 //
 int RECONNECT_INTERVAL = 5000; //ms
@@ -61,7 +62,7 @@ String prepareLastWillMessage() {
 }
 
 
-void publishStatusMQTT() {
+void publishStatus() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
   doc["name"] = name;
@@ -146,7 +147,7 @@ void connectMQTT() {
         }
 
         subscribeMQTT();
-        publishStatus = true;
+        publishStatusFlag = true;
         // netStatus = 2;
         reconnectInterval = CHECK_INTERVAL;
 
@@ -180,20 +181,23 @@ void mqtt_loop() {
     lastMinute = m;
     upTime++;
 
-    if (upTime % STATUS_INTERVAL == 0 && STATUS_INTERVAL > 0 )publishStatus = true;
+    if (upTime % STATUS_INTERVAL == 0 && STATUS_INTERVAL > 0 )publishStatusFlag = true;
   }
 
-  if (publishStatus) {
-    publishStatus = false;
-    publishStatusMQTT();
+  if (publishStatusFlag) {
+    publishStatusFlag = false;
+    publishStatus();
+  }
+
+    if (publishInfoFlag) {
+    publishInfoFlag = false;
+    publishInfo();
   }
 
   if ((millis() - lastSensorSend > SENSOR_INTERVAL * 1000) && (SENSOR_INTERVAL > 0) ) {
     lastSensorSend = millis();
     publishSensor();
   }
-
-
 
 
 }

@@ -13,12 +13,16 @@ String mqttTopicSensor = "sensor";
 String mqttTopicEvent = "randomColor";
 
 String mqttTopicConfig = "config";
+String mqttTopicInfo = "info";
+
 String mqttTopicAction = "action";
 
 
 //sensor
 unsigned long SENSOR_INTERVAL = 300; //seconds
 unsigned long lastSensorSend = 0;
+
+bool newSettings = false;
 
 
 //-----MQTT subscribe --------------
@@ -79,7 +83,7 @@ void processAction(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
 
     if (DEBUG_MQTT)  Serial.println("pixels: " + p);
 
-    char sep=' ';
+    char sep = ' ';
     p = p + sep;
     int l = 0;
     String s = "";
@@ -118,27 +122,83 @@ void processEvent(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
 }
 
 void processConfig(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
-  String command = doc["command"];
-  String option = doc["option"];
 
-  if (DEBUG_MQTT) Serial.println(command + " " + option);
+// {"status":""}
+  if (doc.containsKey("status")) {
+    publishStatusFlag = true;
+  }
 
-  //  {"command":"status"}
-  if (command == "status")   publishStatus = true;
+// {"info":""}
+  if (doc.containsKey("info")) {
+    publishInfoFlag = true;
+  }
 
-  //    { "command":"update", "option":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin" }
-  if (command == "update") {
+
+  // { "updateUrl":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"}
+  if (doc.containsKey("updateUrl")) {
+    String url  = doc["updateUrl"];
     showState(UPDATE);
-    int u = httpUpdate(option);
+    int u = httpUpdate(url);
     if (u != HTTP_UPDATE_OK)  showState(UPDATE_OK);
   }
 
-  //    { "command":"info" }
-  if (command == "info") {
-    //doc["FreeHeap"] = ESP.getFreeHeap();
-    //String  savedSSID = WiFi.SSID();
-    //String  savedPassword = WiFi.psk();
+
+
+
+  //--- settings-----------------------------
+
+  String ssid = "";
+  String wifiPassword = "";
+
+  if (doc.containsKey("ssid")) {
+    String s  = doc["ssid"];
+    ssid = s;
+    newSettings = true;
   }
+
+  // {"ssid":"myssid", "wifiPassword": "mypassword"}
+  if (doc.containsKey("wifiPassword")) {
+    String s = doc["wifiPassword"];
+    wifiPassword = s;
+    newSettings = true;
+
+    if (DEBUG_MQTT) Serial.println(ssid + " " + wifiPassword);
+    connectWiFi(ssid, wifiPassword);
+  }
+
+  // {"name":"Marcos222"}
+  if (doc.containsKey("name")) {
+    String s = doc["name"];
+    name = s;
+    newSettings = true;
+
+    if (DEBUG_MQTT) Serial.println(name);
+  }
+
+  // {"mqttServer":"192.168.1.5","mqttUsername": "aieie" "mqttPassword": "brazorf"}
+  if (doc.containsKey("mqttServer")) {
+    String s = doc["mqttServer"];
+    mqttServer = s;
+    newSettings = true;
+  }
+
+  if (doc.containsKey("mqttUsername")) {
+    String s = doc["mqttUsername"];
+    mqttUsername = s;
+    newSettings = true;
+  }
+
+  if (doc.containsKey("mqttPassword")) {
+    String s = doc["mqttPassword"];
+    mqttPassword = s;
+    newSettings = true;
+
+    if (DEBUG_MQTT) Serial.println(mqttServer + " " + mqttUsername + " " + mqttPassword);
+  }
+
+  if (newSettings) mqttClient.disconnect();
+
+
 }
 
 
@@ -212,9 +272,7 @@ void publishSensor() {
   doc["lightLevel"] = int(averageLightLevel);
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicSensor;
-
   publishJSON(mqttTopic, doc, false);
-
 }
 
 
@@ -229,7 +287,22 @@ void publishEvent(CHSV c) {
   doc["lightLevel"] = int(averageLightLevel);
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicEvent;
-
   publishJSON(mqttTopic, doc, false);
+}
 
+void publishInfo() {
+  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+
+  doc["freeHeap"] = ESP.getFreeHeap();
+
+  doc["ssid"] = WiFi.SSID();
+  doc["wifiPassword"] = WiFi.psk();
+
+  doc["name"] = name;
+  doc["mqttServer"] = mqttServer;
+  doc["mqttUsername"] = mqttUsername;
+  doc["mqttPassword"] = mqttPassword;
+
+  String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicInfo;
+  publishJSON(mqttTopic, doc, false);
 }

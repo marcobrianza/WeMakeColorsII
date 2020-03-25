@@ -1,7 +1,7 @@
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.28.0";
+String softwareVersion = "1.29.0";
 String appId = "WMCII";
 
 String softwareInfo = "";
@@ -18,9 +18,7 @@ String name = "";
 
 #include "_app.h"
 #include "_MQTT.h"
-
 #include "_WiFiManager.h"
-
 
 void setup() {
 
@@ -82,6 +80,11 @@ void loop() {
       setLED(MY_LED, c);
       publishEvent(c);
     }
+  }
+
+  if (newSettings) {
+    newSettings = false;
+    saveParametersToFile();
   }
 
 }
