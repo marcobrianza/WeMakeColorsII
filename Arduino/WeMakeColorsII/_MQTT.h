@@ -72,9 +72,6 @@ void publishStatus() {
   if (upTime == 0) {
     doc["resetReason"] = ESP.getResetReason();
   }
-  doc["softwareInfo"] = softwareInfo;
-  doc["softwarePlatform"] = softwarePlatform;
-
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicStatus;
   publishJSON(mqttTopic, doc, true);
@@ -148,6 +145,7 @@ void connectMQTT() {
 
         subscribeMQTT();
         publishStatusFlag = true;
+        publishInfoFlag = true;
         // netStatus = 2;
         reconnectInterval = CHECK_INTERVAL;
 
@@ -189,7 +187,7 @@ void mqtt_loop() {
     publishStatus();
   }
 
-    if (publishInfoFlag) {
+  if (publishInfoFlag) {
     publishInfoFlag = false;
     publishInfo();
   }

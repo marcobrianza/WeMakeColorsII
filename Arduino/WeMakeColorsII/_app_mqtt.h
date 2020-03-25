@@ -6,7 +6,6 @@ String mqttPassword = "";
 
 String mqttRoot =   "WeMakeColorsII";
 
-
 String mqttTopicStatus = "status";
 String mqttTopicSensor = "sensor";
 
@@ -16,7 +15,6 @@ String mqttTopicConfig = "config";
 String mqttTopicInfo = "info";
 
 String mqttTopicAction = "action";
-
 
 //sensor
 unsigned long SENSOR_INTERVAL = 300; //seconds
@@ -123,12 +121,12 @@ void processEvent(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
 
 void processConfig(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
 
-// {"status":""}
+  // {"status":""}
   if (doc.containsKey("status")) {
     publishStatusFlag = true;
   }
 
-// {"info":""}
+  // {"info":""}
   if (doc.containsKey("info")) {
     publishInfoFlag = true;
   }
@@ -197,7 +195,6 @@ void processConfig(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
   }
 
   if (newSettings) mqttClient.disconnect();
-
 
 }
 
@@ -293,16 +290,20 @@ void publishEvent(CHSV c) {
 void publishInfo() {
   StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
 
-  doc["freeHeap"] = ESP.getFreeHeap();
+  doc["name"] = name;
+  // doc["freeHeap"] = ESP.getFreeHeap();
+
+  doc["softwareInfo"] = softwareInfo;
+  doc["softwarePlatform"] = softwarePlatform;
 
   doc["ssid"] = WiFi.SSID();
   doc["wifiPassword"] = WiFi.psk();
 
-  doc["name"] = name;
+
   doc["mqttServer"] = mqttServer;
   doc["mqttUsername"] = mqttUsername;
   doc["mqttPassword"] = mqttPassword;
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicInfo;
-  publishJSON(mqttTopic, doc, false);
+  publishJSON(mqttTopic, doc, true);
 }
