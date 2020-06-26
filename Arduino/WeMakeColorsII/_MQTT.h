@@ -1,7 +1,7 @@
 boolean DEBUG_MQTT = true;
 
-#include <PubSubClient.h> // version 2.7.0 in PubSubClient.h (line 26) change #define MQTT_MAX_PACKET_SIZE 512 (from 128)
-#include <ArduinoJson.h> // version 6.15.0
+#include <PubSubClient.h> // version 2.8.0
+#include <ArduinoJson.h> // version 6.15.2
 PubSubClient mqttClient(wifiClient);
 
 #define QOS_BEST_EFFORT 0
@@ -10,6 +10,8 @@ PubSubClient mqttClient(wifiClient);
 
 #define BLINK_NO_MQTT 3
 
+#define MQTT_BUFFER 512
+
 unsigned long upTime = 0;
 unsigned long lastMinute = 0;
 
@@ -17,6 +19,7 @@ unsigned long lastMinute = 0;
 int STATUS_INTERVAL = 15; //minutes
 boolean publishStatusFlag = false;
 boolean publishInfoFlag = false;
+boolean softwareUpdateFlag = false;
 
 //
 int RECONNECT_INTERVAL = 5000; //ms
@@ -24,10 +27,10 @@ int CHECK_INTERVAL = 20000; //ms
 int reconnectInterval = RECONNECT_INTERVAL;
 unsigned long lastConnectTime = 0;
 
-void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc, bool retained) {
+void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_BUFFER> jdoc, bool retained) {
   if (mqttClient.connected()) {
 
-    char mqttData[MQTT_MAX_PACKET_SIZE];
+    char mqttData[MQTT_BUFFER];
     serializeJson(jdoc, mqttData);
 
     int ret = mqttClient.publish(mqttTopic.c_str(), mqttData, retained);
@@ -47,7 +50,7 @@ void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_MAX_PACKET_SIZE> jdoc
 //-------------------------
 
 String prepareLastWillMessage() {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  StaticJsonDocument<MQTT_BUFFER> doc;
 
   doc["name"] = name;
   doc["upTime"] = -1;
@@ -62,16 +65,21 @@ String prepareLastWillMessage() {
 }
 
 
-void publishStatus() {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+void publishStatus(String extraAttribute = "", String extraValue = "") {
+  StaticJsonDocument<MQTT_BUFFER> doc;
 
   doc["name"] = name;
   doc["upTime"] = upTime;
   doc["RSSI"] = WiFi.RSSI();
 
-  if (upTime == 0) {
+  static bool firstStatus = true;
+  if (firstStatus) {
+    firstStatus = false;
     doc["resetReason"] = ESP.getResetReason();
   }
+
+
+  if (extraAttribute != "") doc[extraAttribute] = extraValue;
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicStatus;
   publishJSON(mqttTopic, doc, true);
@@ -166,6 +174,10 @@ void connectMQTT() {
 }
 
 
+void mqtt_setup() {
+  mqttClient.setBufferSize(MQTT_BUFFER);
+}
+
 void mqtt_loop() {
   mqttClient.loop();
 
@@ -195,6 +207,23 @@ void mqtt_loop() {
   if ((millis() - lastSensorSend > SENSOR_INTERVAL * 1000) && (SENSOR_INTERVAL > 0) ) {
     lastSensorSend = millis();
     publishSensor();
+  }
+
+  if (softwareUpdateFlag) {
+    softwareUpdateFlag = false;
+
+    publishInfo();
+    publishStatus("softwareUpdate", updateUrl );
+
+    showState(UPDATE);
+    String u = httpUpdate(updateUrl);
+
+    if (u == "HTTP_UPDATE_OK")  {
+      showState(UPDATE_OK);
+    } else {
+      showState(UPDATE_ERROR);
+      publishStatus("softwareUpdate", "http:error:" + u);
+    }
   }
 
 

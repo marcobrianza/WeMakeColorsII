@@ -1,7 +1,11 @@
+// tested on ESP8266 Core 2.7.1
+// use FS:1MB
+// https://arduino.esp8266.com/stable/package_esp8266com_index.json
+
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.29.1";
+String softwareVersion = "1.30.15";
 String appId = "WMCII";
 
 String softwareInfo = "";
@@ -60,6 +64,7 @@ void setup() {
 
   autoUpdate();
   OTA_setup();
+  mqtt_setup();
 
   ledOFF();
   if (DEBUG_MAIN) Serial.println("starting loop");

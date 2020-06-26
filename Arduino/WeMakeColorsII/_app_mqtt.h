@@ -22,6 +22,7 @@ unsigned long lastSensorSend = 0;
 
 bool newSettings = false;
 
+String updateUrl = "";
 
 //-----MQTT subscribe --------------
 
@@ -47,7 +48,7 @@ void subscribeMQTT() {
 
 
 
-void processAction(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
+void processAction(StaticJsonDocument<MQTT_BUFFER>  doc) {
 
   // { "globalBrightness":255, "pixel":0, "h": 0,"s": 128,"v": 255}
   if (doc.containsKey("globalBrightness")) {
@@ -109,7 +110,7 @@ void processAction(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
 
 }
 
-void processEvent(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
+void processEvent(StaticJsonDocument<MQTT_BUFFER>  doc) {
   // {"h": 0,"s": 128,"v": 255}
   int h = doc["h"];
   int s = doc["s"];
@@ -119,7 +120,8 @@ void processEvent(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
 
 }
 
-void processConfig(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
+// WeMakeColorsII/WMCII_CC:50:E3:C4:94:1C/config
+void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
 
   // {"status":""}
   if (doc.containsKey("status")) {
@@ -132,18 +134,19 @@ void processConfig(StaticJsonDocument<MQTT_MAX_PACKET_SIZE>  doc) {
   }
 
 
-  // { "updateUrl":"http://iot.marcobrianza.it/WeMakeColorsII/WeMakeColorsII.ino.d1_mini.bin"}
+  // { "updateUrl":"http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini-1.30.4.bin"}
   if (doc.containsKey("updateUrl")) {
-    String url  = doc["updateUrl"];
-    showState(UPDATE);
-    int u = httpUpdate(url);
-    if (u != HTTP_UPDATE_OK)  showState(UPDATE_OK);
+    String s = doc["updateUrl"];
+    updateUrl = s;
+    if (DEBUG_MQTT)  Serial.println("updateURL: " + updateUrl);
+    softwareUpdateFlag = true;
   }
 
 
 
 
   //--- settings-----------------------------
+
 
   String ssid = "";
   String wifiPassword = "";
@@ -219,7 +222,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
   //  Serial.println(topic_id);
   //  Serial.println(topic_leaf);
 
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  StaticJsonDocument<MQTT_BUFFER> doc;
   DeserializationError error = deserializeJson(doc, payload);
   if (error) {
     if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
@@ -263,7 +266,7 @@ void mqttReceive(char* topic, byte* payload, unsigned int length) {
 
 
 void publishSensor() {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  StaticJsonDocument<MQTT_BUFFER> doc;
 
   doc["name"] = name;
   doc["lightLevel"] = int(averageLightLevel);
@@ -274,7 +277,7 @@ void publishSensor() {
 
 
 void publishEvent(CHSV c) {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  StaticJsonDocument<MQTT_BUFFER> doc;
 
   doc["h"] = c.h;
   doc["s"] = c.s;
@@ -288,7 +291,7 @@ void publishEvent(CHSV c) {
 }
 
 void publishInfo() {
-  StaticJsonDocument<MQTT_MAX_PACKET_SIZE> doc;
+  StaticJsonDocument<MQTT_BUFFER> doc;
 
   doc["name"] = name;
   // doc["freeHeap"] = ESP.getFreeHeap();

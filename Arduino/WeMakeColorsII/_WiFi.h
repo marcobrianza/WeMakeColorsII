@@ -49,7 +49,7 @@ void disableWiFi() {
 
 
 
-void WiFi_setup(String ip="") {
+void WiFi_setup(String ip = "") {
 
   savedSSID = WiFi.SSID();
   savedPassword = WiFi.psk();
@@ -202,7 +202,6 @@ void OTA_setup() {
   ArduinoOTA.setPort(8266); // Port defaults to 8266
   ArduinoOTA.setHostname(name.c_str());
 
-  //ArduinoOTA.setPassword((const char *) OTA_PASSWORD.c_str());
   ArduinoOTA.setPassword(OTA_PASSWORD.c_str());
 
   ArduinoOTA.onStart([]() {
@@ -242,7 +241,7 @@ void OTA_setup() {
 
 // -----  http update ----------------
 
-int httpUpdate(String url) {
+String httpUpdate(String url) {
   t_httpUpdate_return ret = ESPhttpUpdate.update(url);
   String result;
 
@@ -258,7 +257,8 @@ int httpUpdate(String url) {
       break;
   }
 
-  if (DEBUG_WIFI) Serial.print(result);
+return result;
+  if (DEBUG_WIFI) Serial.println("httpUpdate:" + result);
 }
 
 
@@ -282,8 +282,8 @@ void autoUpdate() {
         if (DEBUG_WIFI) Serial.println("Trying update...");
         showState(AUTO_UPDATE);
 
-        int u = httpUpdate(FW_URL);
-        if (u != HTTP_UPDATE_OK)Serial.println("update error"); showState(UPDATE_ERROR) ;
+        String u = httpUpdate(FW_URL);
+        if (u != "HTTP_UPDATE_OK") showState(UPDATE_ERROR) ;
       }
       else {
         if (DEBUG_WIFI) Serial.println("will not update");
