@@ -120,6 +120,8 @@ void processEvent(StaticJsonDocument<MQTT_BUFFER>  doc) {
 
 }
 
+
+
 // WeMakeColorsII/WMCII_CC:50:E3:C4:94:1C/config
 void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
 

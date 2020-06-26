@@ -257,7 +257,7 @@ String httpUpdate(String url) {
       break;
   }
 
-return result;
+  return result;
   if (DEBUG_WIFI) Serial.println("httpUpdate:" + result);
 }
 
@@ -270,20 +270,20 @@ void autoUpdate() {
 
   if (httpCode > 0) {
     // HTTP header has been send and Server response header has been handled
-    if (DEBUG_WIFI)Serial.print("[HTTP] GET " + MD5_URL);
-    if (DEBUG_WIFI)Serial.println("... code:" + String(httpCode));
+    if (DEBUG_WIFI)Serial.println(MD5_URL + " " + String(httpCode));
 
     // file found at server
     if (httpCode == HTTP_CODE_OK) {
       String md5 = http.getString();
-      if (DEBUG_WIFI)Serial.println("Server md5: " + md5);
-      if (DEBUG_WIFI) Serial.println(" Board md5: " + ESP.getSketchMD5());
+      if (DEBUG_WIFI)Serial.println("Server md5: " + md5 + " " + md5.length());
+      if (DEBUG_WIFI)Serial.println("Board md5:  " + ESP.getSketchMD5());
       if ((ESP.getSketchMD5() != md5) && (md5.length() == 32) ) {
         if (DEBUG_WIFI) Serial.println("Trying update...");
         showState(AUTO_UPDATE);
 
         String u = httpUpdate(FW_URL);
-        if (u != "HTTP_UPDATE_OK") showState(UPDATE_ERROR) ;
+        if (u == "HTTP_UPDATE_OK") showState(OK) ;
+        else showState(UPDATE_ERROR) ;
       }
       else {
         if (DEBUG_WIFI) Serial.println("will not update");
