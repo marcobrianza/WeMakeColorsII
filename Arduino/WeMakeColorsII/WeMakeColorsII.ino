@@ -1,11 +1,11 @@
-// tested on ESP8266 Core 2.7.1
+// tested on ESP8266 Core 2.7.4
 // use FS:1MB
 // https://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.30.17";
+String softwareVersion = "1.31.2";
 String appId = "WMCII";
 
 String softwareInfo = "";

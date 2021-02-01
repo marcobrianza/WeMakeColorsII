@@ -1,7 +1,7 @@
 boolean DEBUG_MQTT = true;
 
 #include <PubSubClient.h> // version 2.8.0
-#include <ArduinoJson.h> // version 6.15.2
+#include <ArduinoJson.h> // version 6.17.2
 PubSubClient mqttClient(wifiClient);
 
 #define QOS_BEST_EFFORT 0

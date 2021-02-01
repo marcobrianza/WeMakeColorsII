@@ -1,5 +1,13 @@
 //LED
-#include <FastLED.h> // version  3.3.3
+#include <FastLED.h> // version  3.4.0
+
+// standard defines for WMCII
+#define LED_PIN D1
+#define LED_ORDER GRB
+
+// defines for IoT kit
+//#define LED_PIN D5
+//#define LED_ORDER RGB
 
 int GLOBAL_BRIGHTNESS = 255;
 
@@ -8,7 +16,7 @@ CRGB leds[NUM_LEDS];
 
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
-  FastLED.addLeds<WS2812B, D1, GRB>(leds, NUM_LEDS); //D1 is GPIO5
+  FastLED.addLeds<WS2812B, LED_PIN, LED_ORDER>(leds, NUM_LEDS);
 }
 
 void showAllLeds(CRGB c ) {
