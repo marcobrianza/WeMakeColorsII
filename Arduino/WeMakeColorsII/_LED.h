@@ -1,13 +1,16 @@
 //LED
 #include <FastLED.h> // version  3.4.0
 
-// standard defines for WMCII
-#define LED_PIN D1
-#define LED_ORDER GRB
 
-// defines for IoT kit
-//#define LED_PIN D5
-//#define LED_ORDER RGB
+#if BOARD_TYPE==IOTKIT// defines for IoT kit
+  #define LED_PIN D5
+  #define LED_ORDER RGB
+#elif BOARD_TYPE==WMCII //standard defines for WMCII
+  #define LED_PIN D1
+  #define LED_ORDER GRB
+# else 
+  #error("please define a compatible BOARD_TYPE");
+#endif
 
 int GLOBAL_BRIGHTNESS = 255;
 

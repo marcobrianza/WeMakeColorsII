@@ -2,10 +2,16 @@
 // use FS:1MB
 // https://arduino.esp8266.com/stable/package_esp8266com_index.json
 
+
+#define WMCII 0
+#define IOTKIT 1
+
+#define BOARD_TYPE WMCII  //please define one of the above boards
+
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.31.2";
+String softwareVersion = "1.40.1";
 String appId = "WMCII";
 
 String softwareInfo = "";
@@ -23,6 +29,9 @@ String name = "";
 #include "_app.h"
 #include "_MQTT.h"
 #include "_WiFiManager.h"
+
+
+
 
 void setup() {
 
@@ -67,7 +76,9 @@ void setup() {
   mqtt_setup();
 
   ledOFF();
+  if (DEBUG_MAIN) Serial.println("BOARD_TYPE:" + String(BOARD_TYPE));
   if (DEBUG_MAIN) Serial.println("starting loop");
+
 }
 
 void loop() {
@@ -87,12 +98,25 @@ void loop() {
     }
   }
 
+
+#if BOARD_TYPE==IOTKIT
+  if ( ((millis() - lastButtonTime) > BUTTON_INTERVAL) && !digitalRead(BUTTON) )  {
+    lastButtonTime = millis();
+
+    CHSV c = newRndColor();
+    setLED(MY_LED, c);
+    publishEvent(c);
+  }
+#endif
+
   if (newSettings) {
     newSettings = false;
     saveParametersToFile();
   }
 
 }
+
+
 
 
 

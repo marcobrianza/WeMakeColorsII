@@ -1,7 +1,10 @@
 boolean DEBUG_APP = true;
 
 unsigned long lastAppTime = 0;
-int APP_INTERVAL = 100;
+unsigned long  APP_INTERVAL = 100;
+
+unsigned long lastButtonTime = 0;
+unsigned long  BUTTON_INTERVAL = 2000;
 
 //------
 
@@ -29,10 +32,13 @@ bool AUTO_BRIGHTNESS = true;
 #define MY_LED 0
 #define REMOTE_LED 1
 
+#define BUTTON D6
+
 void app_setup() {
   setupLEDs();
   showState(APP_START);
   globalLightLevel = analogRead(inputPin);
+  pinMode(BUTTON, INPUT_PULLUP);
 }
 
 
@@ -105,6 +111,8 @@ boolean checkLight() {
 
 
 
+
+
 CHSV newRndColor() {
 
   int h = random(0, 255);
@@ -128,9 +136,9 @@ void showLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
   FastLED.show();
 
-//  Serial.println("AUTO_BRIGHTNESS: " + String(AUTO_BRIGHTNESS));
-//  Serial.println("globalLightLevel: " + String(globalLightLevel));
-//  Serial.println("GLOBAL_BRIGHTNESS " + String(GLOBAL_BRIGHTNESS));
+  //  Serial.println("AUTO_BRIGHTNESS: " + String(AUTO_BRIGHTNESS));
+  //  Serial.println("globalLightLevel: " + String(globalLightLevel));
+  //  Serial.println("GLOBAL_BRIGHTNESS " + String(GLOBAL_BRIGHTNESS));
 
 }
 
