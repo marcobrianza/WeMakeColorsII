@@ -8,10 +8,11 @@
 
 #define BOARD_TYPE WMCII  //please define one of the above boards
 
+
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.40.1";
+String softwareVersion = "1.40.2";
 String appId = "WMCII";
 
 String softwareInfo = "";
@@ -29,8 +30,6 @@ String name = "";
 #include "_app.h"
 #include "_MQTT.h"
 #include "_WiFiManager.h"
-
-
 
 
 void setup() {

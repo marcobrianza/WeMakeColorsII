@@ -206,26 +206,28 @@ void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
 
 
 
-void mqttReceive(char* topic, byte* payload, unsigned int length) {
-  String Topic = String(topic);
-  payload[length] = 0;
-  String Payload = String((char*)payload);
+void mqttReceive(char* rawTopic, byte* rawPayload, unsigned int length) {
+  String topic = rawTopic;
+  
+  rawPayload[length] = 0;
+  String strPayload = String((char*)rawPayload);
 
-  if (DEBUG_MQTT)  Serial.println("MQTT received: " + String(length) + " " + Topic + " " + Payload);
+
+  if (DEBUG_MQTT)  Serial.println("MQTT received: " + String(length) + " " + topic + " " + strPayload);
 
   int p1 = mqttRoot.length() + 1;
-  int p2 = Topic.indexOf("/", p1);
+  int p2 = topic.indexOf("/", p1);
 
   //String topic_root = String(topic).substring(0, p1 - 1);
-  String topic_id = String(topic).substring(p1, p2);
-  String topic_leaf = String(topic).substring(p2 + 1);
+  String topic_id = topic.substring(p1, p2);
+  String topic_leaf = topic.substring(p2 + 1);
 
   //  Serial.println(topic_root);
   //  Serial.println(topic_id);
   //  Serial.println(topic_leaf);
 
   StaticJsonDocument<MQTT_BUFFER> doc;
-  DeserializationError error = deserializeJson(doc, payload);
+  DeserializationError error = deserializeJson(doc, strPayload);
   if (error) {
     if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
   }
