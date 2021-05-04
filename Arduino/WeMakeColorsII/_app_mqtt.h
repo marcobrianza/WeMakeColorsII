@@ -48,11 +48,11 @@ void subscribeMQTT() {
 
 
 
-void processAction(StaticJsonDocument<MQTT_BUFFER>  doc) {
+void processAction(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
 
   // { "globalBrightness":255, "pixel":0, "h": 0,"s": 128,"v": 255}
-  if (doc.containsKey("globalBrightness")) {
-    int l = doc["globalBrightness"];
+  if (jPayload.containsKey("globalBrightness")) {
+    int l = jPayload["globalBrightness"];
     l = constrain(l, 0, 255);
     AUTO_BRIGHTNESS = false;
     GLOBAL_BRIGHTNESS = l;
@@ -61,24 +61,24 @@ void processAction(StaticJsonDocument<MQTT_BUFFER>  doc) {
   }
 
   // { "autoBrightness":true}
-  if (doc.containsKey("autoBrightness")) {
-    AUTO_BRIGHTNESS = doc["autoBrightness"];
+  if (jPayload.containsKey("autoBrightness")) {
+    AUTO_BRIGHTNESS = jPayload["autoBrightness"];
     if (DEBUG_MQTT)  Serial.println("autoBrightness: " + String(AUTO_BRIGHTNESS) );
     showLEDs();
   }
 
-  if (doc.containsKey("pixel")) {
-    int p = doc["pixel"];
-    int h = doc["h"];
-    int s = doc["s"];
-    int v = doc["v"];
+  if (jPayload.containsKey("pixel")) {
+    int p = jPayload["pixel"];
+    int h = jPayload["h"];
+    int s = jPayload["s"];
+    int v = jPayload["v"];
     if (DEBUG_MQTT)  Serial.println("pixel hsv: " + String(p) + " " + String(h) + " " + String(s) + " " + String(v) );
     setLED(p, CHSV(h, s, v));
   }
 
   // {"pixels":"255 0 0 0 0 255"}
-  if (doc.containsKey("pixels")) {
-    String p = doc["pixels"];
+  if (jPayload.containsKey("pixels")) {
+    String p = jPayload["pixels"];
 
     if (DEBUG_MQTT)  Serial.println("pixels: " + p);
 
@@ -110,11 +110,11 @@ void processAction(StaticJsonDocument<MQTT_BUFFER>  doc) {
 
 }
 
-void processEvent(StaticJsonDocument<MQTT_BUFFER>  doc) {
+void processEvent(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
   // {"h": 0,"s": 128,"v": 255}
-  int h = doc["h"];
-  int s = doc["s"];
-  int v = doc["v"];
+  int h = jPayload["h"];
+  int s = jPayload["s"];
+  int v = jPayload["v"];
   if (DEBUG_MQTT)  Serial.println("hsv: " + String(h) + " " + String(s) + " " + String(v) );
   setLED(REMOTE_LED, CHSV(h, s, v));
 
@@ -123,22 +123,22 @@ void processEvent(StaticJsonDocument<MQTT_BUFFER>  doc) {
 
 
 // WeMakeColorsII/WMCII_CC:50:E3:C4:94:1C/config
-void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
+void processConfig(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
 
   // {"status":""}
-  if (doc.containsKey("status")) {
+  if (jPayload.containsKey("status")) {
     publishStatusFlag = true;
   }
 
   // {"info":""}
-  if (doc.containsKey("info")) {
+  if (jPayload.containsKey("info")) {
     publishInfoFlag = true;
   }
 
 
   // { "updateUrl":"http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini-1.30.4.bin"}
-  if (doc.containsKey("updateUrl")) {
-    String s = doc["updateUrl"];
+  if (jPayload.containsKey("updateUrl")) {
+    String s = jPayload["updateUrl"];
     updateUrl = s;
     if (DEBUG_MQTT)  Serial.println("updateURL: " + updateUrl);
     softwareUpdateFlag = true;
@@ -153,15 +153,15 @@ void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
   String ssid = "";
   String wifiPassword = "";
 
-  if (doc.containsKey("ssid")) {
-    String s  = doc["ssid"];
+  if (jPayload.containsKey("ssid")) {
+    String s  = jPayload["ssid"];
     ssid = s;
     newSettings = true;
   }
 
   // {"ssid":"myssid", "wifiPassword": "mypassword"}
-  if (doc.containsKey("wifiPassword")) {
-    String s = doc["wifiPassword"];
+  if (jPayload.containsKey("wifiPassword")) {
+    String s = jPayload["wifiPassword"];
     wifiPassword = s;
     newSettings = true;
 
@@ -170,8 +170,8 @@ void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
   }
 
   // {"name":"Marcos222"}
-  if (doc.containsKey("name")) {
-    String s = doc["name"];
+  if (jPayload.containsKey("name")) {
+    String s = jPayload["name"];
     name = s;
     newSettings = true;
 
@@ -179,20 +179,20 @@ void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
   }
 
   // {"mqttServer":"192.168.1.5","mqttUsername": "aieie" "mqttPassword": "brazorf"}
-  if (doc.containsKey("mqttServer")) {
-    String s = doc["mqttServer"];
+  if (jPayload.containsKey("mqttServer")) {
+    String s = jPayload["mqttServer"];
     mqttServer = s;
     newSettings = true;
   }
 
-  if (doc.containsKey("mqttUsername")) {
-    String s = doc["mqttUsername"];
+  if (jPayload.containsKey("mqttUsername")) {
+    String s = jPayload["mqttUsername"];
     mqttUsername = s;
     newSettings = true;
   }
 
-  if (doc.containsKey("mqttPassword")) {
-    String s = doc["mqttPassword"];
+  if (jPayload.containsKey("mqttPassword")) {
+    String s = jPayload["mqttPassword"];
     mqttPassword = s;
     newSettings = true;
 
@@ -208,9 +208,11 @@ void processConfig(StaticJsonDocument<MQTT_BUFFER>  doc) {
 
 void mqttReceive(char* rawTopic, byte* rawPayload, unsigned int length) {
   String topic = rawTopic;
-  
-  rawPayload[length] = 0;
-  String strPayload = String((char*)rawPayload);
+
+  String strPayload = "";
+  for (int i = 0; i < length; i++) {
+    strPayload = strPayload + (char)rawPayload[i];
+  }
 
 
   if (DEBUG_MQTT)  Serial.println("MQTT received: " + String(length) + " " + topic + " " + strPayload);
@@ -226,8 +228,8 @@ void mqttReceive(char* rawTopic, byte* rawPayload, unsigned int length) {
   //  Serial.println(topic_id);
   //  Serial.println(topic_leaf);
 
-  StaticJsonDocument<MQTT_BUFFER> doc;
-  DeserializationError error = deserializeJson(doc, strPayload);
+  StaticJsonDocument<MQTT_BUFFER> jPayload;
+  DeserializationError error = deserializeJson(jPayload, strPayload);
   if (error) {
     if (DEBUG_MQTT)  Serial.println("deserializeJson() failed with code: " + String(error.c_str()));
   }
@@ -242,7 +244,7 @@ void mqttReceive(char* rawTopic, byte* rawPayload, unsigned int length) {
         Serial.println("Event message: " + my);
       }
       if ((topic_id == thingId) && (ECHO_MODE) || (topic_id != thingId) ) {
-        processEvent(doc);
+        processEvent(jPayload);
       }
     }
 
@@ -250,14 +252,14 @@ void mqttReceive(char* rawTopic, byte* rawPayload, unsigned int length) {
     //----- config------------
     if ((topic_id == thingId) && (topic_leaf == mqttTopicConfig)) {
       if (DEBUG_MQTT) Serial.println("Config message:");
-      processConfig(doc);
+      processConfig(jPayload);
     }
 
 
     //----- action------------
     if ((topic_id == thingId) && (topic_leaf == mqttTopicAction)) {
       if (DEBUG_MQTT) Serial.println("Action message:");
-      processAction(doc);
+      processAction(jPayload);
     }
 
   }
@@ -270,47 +272,47 @@ void mqttReceive(char* rawTopic, byte* rawPayload, unsigned int length) {
 
 
 void publishSensor() {
-  StaticJsonDocument<MQTT_BUFFER> doc;
+  StaticJsonDocument<MQTT_BUFFER> jPayload;
 
-  doc["name"] = name;
-  doc["lightLevel"] = int(averageLightLevel);
+  jPayload["name"] = name;
+  jPayload["lightLevel"] = int(averageLightLevel);
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicSensor;
-  publishJSON(mqttTopic, doc, false);
+  publishJSON(mqttTopic, jPayload, false);
 }
 
 
 void publishEvent(CHSV c) {
-  StaticJsonDocument<MQTT_BUFFER> doc;
+  StaticJsonDocument<MQTT_BUFFER> jPayload;
 
-  doc["h"] = c.h;
-  doc["s"] = c.s;
-  doc["v"] = c.v;
+  jPayload["h"] = c.h;
+  jPayload["s"] = c.s;
+  jPayload["v"] = c.v;
 
-  doc["name"] = name;
-  doc["lightLevel"] = int(averageLightLevel);
+  jPayload["name"] = name;
+  jPayload["lightLevel"] = int(averageLightLevel);
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicEvent;
-  publishJSON(mqttTopic, doc, false);
+  publishJSON(mqttTopic, jPayload, false);
 }
 
 void publishInfo() {
-  StaticJsonDocument<MQTT_BUFFER> doc;
+  StaticJsonDocument<MQTT_BUFFER> jPayload;
 
-  doc["name"] = name;
-  // doc["freeHeap"] = ESP.getFreeHeap();
+  jPayload["name"] = name;
+  // jPayload["freeHeap"] = ESP.getFreeHeap();
 
-  doc["softwareInfo"] = softwareInfo;
-  doc["softwarePlatform"] = softwarePlatform;
+  jPayload["softwareInfo"] = softwareInfo;
+  jPayload["softwarePlatform"] = softwarePlatform;
 
-  doc["ssid"] = WiFi.SSID();
-  doc["wifiPassword"] = WiFi.psk();
+  jPayload["ssid"] = WiFi.SSID();
+  jPayload["wifiPassword"] = WiFi.psk();
 
 
-  doc["mqttServer"] = mqttServer;
-  doc["mqttUsername"] = mqttUsername;
-  doc["mqttPassword"] = mqttPassword;
+  jPayload["mqttServer"] = mqttServer;
+  jPayload["mqttUsername"] = mqttUsername;
+  jPayload["mqttPassword"] = mqttPassword;
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicInfo;
-  publishJSON(mqttTopic, doc, true);
+  publishJSON(mqttTopic, jPayload, true);
 }

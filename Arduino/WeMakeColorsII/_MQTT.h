@@ -27,14 +27,14 @@ int CHECK_INTERVAL = 20000; //ms
 int reconnectInterval = RECONNECT_INTERVAL;
 unsigned long lastConnectTime = 0;
 
-void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_BUFFER> jdoc, bool retained) {
+void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_BUFFER> jPayload, bool retained) {
   if (mqttClient.connected()) {
 
-    char mqttData[MQTT_BUFFER];
-    serializeJson(jdoc, mqttData);
+    char mqttPayload[MQTT_BUFFER];
+    serializeJson(jPayload, mqttPayload);
 
-    int ret = mqttClient.publish(mqttTopic.c_str(), mqttData, retained);
-    if (DEBUG_MQTT) Serial.println(String(ret) + "   MQTT sent: " +  String(String(mqttData).length()) + " " + mqttTopic + " " + mqttData );
+    int ret = mqttClient.publish(mqttTopic.c_str(), mqttPayload, retained);
+    if (DEBUG_MQTT) Serial.println(String(ret) + "   MQTT sent: " +  String(String(mqttPayload).length()) + " " + mqttTopic + " " + mqttPayload );
 
   } else if (DEBUG_MQTT)  Serial.println("publish " + mqttTopic + ": MQTT not connected");
 }
@@ -50,39 +50,39 @@ void publishJSON(String mqttTopic, StaticJsonDocument<MQTT_BUFFER> jdoc, bool re
 //-------------------------
 
 String prepareLastWillMessage() {
-  StaticJsonDocument<MQTT_BUFFER> doc;
+  StaticJsonDocument<MQTT_BUFFER> jPayload;
 
-  doc["name"] = name;
-  doc["upTime"] = -1;
+  jPayload["name"] = name;
+  jPayload["upTime"] = -1;
 
-  doc["softwareInfo"] = softwareInfo;
-  doc["softwarePlatform"] = softwarePlatform;
+  jPayload["softwareInfo"] = softwareInfo;
+  jPayload["softwarePlatform"] = softwarePlatform;
 
   String lastWillMessage;
 
-  serializeJson(doc, lastWillMessage);
+  serializeJson(jPayload, lastWillMessage);
   return (lastWillMessage);
 }
 
 
 void publishStatus(String extraAttribute = "", String extraValue = "") {
-  StaticJsonDocument<MQTT_BUFFER> doc;
+  StaticJsonDocument<MQTT_BUFFER> jPayload;
 
-  doc["name"] = name;
-  doc["upTime"] = upTime;
-  doc["RSSI"] = WiFi.RSSI();
+  jPayload["name"] = name;
+  jPayload["upTime"] = upTime;
+  jPayload["RSSI"] = WiFi.RSSI();
 
   static bool firstStatus = true;
   if (firstStatus) {
     firstStatus = false;
-    doc["resetReason"] = ESP.getResetReason();
+    jPayload["resetReason"] = ESP.getResetReason();
   }
 
 
-  if (extraAttribute != "") doc[extraAttribute] = extraValue;
+  if (extraAttribute != "") jPayload[extraAttribute] = extraValue;
 
   String   mqttTopic = mqttRoot + "/" + thingId + "/" + mqttTopicStatus;
-  publishJSON(mqttTopic, doc, true);
+  publishJSON(mqttTopic, jPayload, true);
 
 }
 
