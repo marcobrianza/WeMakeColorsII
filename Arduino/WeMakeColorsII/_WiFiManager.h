@@ -143,7 +143,7 @@ void connectWiFi_Manager(bool force_config) {
   if (DEBUG_WIFIMANAGER)  wifiManager.setDebugOutput(true);
   else wifiManager.setDebugOutput(false);
 
-  wifiManager.setAPStaticIPConfig(IPAddress(1, 1, 1, 1), IPAddress(1, 1, 1, 1), IPAddress(255, 255, 255, 0));
+  wifiManager.setAPStaticIPConfig(IPAddress(10, 1, 1, 1), IPAddress(10, 1, 1, 1), IPAddress(255, 255, 255, 0));
   wifiManager.setMinimumSignalQuality(CAPTIVE_SIGNAL_QUALITY);
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
