@@ -38,6 +38,8 @@ String OTA_PASSWORD = "12345678";
 #include <ESP8266HTTPClient.h> // built in ESP8266 Core
 #include <ESP8266httpUpdate.h> // built in ESP8266 Core
 
+WiFiClient client;
+
 String MD5_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.md5.txt";
 String FW_URL = "http://iot.marcobrianza.it/art/WeMakeColorsII.ino.d1_mini.bin";
 
@@ -242,7 +244,7 @@ void OTA_setup() {
 // -----  http update ----------------
 
 String httpUpdate(String url) {
-  t_httpUpdate_return ret = ESPhttpUpdate.update(url);
+  t_httpUpdate_return ret = ESPhttpUpdate.update(client, url);
   String result;
 
   switch (ret) {
@@ -265,7 +267,7 @@ String httpUpdate(String url) {
 void autoUpdate() {
   if (DEBUG_WIFI) Serial.println("Autoupdate...");
   HTTPClient http;
-  http.begin(MD5_URL);
+  http.begin(client, MD5_URL);
   int httpCode = http.GET();
 
   if (httpCode > 0) {

@@ -36,7 +36,7 @@ String readAttribute(String attributeName) {
   return value;
 }
 
-String deleteAttribute(String attributeName) {
+void deleteAttribute(String attributeName) {
   if (SPIFFS.begin()) {
     String value = "";
     SPIFFS.remove(attributeName + ".txt");
