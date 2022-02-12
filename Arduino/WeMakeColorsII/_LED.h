@@ -1,5 +1,6 @@
 //LED
-#include <FastLED.h> // version  3.4.0
+#include <FastLED.h> // FastLED - by Daniel Garcia - 3.5.0 http://librarymanager/all#fastled
+
 
 
 #if BOARD_TYPE==IOTKIT// defines for IoT kit

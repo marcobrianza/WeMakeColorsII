@@ -1,18 +1,18 @@
-// tested on ESP8266 Core 2.7.4 (compatible with 3.0.1 not fastled, so stick to 2.7.4)
-// use FS:1MB
+// tested on ESP8266 Core 3.0.2
+// Flash Size: "4MB (FS:1MB OTA:~1019KB)
+// lwIP Variant: "v2 Lower Memory"
 // https://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 
 #define WMCII 0
 #define IOTKIT 1
 
-#define BOARD_TYPE WMCII  //please define one of the above boards
-
+#define BOARD_TYPE WMCII  // please define one of the above boards
 
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.50.0";
+String softwareVersion = "1.60.0";
 String appId = "WMCII";
 
 String softwareInfo = "";
