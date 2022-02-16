@@ -103,7 +103,8 @@ void processAction(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
     Serial.println(l);
     if (l == b) {
       memmove(&leds[0], &newPixels[0], b);
-      FastLED.show();
+      streamLEDs = true;
+      //FastLED.show();
     }
   }
 

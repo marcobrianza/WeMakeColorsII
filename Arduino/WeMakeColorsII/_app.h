@@ -134,7 +134,8 @@ void showLEDs() {
   if (GLOBAL_BRIGHTNESS > 255) GLOBAL_BRIGHTNESS = 255;
 
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
-  FastLED.show();
+  streamLEDs=true;
+  //FastLED.show();
 
   //  Serial.println("AUTO_BRIGHTNESS: " + String(AUTO_BRIGHTNESS));
   //  Serial.println("globalLightLevel: " + String(globalLightLevel));

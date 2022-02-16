@@ -1,4 +1,4 @@
-// tested on ESP8266 Core 3.0.2
+// tested on ESP8266 Core 3.0.2 (not working) use 2.7.4
 // Flash Size: "4MB (FS:1MB OTA:~1019KB)
 // lwIP Variant: "v2 Lower Memory"
 // https://arduino.esp8266.com/stable/package_esp8266com_index.json
@@ -12,7 +12,7 @@
 boolean DEBUG_MAIN = true;
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.60.0";
+String softwareVersion = "1.6.1";
 String appId = "WMCII";
 
 String softwareInfo = "";
@@ -95,6 +95,15 @@ void loop() {
       setLED(MY_LED, c);
       publishEvent(c);
     }
+  }
+
+  if (streamLEDs) {
+    streamLEDs = false;
+    Serial.flush();
+    //yield();
+    //noInterrupts();
+    FastLED.show();
+    //interrupts();
   }
 
 

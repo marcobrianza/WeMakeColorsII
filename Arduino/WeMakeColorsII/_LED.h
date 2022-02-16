@@ -1,6 +1,8 @@
 //LED
-#include <FastLED.h> // FastLED - by Daniel Garcia - 3.5.0 http://librarymanager/all#fastled
+//#define FASTLED_ALLOW_INTERRUPTS 0
+//#define FASTLED_INTERRUPT_RETRY_COUNT 1
 
+#include <FastLED.h> // FastLED - by Daniel Garcia - 3.5.0 http://librarymanager/all#fastled
 
 
 #if BOARD_TYPE==IOTKIT// defines for IoT kit
@@ -18,6 +20,8 @@ int GLOBAL_BRIGHTNESS = 255;
 const int NUM_LEDS = 2;
 CRGB leds[NUM_LEDS];
 
+bool streamLEDs =false;
+
 void setupLEDs() {
   FastLED.setBrightness(GLOBAL_BRIGHTNESS);
   FastLED.addLeds<WS2812B, LED_PIN, LED_ORDER>(leds, NUM_LEDS);
@@ -27,7 +31,8 @@ void showAllLeds(CRGB c ) {
   for ( int i = 0; i < NUM_LEDS; i++) {
     leds[i] = c;
   }
-  FastLED.show();
+  streamLEDs=true;
+  //FastLED.show();
 }
 
 void showAllLeds(int r, int g, int b ) {
