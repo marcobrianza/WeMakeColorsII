@@ -1,6 +1,7 @@
 boolean DEBUG_WIFI = true;
 
 #define LAN_OTA true
+#define WEB_UPDATE true // http://%name%.local/update
 
 //Wi-Fi
 #include <ESP8266WiFi.h>  // built in ESP8266 Core
@@ -32,6 +33,13 @@ String  savedPassword;
 #include <ESP8266mDNS.h> // built in ESP8266 Core
 #include <ArduinoOTA.h> // built in ESP8266 Core
 String OTA_PASSWORD = "12345678";
+#endif
+
+#if  (WEB_UPDATE)
+#include <ESP8266WebServer.h>
+#include <ESP8266HTTPUpdateServer.h>
+ESP8266WebServer httpServer(80);
+ESP8266HTTPUpdateServer httpUpdater;
 #endif
 
 //http update
@@ -191,6 +199,11 @@ void WiFi_loop() {
 #if  (LAN_OTA)
   ArduinoOTA.handle();
 #endif
+
+#if  (WEB_UPDATE)
+  httpServer.handleClient();
+  MDNS.update();
+#endif
 }
 
 
@@ -298,4 +311,19 @@ void autoUpdate() {
     http.end();
   }
   if (DEBUG_WIFI) Serial.println();
+}
+
+
+// WebUpdate----------------------------------
+
+
+void WebUpdate_setup() {
+#if  (WEB_UPDATE)
+
+  httpUpdater.setup(&httpServer);
+  httpServer.begin();
+  MDNS.addService("http", "tcp", 80);
+  Serial.printf("HTTPUpdateServer ready! Open http://%s.local/update in your browser\n", name.c_str());
+
+#endif
 }

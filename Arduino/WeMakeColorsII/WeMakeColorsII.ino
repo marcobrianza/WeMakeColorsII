@@ -11,18 +11,8 @@
 
 boolean DEBUG_MAIN = true;
 
-String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.6.1";
-String appId = "WMCII";
 
-String softwareInfo = "";
-String softwarePlatform = "";
-
-String thingId = "";
-String name = "";
-
-#include <ESP8266WiFi.h>  // built in ESP8266 Core
-
+#include "_info.h"
 #include "_miniUI.h"
 #include "_app_status.h"
 #include "_WiFi.h"
@@ -33,9 +23,8 @@ String name = "";
 
 
 void setup() {
-
-  softwareInfo_setup();
-  ledOFF();
+  miniUI_Setup();
+  softwareInfo_setup("");
   app_setup();
 
   loadParametersFromFile();
@@ -72,6 +61,7 @@ void setup() {
 
   autoUpdate();
   OTA_setup();
+  WebUpdate_setup() ;
   mqtt_setup();
 
   ledOFF();
@@ -120,31 +110,6 @@ void loop() {
   if (newSettings) {
     newSettings = false;
     saveParametersToFile();
-  }
-
-}
-
-
-
-
-
-void softwareInfo_setup() {
-
-  softwareInfo = softwareName + " - " + softwareVersion +  " - " + ESP.getSketchMD5() + " - " + String (ESP.getCpuFreqMHz()); // + " - " + String (__DATE__) + " - " + String(__TIME__);;
-  softwarePlatform = ESP.getFullVersion();
-  thingId = appId + "_" +  WiFi.macAddress().c_str();
-  name = thingId;
-
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  Serial.begin(115200);
-
-  if (DEBUG_MAIN) {
-    Serial.println("");
-    Serial.println(softwareInfo);
-    Serial.println(softwarePlatform);
-    Serial.println("resetReason=" + ESP.getResetReason());
-    Serial.println("thingId: " + thingId);
   }
 
 }

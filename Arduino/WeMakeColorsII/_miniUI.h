@@ -32,6 +32,22 @@ void ledOFF() {
   //Serial.println("LED_STATE " + String(LED_STATE));
 }
 
+void miniUI_Setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  ledOFF();
+}
+
+
+void blinkBlock(int b) {
+  for ( int i = 0 ;i < b; i++) {
+    ledON();
+    delay(200);
+    ledOFF();
+    delay(200);
+  }
+}
+
+
 void ledInvert() {
   LED_STATE = !LED_STATE;
   digitalWrite(LED_BUILTIN, LED_STATE);
