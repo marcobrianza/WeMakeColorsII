@@ -111,5 +111,5 @@ void loop() {
     newSettings = false;
     saveParametersToFile();
   }
-
+  delay(1);
 }

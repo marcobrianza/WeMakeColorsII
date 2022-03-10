@@ -71,7 +71,8 @@ void WiFi_setup(String ip = "") {
   WiFi.setAutoReconnect(true);
 
   //Serial.println(wifi_get_sleep_type());
-  wifi_set_sleep_type(NONE_SLEEP_T);
+  //wifi_set_sleep_type(NONE_SLEEP_T);
+   WiFi.setSleepMode(WIFI_LIGHT_SLEEP, 10);
 
   //Serial.println("PhyMode:" + String( WiFi.getPhyMode()));
   WiFi.setPhyMode(WIFI_PHY_MODE_11N);   // WIFI_PHY_MODE_11B = 1, WIFI_PHY_MODE_11G = 2, WIFI_PHY_MODE_11N = 3
