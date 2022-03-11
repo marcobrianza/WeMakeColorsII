@@ -54,6 +54,7 @@ String prepareLastWillMessage() {
 
   jPayload["name"] = name;
   jPayload["upTime"] = -1;
+  jPayload["RSSI"] = WiFi.RSSI();
 
   jPayload["softwareInfo"] = softwareInfo;
   jPayload["softwarePlatform"] = softwarePlatform;
@@ -71,6 +72,9 @@ void publishStatus(String extraAttribute = "", String extraValue = "") {
   jPayload["name"] = name;
   jPayload["upTime"] = upTime;
   jPayload["RSSI"] = WiFi.RSSI();
+
+  jPayload["softwareInfo"] = softwareInfo;
+  jPayload["softwarePlatform"] = softwarePlatform;
 
   static bool firstStatus = true;
   if (firstStatus) {
