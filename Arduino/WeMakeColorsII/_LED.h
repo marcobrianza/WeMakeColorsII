@@ -3,38 +3,77 @@
 //#define FASTLED_INTERRUPT_RETRY_COUNT 1
 
 #include <FastLED.h> // FastLED - by Daniel Garcia - 3.5.0 http://librarymanager/all#fastled
-
+#include <Adafruit_NeoPixel.h>
 
 #if BOARD_TYPE==IOTKIT// defines for IoT kit
-  #define LED_PIN D5
-  #define LED_ORDER RGB
+#define LED_PIN D5
+#define LED_ORDER RGB
 #elif BOARD_TYPE==WMCII //standard defines for WMCII
-  #define LED_PIN D1
-  #define LED_ORDER GRB
-# else 
-  #error("please define a compatible BOARD_TYPE");
+#define LED_PIN D1
+#define LED_ORDER GRB
+# else
+#error("please define a compatible BOARD_TYPE");
 #endif
 
 int GLOBAL_BRIGHTNESS = 255;
 
 const int NUM_LEDS = 2;
-CRGB leds[NUM_LEDS];
+//CRGB leds[NUM_LEDS];
 
-bool streamLEDs =false;
+bool streamLEDs = false;
+
+typedef struct {
+  byte h;
+  byte s;
+  byte v;
+} hsvColor_t;
+
+typedef struct {
+  byte r;
+  byte g;
+  byte b;
+} rgbColor_t;
+
+
+Adafruit_NeoPixel pixels(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 void setupLEDs() {
-  FastLED.setBrightness(GLOBAL_BRIGHTNESS);
-  FastLED.addLeds<WS2812B, LED_PIN, LED_ORDER>(leds, NUM_LEDS);
+  pixels.setBrightness(GLOBAL_BRIGHTNESS);
+  pixels.begin();
+  pixels.clear();
+  pixels.show();
 }
 
-void showAllLeds(CRGB c ) {
+rgbColor_t rgbColor ( byte r, byte g, byte b) {
+  rgbColor_t c = {r, g, b};
+  return (c);
+}
+
+void showAllLeds(rgbColor_t c ) {
   for ( int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = c;
+    pixels.setPixelColor(i, c.r, c.g, c.b);
   }
-  streamLEDs=true;
-  //FastLED.show();
+  pixels.show();
 }
 
 void showAllLeds(int r, int g, int b ) {
-  showAllLeds (CRGB(r, g, b));
+  for ( int i = 0; i < NUM_LEDS; i++) {
+    pixels.setPixelColor(i, r, g, b);
+  }
+  pixels.show();
+}
+
+
+void testRGB(){
+    showAllLeds({255, 0, 0});
+  pixels.show();
+  delay(1000);
+
+  showAllLeds({0, 255, 0});
+  pixels.show();
+  delay(1000);
+
+  showAllLeds({0, 0, 255});
+  pixels.show();
+  delay(1000);
 }

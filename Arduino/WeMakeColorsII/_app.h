@@ -113,7 +113,7 @@ boolean checkLight() {
 
 
 
-CHSV newRndColor() {
+hsvColor_t newRndColor() {
 
   int h = random(0, 255);
   int s = random(128, 255);
@@ -121,7 +121,7 @@ CHSV newRndColor() {
 
   //Serial.print(h); Serial.print(" "); Serial.print(s); Serial.print(" "); Serial.println(v);
 
-  return CHSV(h, s, v);
+  return {h, s, v};
 }
 
 
@@ -133,9 +133,8 @@ void showLEDs() {
   }
   if (GLOBAL_BRIGHTNESS > 255) GLOBAL_BRIGHTNESS = 255;
 
-  FastLED.setBrightness(GLOBAL_BRIGHTNESS);
-  streamLEDs=true;
-  //FastLED.show();
+  pixels.setBrightness(GLOBAL_BRIGHTNESS);
+  pixels.show();
 
   //  Serial.println("AUTO_BRIGHTNESS: " + String(AUTO_BRIGHTNESS));
   //  Serial.println("globalLightLevel: " + String(globalLightLevel));
@@ -144,14 +143,21 @@ void showLEDs() {
 }
 
 
+void setLED(int i, hsvColor_t newC) {
+  //  Serial.println("setLED " + String(i));
+  //  Serial.println(newC.h);
+  //  Serial.println(newC.s);
+  //  Serial.println(newC.v);
 
-void setLED(int i, CHSV newC) {
   if (i < NUM_LEDS) {
-    leds[i] = newC;
+    CHSV c = CHSV(newC.h , newC.s, newC.v);
+    CRGB cc = c;
+    pixels.setPixelColor(i, pixels.Color(cc.r, cc.g, cc.b));
+    //pixels.show();
     showLEDs();
-  } else if (DEBUG_APP) Serial.println("pixel index to high");
-
+  } else if (DEBUG_APP) Serial.println("pixel index too high");
 }
+
 
 
 void  app_testDevice() {

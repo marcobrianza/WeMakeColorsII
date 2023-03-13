@@ -1,5 +1,5 @@
-// tested on ESP8266 Core 3.0.2 (not working) use 2.7.4
-// Flash Size: "4MB (FS:1MB OTA:~1019KB)
+// tested on ESP8266 Core 3.1.1
+// Flash Size: "4MB (FS:2MB OTA:~1019KB)
 // lwIP Variant: "v2 Lower Memory"
 // https://arduino.esp8266.com/stable/package_esp8266com_index.json
 
@@ -10,7 +10,6 @@
 #define BOARD_TYPE WMCII  // please define one of the above boards
 
 boolean DEBUG_MAIN = true;
-
 
 #include "_info.h"
 #include "_miniUI.h"
@@ -26,6 +25,7 @@ void setup() {
   miniUI_Setup();
   softwareInfo_setup("");
   app_setup();
+
 
   loadParametersFromFile();
 
@@ -68,6 +68,9 @@ void setup() {
   if (DEBUG_MAIN) Serial.println("BOARD_TYPE:" + String(BOARD_TYPE));
   if (DEBUG_MAIN) Serial.println("starting loop");
 
+
+
+
 }
 
 void loop() {
@@ -81,27 +84,19 @@ void loop() {
   if ((millis() - lastAppTime) > APP_INTERVAL)  {
     lastAppTime = millis();
     if (checkLight()) {
-      CHSV c = newRndColor();
+      hsvColor_t c = newRndColor();
       setLED(MY_LED, c);
       publishEvent(c);
     }
   }
 
-  if (streamLEDs) {
-    streamLEDs = false;
-    Serial.flush();
-    //yield();
-    //noInterrupts();
-    FastLED.show();
-    //interrupts();
-  }
 
 
 #if BOARD_TYPE==IOTKIT
   if ( ((millis() - lastButtonTime) > BUTTON_INTERVAL) && !digitalRead(BUTTON) )  {
     lastButtonTime = millis();
 
-    CHSV c = newRndColor();
+    hsvColor c = newRndColor();
     setLED(MY_LED, c);
     publishEvent(c);
   }

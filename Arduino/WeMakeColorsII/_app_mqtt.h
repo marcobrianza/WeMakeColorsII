@@ -73,40 +73,40 @@ void processAction(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
     int s = jPayload["s"];
     int v = jPayload["v"];
     if (DEBUG_MQTT)  Serial.println("pixel hsv: " + String(p) + " " + String(h) + " " + String(s) + " " + String(v) );
-    setLED(p, CHSV(h, s, v));
+    setLED(p, {h, s, v});
   }
 
   // {"pixels":"255 0 0 0 0 255"}
-  if (jPayload.containsKey("pixels")) {
-    String p = jPayload["pixels"];
+//  if (jPayload.containsKey("pixels")) {
+//    String p = jPayload["pixels"];
+//
+//    if (DEBUG_MQTT)  Serial.println("pixels: " + p);
+//
+//    char sep = ' ';
+//    p = p + sep;
+//    int l = 0;
+//    String s = "";
+//    int b =  NUM_LEDS * 3;
+//    byte newPixels[b];
+//
+//    for (int i = 0; i < p.length() ; i++) {
+//      char c = p.charAt(i);
+//      if (c == sep) {
+//        byte v = s.toInt();
+//        newPixels[l] = v;
+//        Serial.println (v);
+//        s = "";
+//        l++;
+//        if (l == b) break;
+//      } else s = s + c;
+//    }
+//    Serial.println(l);
+//    if (l == b) {
+//      memmove(&leds[0], &newPixels[0], b);
+//pixels.show();
 
-    if (DEBUG_MQTT)  Serial.println("pixels: " + p);
-
-    char sep = ' ';
-    p = p + sep;
-    int l = 0;
-    String s = "";
-    int b =  NUM_LEDS * 3;
-    byte newPixels[b];
-
-    for (int i = 0; i < p.length() ; i++) {
-      char c = p.charAt(i);
-      if (c == sep) {
-        byte v = s.toInt();
-        newPixels[l] = v;
-        Serial.println (v);
-        s = "";
-        l++;
-        if (l == b) break;
-      } else s = s + c;
-    }
-    Serial.println(l);
-    if (l == b) {
-      memmove(&leds[0], &newPixels[0], b);
-      streamLEDs = true;
-      //FastLED.show();
-    }
-  }
+//    }
+//  }
 
 
 }
@@ -117,7 +117,7 @@ void processEvent(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
   int s = jPayload["s"];
   int v = jPayload["v"];
   if (DEBUG_MQTT)  Serial.println("hsv: " + String(h) + " " + String(s) + " " + String(v) );
-  setLED(REMOTE_LED, CHSV(h, s, v));
+  setLED(REMOTE_LED, {h, s, v});
 
 }
 
@@ -283,7 +283,7 @@ void publishSensor() {
 }
 
 
-void publishEvent(CHSV c) {
+void publishEvent(hsvColor_t c) {
   StaticJsonDocument<MQTT_BUFFER> jPayload;
 
   jPayload["h"] = c.h;
