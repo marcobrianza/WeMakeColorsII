@@ -15,7 +15,7 @@ boolean DEBUG_MAIN = true;
 #include "miniUI.h"
 #include "app_status.h"
 #include "WiFi.h"
-
+#include "time.h"
 #include "app.h"
 #include "MQTT.h"
 #include "WiFiManager.h"
@@ -63,7 +63,7 @@ void setup() {
   OTA_setup();
   WebUpdate_setup() ;
   mqtt_setup();
-  //setup_time();
+  Setup_Time();
 
   ledOFF();
   if (DEBUG_MAIN) Serial.println("BOARD_TYPE:" + String(BOARD_TYPE));

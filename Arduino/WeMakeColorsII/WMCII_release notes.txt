@@ -1,5 +1,8 @@
 release notes:
 
+1.92.0
+NTP and "date" json field
+
 1.8.3
 force no sleep NONE_SLEEP_T
 
