@@ -11,14 +11,14 @@
 
 boolean DEBUG_MAIN = true;
 
-#include "_info.h"
-#include "_miniUI.h"
-#include "_app_status.h"
-#include "_WiFi.h"
+#include "info.h"
+#include "miniUI.h"
+#include "app_status.h"
+#include "WiFi.h"
 
-#include "_app.h"
-#include "_MQTT.h"
-#include "_WiFiManager.h"
+#include "app.h"
+#include "MQTT.h"
+#include "WiFiManager.h"
 
 
 void setup() {
@@ -29,7 +29,7 @@ void setup() {
 
   loadParametersFromFile();
 
-  byte bc = miniUI_bootCount();
+  uint8_t bc = miniUI_bootCount();
   if (bc == BOOT_TEST_DEVICE)  app_testDevice();
 
   ledON();
@@ -63,12 +63,11 @@ void setup() {
   OTA_setup();
   WebUpdate_setup() ;
   mqtt_setup();
+  //setup_time();
 
   ledOFF();
   if (DEBUG_MAIN) Serial.println("BOARD_TYPE:" + String(BOARD_TYPE));
   if (DEBUG_MAIN) Serial.println("starting loop");
-
-
 
 
 }
