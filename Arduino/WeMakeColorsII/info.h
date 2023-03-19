@@ -3,7 +3,7 @@ boolean DEBUG_INFO = true;
 #include <ESP8266WiFi.h>  // built in ESP8266 Core
 
 String softwareName = "WeMakeColorsII";
-String softwareVersion = "1.91.0";
+String softwareVersion = "1.92.0";
 String appId = "WMCII";
 
 String softwareInfo = "";
