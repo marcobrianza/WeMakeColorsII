@@ -124,12 +124,15 @@ hsvColor_t newRndColor() {
   return {h, s, v};
 }
 
+int mapInt(int x, int in_min, int in_max, int out_min, int out_max) {
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 void showLEDs() {
 
   if (AUTO_BRIGHTNESS) {
     //Serial.println("Setting AUTO_BRIGHTNESS");
-    GLOBAL_BRIGHTNESS = map(globalLightLevel, 0, 512, 64, 255);
+    GLOBAL_BRIGHTNESS = mapInt(globalLightLevel, 0, 512, 64, 255);
   }
   if (GLOBAL_BRIGHTNESS > 255) GLOBAL_BRIGHTNESS = 255;
 

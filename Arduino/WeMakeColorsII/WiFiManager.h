@@ -4,7 +4,7 @@ boolean DEBUG_WIFIMANAGER = true;
 #include "FS.h"
 #include <DNSServer.h> // built in ESP8266 Core
 #include <ESP8266WebServer.h> // built in ESP8266 Core
-#include <WiFiManager.h> //WiFiManager - by tablatronix - 0.16.0   http://librarymanager/all#WiFiManager 
+#include <WiFiManager.h> //WiFiManager - by tablatronix - 2.0.17   http://librarymanager/all#WiFiManager 
 
 #define MAX_PARAM 40
 

@@ -1,6 +1,6 @@
 //NTP
 #include <TimeLib.h> // Time by Michael Margolis 1.6.1
-#include <NtpClientLib.h> // NtpCliebtLib by German Martin 3.0.2-beta
+#include <NtpClientLib.h> // NtpCliebtLib by German Martin 3.0.2-beta from https://github.com/marcobrianza/NtpClient
 
 bool validNtpTime = false;
 

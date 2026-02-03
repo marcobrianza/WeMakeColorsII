@@ -87,12 +87,12 @@ void processAction(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
 //    int l = 0;
 //    String s = "";
 //    int b =  NUM_LEDS * 3;
-//    byte newPixels[b];
+//    uint8_t newPixels[b];
 //
 //    for (int i = 0; i < p.length() ; i++) {
 //      char c = p.charAt(i);
 //      if (c == sep) {
-//        byte v = s.toInt();
+//        uint8_t v = s.toInt();
 //        newPixels[l] = v;
 //        Serial.println (v);
 //        s = "";
@@ -207,7 +207,7 @@ void processConfig(StaticJsonDocument<MQTT_BUFFER>  jPayload) {
 
 
 
-void mqttReceive(char* rawTopic, byte* rawPayload, unsigned int length) {
+void mqttReceive(char* rawTopic, uint8_t* rawPayload, unsigned int length) {
   String topic = rawTopic;
 
   String strPayload = "";

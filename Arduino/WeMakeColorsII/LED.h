@@ -2,8 +2,8 @@
 //#define FASTLED_ALLOW_INTERRUPTS 0
 //#define FASTLED_INTERRUPT_RETRY_COUNT 1
 
-#include <FastLED.h> // FastLED - by Daniel Garcia - 3.5.0 http://librarymanager/all#fastled //we need this for HSV to RGB conversion
-#include <Adafruit_NeoPixel.h> //Adafruit NeoPixel by Adafruit 1.11.0 
+#include <FastLED.h> // FastLED - by Daniel Garcia - 3.10.3 http://librarymanager/all#fastled //we need this for HSV to RGB conversion
+#include <Adafruit_NeoPixel.h> //Adafruit NeoPixel by Adafruit 1.15.2 
 
 #if BOARD_TYPE==IOTKIT// defines for IoT kit
 #define LED_PIN D5
@@ -23,15 +23,15 @@ const int NUM_LEDS = 2;
 bool streamLEDs = false;
 
 typedef struct {
-  byte h;
-  byte s;
-  byte v;
+  uint8_t h;
+  uint8_t s;
+  uint8_t v;
 } hsvColor_t;
 
 typedef struct {
-  byte r;
-  byte g;
-  byte b;
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
 } rgbColor_t;
 
 
@@ -44,7 +44,7 @@ void setupLEDs() {
   pixels.show();
 }
 
-rgbColor_t rgbColor ( byte r, byte g, byte b) {
+rgbColor_t rgbColor ( uint8_t r, uint8_t g, uint8_t b) {
   rgbColor_t c = {r, g, b};
   return (c);
 }

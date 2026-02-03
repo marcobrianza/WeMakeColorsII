@@ -1,4 +1,4 @@
-// tested on ESP8266 Core 3.1.1
+// tested on ESP8266 Core 3.1.2
 // Flash Size: "4MB (FS:2MB OTA:~1019KB)
 // lwIP Variant: "v2 Lower Memory"
 // https://arduino.esp8266.com/stable/package_esp8266com_index.json

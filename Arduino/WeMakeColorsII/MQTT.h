@@ -1,7 +1,7 @@
 boolean DEBUG_MQTT = true;
 
 #include <PubSubClient.h> // PubSubClient - by Nick O'Leary - 2.8.0 http://librarymanager/all#PubSubClient
-#include <ArduinoJson.h> //  ArduinoJson  - by Benoit Blanchon - 6.21.0 http://librarymanager/all#ArduinoJson
+#include <ArduinoJson.h> //  ArduinoJson  - by Benoit Blanchon - 7.4.2 http://librarymanager/all#ArduinoJson
 PubSubClient mqttClient(wifiClient);
 
 #define QOS_BEST_EFFORT 0
@@ -82,7 +82,7 @@ void publishStatus(String extraAttribute = "", String extraValue = "") {
   jPayload["upTime"] = upTime;
   jPayload["RSSI"] = WiFi.RSSI();
   jPayload["BSSID"] = WiFi.BSSIDstr();
-  jPayload["IP"] = WiFi.localIP();
+  jPayload["IP"] = WiFi.localIP().toString();
 
   //  jPayload["softwareInfo"] = softwareInfo;
   //  jPayload["softwarePlatform"] = softwarePlatform;

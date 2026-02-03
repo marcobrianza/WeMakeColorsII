@@ -104,8 +104,8 @@ void miniUI_loop() {
 
 }
 
-byte miniUI_bootCount() {
-  byte c = bootCount();
+uint8_t miniUI_bootCount() {
+  uint8_t c = bootCount();
   if (DEBUG_MINIUI)Serial.println("boot count=" + String(c));
   return c;
 }
